@@ -1,6 +1,6 @@
 # ScoutBuddy — Core Experience Feature Spec
 
-Status: documentation only, not yet built. Covers the "build first" scope from the brief: a menu approval workflow with two roles, Patrol Leader and ASPL of Camping.
+Status: documentation only, not yet built. Covers the "build first" scope from the brief: a menu approval workflow with two roles, Patrol Leader and ASPL of Camping. See [ROADMAP.md](ROADMAP.md) for how this is broken into sequenced, independently valuable iterations.
 
 ## Roles
 
