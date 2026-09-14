@@ -1,0 +1,99 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Patrol {
+  EAGLE
+  PUMA
+  RAVEN
+  SILVER_FOX
+}
+
+enum MealOccasion {
+  FRIDAY_CRACKER_BARREL
+  SATURDAY_BREAKFAST
+  SATURDAY_LUNCH
+  SATURDAY_DINNER
+  SATURDAY_CRACKER_BARREL
+  SUNDAY_BREAKFAST
+}
+
+enum MenuStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  SUBMITTED
+  CHANGES_REQUESTED
+  APPROVED
+}
+
+enum ReviewDecision {
+  APPROVED
+  CHANGES_REQUESTED
+}
+
+model Campout {
+  id        String   @id @default(cuid())
+  name      String
+  date      DateTime
+  createdAt DateTime @default(now())
+  menus     Menu[]
+}
+
+model Menu {
+  id             String     @id @default(cuid())
+  campoutId      String
+  campout        Campout    @relation(fields: [campoutId], references: [id])
+  patrol         Patrol
+  dueDate        DateTime
+  status         MenuStatus @default(NOT_STARTED)
+  nutritionNote  String     @default("")
+  allergyNote    String     @default("")
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  meals          Meal[]
+  reviews        Review[]
+
+  @@unique([campoutId, patrol])
+}
+
+model Meal {
+  id       String       @id @default(cuid())
+  menuId   String
+  menu     Menu         @relation(fields: [menuId], references: [id])
+  occasion MealOccasion
+  dishes   Dish[]
+
+  @@unique([menuId, occasion])
+}
+
+model Dish {
+  id          String       @id @default(cuid())
+  mealId      String
+  meal        Meal         @relation(fields: [mealId], references: [id])
+  name        String
+  ingredients Ingredient[]
+}
+
+model Ingredient {
+  id       String @id @default(cuid())
+  dishId   String
+  dish     Dish   @relation(fields: [dishId], references: [id])
+  name     String
+  quantity String
+}
+
+model Review {
+  id        String         @id @default(cuid())
+  menuId    String
+  menu      Menu           @relation(fields: [menuId], references: [id])
+  decision  ReviewDecision
+  comment   String?
+  createdAt DateTime       @default(now())
+}

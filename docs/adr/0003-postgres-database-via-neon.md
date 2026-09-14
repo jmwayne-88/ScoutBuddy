@@ -9,7 +9,7 @@ The shared-backend decision ([0001](0001-hosted-web-app-architecture.md)) requir
 
 ## Decision
 
-Use Postgres, hosted on Neon's managed free tier, as the database. Connection is via a pooled connection string (`DATABASE_URL`), provisioned directly in Neon's dashboard.
+Use Postgres, hosted on Neon's managed free tier, as the database. The app connects via a pooled connection string (`DATABASE_URL`); Prisma Migrate connects via a separate non-pooled string (`DIRECT_URL`) to avoid PgBouncer prepared-statement issues — both provisioned directly in Neon's dashboard.
 
 ## Alternatives Considered
 
@@ -18,6 +18,6 @@ Use Postgres, hosted on Neon's managed free tier, as the database. Connection is
 
 ## Consequences
 
-- The app connects to Postgres via a single `DATABASE_URL` connection string, kept out of version control (see [0005](0005-env-based-secrets-management.md)).
-- Schema/migrations will need a tool (e.g. Prisma or Drizzle) chosen at build time; not yet decided.
+- The app connects to Postgres via `DATABASE_URL` (pooled) and `DIRECT_URL` (non-pooled), both kept out of version control (see [0005](0005-env-based-secrets-management.md)).
+- Schema/migrations use Prisma — see [0008](0008-prisma-orm.md) for that decision and why the direct connection matters for it.
 - Switching providers later (e.g. to Supabase) is possible since both are standard Postgres, but is not currently planned.

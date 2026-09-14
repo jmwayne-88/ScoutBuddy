@@ -11,3 +11,7 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0005 - Secrets kept in gitignored env files](0005-env-based-secrets-management.md)
 - [0006 - Meal-framework variation as structured occasion removal](0006-structured-meal-framework-variation.md)
 - [0007 - Menu status lifecycle as a role-gated state machine](0007-menu-status-lifecycle-and-permissions.md)
+- [0008 - Prisma as the ORM, with the binary query engine](0008-prisma-orm.md)
+- [0009 - Next.js Server Actions for writes, Server Components for reads](0009-server-actions-for-writes.md)
+- [0010 - Cookie-based role identity, no accounts or passwords](0010-cookie-based-role-identity.md)
+- [0011 - Tailwind CSS for styling](0011-tailwind-css.md)
