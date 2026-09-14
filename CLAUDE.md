@@ -12,9 +12,8 @@ Use real troop terms throughout code, UI copy, and comments. Do not genericize:
 
 ## Architecture
 
-- **Stack**: Next.js (React + TypeScript), API routes in the same project, Postgres via a managed free-tier host (Supabase or Neon), deployed on Vercel.
-- **Why a hosted backend, not local-only**: multiple youth leaders across four patrols need to see the same campout/menu state from their own devices — this is shared, synced state, not something that can live on one device.
-- **Why this stack**: single language across frontend/backend, minimal infrastructure to operate, free-tier friendly, and Vercel + GitHub gives push-to-deploy without dedicated ops support.
+- **Stack**: Next.js (React + TypeScript), API routes in the same project, Postgres via Neon, deployed on Vercel from the `jmwayne-88/ScoutBuddy` GitHub repo.
+- Full rationale for every architectural choice lives in [docs/adr/](docs/adr/README.md) as individual Architecture Decision Records — read those before proposing a stack or data-model change, and add a new ADR when a real decision is made rather than just editing code.
 
 ## Fixed reference data
 
