@@ -36,4 +36,5 @@ Not Started → In Progress → Submitted → Changes Requested → Approved
 
 ## Working conventions
 
-(To be filled in as the codebase takes shape — testing approach, folder structure, naming conventions.)
+- **Every architecture decision gets its own ADR.** Any time a real architectural choice is made or changed (stack, hosting, data model shape, a new external service, a significant convention like the status state machine) — not just at project kickoff — write a new numbered file in [docs/adr/](docs/adr/README.md) following the existing Context / Decision / Alternatives Considered / Consequences format, link it from `docs/adr/README.md`'s index, and cross-link related ADRs. If a decision supersedes an earlier one, write a new ADR and update the old one's Status line rather than editing its original content away.
+- (To be filled in further as the codebase takes shape — testing approach, folder structure, naming conventions.)
