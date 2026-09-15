@@ -22,7 +22,14 @@ Use Neon's native branching to split the existing single database into two: a **
 
 ## Consequences
 
-- Two sets of database credentials now exist. Both are still subject to [ADR 0005](0005-env-based-secrets-management.md): kept out of git, `.env` holds only the `development` branch's strings, and `.env.example`'s placeholders should make clear which role each variable plays.
+- Two sets of database credentials now exist. Both are still subject to [ADR 0005](0005-env-based-secrets-management.md): kept out of git, `.env` holds only the `development` branch's strings, and `.env.example`'s placeholders make clear which role each variable plays.
 - Every future schema change now has two steps instead of one: migrate `development`, verify, then migrate `production` at deploy time. Skipping the second step means production silently falls behind the code that expects the new schema — worth catching before it ships, not something this ADR by itself prevents.
-- The test data already sitting in the current database (from building and verifying Iterations 1-5) stays wherever the branch split leaves it; since no real troop data exists yet, no data migration or cleanup is required as part of this decision.
-- Creating the `development` branch, updating local `.env`, and configuring Vercel's Production environment variables are implementation steps that follow from this decision — not yet done as of this ADR being written.
+- The original database (all the test data from building and verifying Iterations 1-5 — "Fall Backpacking Trip," "Winter Klondike Derby," "Spring Canoe Trip") keeps that name-implying-production status and stays as-is; it becomes the `production` branch as-is, test data and all. Since no real troop data exists yet, no cleanup was required before this decision could be implemented — but it's worth clearing that data out before real use starts, as a separate step whenever that's decided.
+
+## Implementation
+
+Done, 2026-09-15:
+
+- A `development` branch was created in the Neon dashboard, off the original branch. Its schema came through from the branch copy, but not its data — it came up empty, which turned out to be a clean starting point rather than a problem. Local `.env` now points at it (`DATABASE_URL`/`DIRECT_URL`).
+- Because the branch had the schema already but no `_prisma_migrations` tracking history, `prisma migrate dev` reported drift. Resolved non-destructively with `prisma migrate resolve --applied <migration>` for both existing migrations, rather than `migrate reset` (which would have dropped everything) — there was nothing to fix but the tracking metadata, so nothing needed dropping. Verified after: `prisma migrate status` reports the schema up to date, and a direct query against the original branch confirmed its data is untouched.
+- **Not yet done**: pointing Vercel's Production environment variables at the original branch's connection strings. That's a manual step in Vercel's dashboard that requires the project owner's access — the values to use are the ones this project has been using as `DATABASE_URL`/`DIRECT_URL` all along, before this change.

@@ -1,6 +1,6 @@
 # Requirement 6 — Test Database Isolation
 
-Status: Not started
+Status: Mostly done — see Acceptance Criteria; one manual Vercel step remains
 Depends on: none — cross-cutting infrastructure requirement, not tied to a single ROADMAP iteration
 
 ## Goal
@@ -18,11 +18,11 @@ Once ScoutBuddy is actually in use by the troop, development work and testing �
 
 ## Acceptance Criteria
 
-- [ ] Two distinct databases (or Neon branches) exist: one for development/testing, one for production.
-- [ ] `.env`'s `DATABASE_URL` and `DIRECT_URL` point at the dev/test database.
-- [ ] Vercel's Production environment variables point at a different database than local `.env` uses.
-- [ ] Running `npx prisma migrate dev` locally cannot reach the production database — true by connection string, not just by convention or care.
-- [ ] Someone new to the project (human or AI) can tell which database is which without having to ask.
+- [x] Two distinct databases (or Neon branches) exist: one for development/testing, one for production.
+- [x] `.env`'s `DATABASE_URL` and `DIRECT_URL` point at the dev/test database.
+- [ ] Vercel's Production environment variables point at a different database than local `.env` uses. **Remaining manual step** — requires the project owner's Vercel dashboard access; see ADR 0014's Implementation section for the values to use.
+- [x] Running `npx prisma migrate dev` locally cannot reach the production database — true by connection string, not just by convention or care.
+- [x] Someone new to the project (human or AI) can tell which database is which without having to ask — see ADR 0014 and the comments in `.env.example`.
 
 ## Out of Scope for This Requirement
 
