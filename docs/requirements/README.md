@@ -1,6 +1,6 @@
 # Requirements
 
-One file per iteration from [ROADMAP.md](../../ROADMAP.md), each expanding that iteration's roadmap bullets into numbered, testable requirements and an acceptance checklist. Update the corresponding file here (and ROADMAP.md's summary) together if an iteration's scope changes — don't let them drift apart.
+One file per product iteration from [ROADMAP.md](../../ROADMAP.md) (01-05), each expanding that iteration's roadmap bullets into numbered, testable requirements and an acceptance checklist — update the corresponding file here (and ROADMAP.md's summary) together if an iteration's scope changes, don't let them drift apart. Numbers from 06 on are cross-cutting/infrastructure requirements not tied to a single ROADMAP iteration.
 
 ## Index
 
@@ -9,3 +9,4 @@ One file per iteration from [ROADMAP.md](../../ROADMAP.md), each expanding that 
 - [03 - Multiple Campouts](03-multiple-campouts.md)
 - [04 - Meal-Framework Variation](04-meal-framework-variation.md)
 - [05 - Workflow Hardening & Polish](05-workflow-hardening-and-polish.md)
+- [06 - Test Database Isolation](06-test-database-isolation.md)
