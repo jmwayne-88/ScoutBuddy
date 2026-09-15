@@ -1,5 +1,6 @@
 import { getActor } from "@/lib/session";
 import { PATROLS, patrolLabel } from "@/lib/constants";
+import { PatrolBadge } from "@/components/PatrolBadge";
 import { chooseRole } from "./role-actions";
 
 export default async function HomePage() {
@@ -29,7 +30,7 @@ export default async function HomePage() {
                 value={`PATROL_LEADER:${p.value}`}
                 defaultChecked={actor?.role === "PATROL_LEADER" && actor.patrol === p.value}
               />
-              the Patrol Leader for {p.label}
+              the Patrol Leader for <PatrolBadge patrol={p.value} />
             </label>
           ))}
         </fieldset>

@@ -12,7 +12,7 @@ export async function chooseRole(formData: FormData) {
 
   if (value === "ASPL") {
     await setActor({ role: "ASPL" });
-    redirect("/aspl");
+    redirect("/campouts");
   }
 
   const [, patrol] = value.split(":");

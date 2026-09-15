@@ -15,3 +15,5 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0009 - Next.js Server Actions for writes, Server Components for reads](0009-server-actions-for-writes.md)
 - [0010 - Cookie-based role identity, no accounts or passwords](0010-cookie-based-role-identity.md)
 - [0011 - Tailwind CSS for styling](0011-tailwind-css.md)
+- [0012 - Meal-framework removal modeled as a campout-scoped exception table](0012-meal-framework-exceptions.md)
+- [0013 - Editing a Submitted menu does not revert its status](0013-submitted-menu-edits-do-not-revert-status.md)

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import "./globals.css";
 import { getActor } from "@/lib/session";
-import { patrolLabel } from "@/lib/constants";
+import { PatrolBadge } from "@/components/PatrolBadge";
 
 export const metadata: Metadata = {
   title: "ScoutBuddy",
@@ -18,12 +18,18 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body>
         <header className="border-b border-slate-200 bg-white px-4 py-3 flex items-center justify-between gap-4">
           <span className="font-semibold">ScoutBuddy</span>
-          <span className="text-sm text-slate-600">
-            {actor
-              ? actor.role === "ASPL"
-                ? "Acting as: ASPL of Camping"
-                : `Acting as: Patrol Leader — ${patrolLabel(actor.patrol)}`
-              : "No role selected"}
+          <span className="text-sm text-slate-600 flex items-center gap-2">
+            {actor ? (
+              actor.role === "ASPL" ? (
+                "Acting as: ASPL of Camping"
+              ) : (
+                <span className="flex items-center gap-2">
+                  Acting as: Patrol Leader — <PatrolBadge patrol={actor.patrol} />
+                </span>
+              )
+            ) : (
+              "No role selected"
+            )}
             {" · "}
             <Link href="/" className="underline">
               Switch role

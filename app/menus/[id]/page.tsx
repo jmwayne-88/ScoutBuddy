@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
 import { canEditMenu, canReview, canSubmitMenu } from "@/lib/permissions";
-import { MEAL_OCCASIONS, patrolLabel } from "@/lib/constants";
+import { MEAL_OCCASIONS } from "@/lib/constants";
+import { PatrolBadge } from "@/components/PatrolBadge";
 import {
   addDish,
   addIngredient,
@@ -15,8 +16,15 @@ import {
   updateNotes,
 } from "./actions";
 
-export default async function MenuPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function MenuPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
+}) {
   const { id } = await params;
+  const { error } = await searchParams;
   const actor = await getActor();
 
   const menu = await db.menu.findUnique({
@@ -38,9 +46,9 @@ export default async function MenuPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-xl font-semibold">
-          {patrolLabel(menu.patrol)} — {menu.campout.name}
+      <div className="space-y-1">
+        <h1 className="text-xl font-semibold flex items-center gap-2">
+          <PatrolBadge patrol={menu.patrol} /> — {menu.campout.name}
         </h1>
         <p className="text-sm text-slate-600">
           Due {menu.dueDate.toDateString()} · Status: {menu.status.replace(/_/g, " ")}
@@ -169,12 +177,19 @@ export default async function MenuPage({ params }: { params: Promise<{ id: strin
       </section>
 
       {canSubmit && (
-        <form action={submitMenu}>
-          <input type="hidden" name="menuId" value={menu.id} />
-          <button type="submit" className="rounded bg-emerald-700 px-4 py-2 text-white">
-            Submit menu
-          </button>
-        </form>
+        <div className="space-y-2">
+          {error === "empty-occasions" && (
+            <p className="text-sm text-red-700">
+              This menu can&apos;t be submitted yet — every meal occasion needs at least one dish.
+            </p>
+          )}
+          <form action={submitMenu}>
+            <input type="hidden" name="menuId" value={menu.id} />
+            <button type="submit" className="rounded bg-emerald-700 px-4 py-2 text-white">
+              Submit menu
+            </button>
+          </form>
+        </div>
       )}
 
       {canReviewMenu && (

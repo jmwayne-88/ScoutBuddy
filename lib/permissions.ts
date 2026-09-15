@@ -6,12 +6,20 @@ export type MenuForPermissions = {
   status: MenuStatus;
 };
 
-export function canCreateCampout(actor: Actor | null): boolean {
+export function isASPL(actor: Actor | null): boolean {
   return actor?.role === "ASPL";
 }
 
+export function canCreateCampout(actor: Actor | null): boolean {
+  return isASPL(actor);
+}
+
 export function canAssignMenu(actor: Actor | null): boolean {
-  return actor?.role === "ASPL";
+  return isASPL(actor);
+}
+
+export function canManageMealFramework(actor: Actor | null): boolean {
+  return isASPL(actor);
 }
 
 export function canEditMenu(actor: Actor | null, menu: MenuForPermissions): boolean {
@@ -26,6 +34,6 @@ export function canSubmitMenu(actor: Actor | null, menu: MenuForPermissions): bo
 }
 
 export function canReview(actor: Actor | null, menu: MenuForPermissions): boolean {
-  if (actor?.role !== "ASPL") return false;
+  if (!isASPL(actor)) return false;
   return menu.status === "SUBMITTED";
 }

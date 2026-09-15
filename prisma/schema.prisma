@@ -39,11 +39,12 @@ enum ReviewDecision {
 }
 
 model Campout {
-  id        String   @id @default(cuid())
-  name      String
-  date      DateTime
-  createdAt DateTime @default(now())
-  menus     Menu[]
+  id                       String                    @id @default(cuid())
+  name                     String
+  date                     DateTime
+  createdAt                DateTime                  @default(now())
+  menus                    Menu[]
+  mealFrameworkExceptions  MealFrameworkException[]
 }
 
 model Menu {
@@ -96,4 +97,18 @@ model Review {
   decision  ReviewDecision
   comment   String?
   createdAt DateTime       @default(now())
+}
+
+// A row means "this occasion is removed for this patrol (or every patrol,
+// if patrol is null) on this campout." No DB-level unique constraint: Postgres
+// treats NULL as distinct in uniqueness, so it can't dedupe the "all patrols"
+// case — app code (removeOccasion) does deleteMany-then-create for the exact
+// same scope instead, as an app-level upsert. See ADR 0012.
+model MealFrameworkException {
+  id        String       @id @default(cuid())
+  campoutId String
+  campout   Campout      @relation(fields: [campoutId], references: [id])
+  patrol    Patrol?
+  occasion  MealOccasion
+  createdAt DateTime     @default(now())
 }

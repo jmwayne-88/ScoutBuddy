@@ -2,17 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import type { MenuStatus } from "@prisma/client";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
 import { canEditMenu, canReview, canSubmitMenu } from "@/lib/permissions";
-
-function requireString(formData: FormData, key: string): string {
-  const value = formData.get(key);
-  if (typeof value !== "string" || value.trim() === "") {
-    throw new Error(`Missing required field: ${key}`);
-  }
-  return value;
-}
+import { menuHasEmptyOccasion } from "@/lib/validation";
+import { requireString } from "@/lib/form-data";
 
 async function requireEditableMenu(menuId: string) {
   const actor = await getActor();
@@ -114,10 +109,17 @@ export async function removeIngredient(formData: FormData) {
 export async function submitMenu(formData: FormData) {
   const menuId = requireString(formData, "menuId");
   const actor = await getActor();
-  const menu = await db.menu.findUniqueOrThrow({ where: { id: menuId } });
+  const menu = await db.menu.findUniqueOrThrow({
+    where: { id: menuId },
+    include: { meals: { include: { dishes: true } } },
+  });
 
   if (!canSubmitMenu(actor, menu)) {
     throw new Error("You don't have permission to submit this menu.");
+  }
+
+  if (menuHasEmptyOccasion(menu.meals)) {
+    redirect(`/menus/${menuId}?error=empty-occasions`);
   }
 
   await db.menu.update({ where: { id: menuId }, data: { status: "SUBMITTED" } });
