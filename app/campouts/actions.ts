@@ -1,9 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
 import { canCreateCampout } from "@/lib/permissions";
+
+function optionalString(formData: FormData, key: string): string | undefined {
+  const value = formData.get(key);
+  if (typeof value !== "string" || value.trim() === "") return undefined;
+  return value.trim();
+}
 
 export async function createCampout(formData: FormData) {
   const actor = await getActor();
@@ -17,9 +24,16 @@ export async function createCampout(formData: FormData) {
     throw new Error("A campout needs a name and a date.");
   }
 
-  await db.campout.create({
-    data: { name: name.trim(), date: new Date(date) },
+  const campout = await db.campout.create({
+    data: {
+      name: name.trim(),
+      date: new Date(date),
+      location: optionalString(formData, "location"),
+      description: optionalString(formData, "description"),
+      imageUrl: optionalString(formData, "imageUrl"),
+    },
   });
 
   revalidatePath("/campouts");
+  redirect(`/campouts/${campout.id}`);
 }

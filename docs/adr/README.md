@@ -19,3 +19,4 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0013 - Editing a Submitted menu does not revert its status](0013-submitted-menu-edits-do-not-revert-status.md)
 - [0014 - Separate Neon branch for development and testing](0014-separate-dev-test-database-branch.md)
 - [0015 - Visual design aligned to Scouting America's brand guidelines, no trademarks](0015-brand-aligned-visual-design.md)
+- [0016 - Semantic status colors, and a Scouting Blue header](0016-status-colors-and-header-blue.md)

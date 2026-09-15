@@ -8,11 +8,8 @@ export default async function PatrolLeaderPage() {
 
   if (actor?.role !== "PATROL_LEADER") {
     return (
-      <p>
-        You&apos;re not currently acting as a Patrol Leader.{" "}
-        <Link href="/" className="link">
-          Switch role
-        </Link>
+      <p className="max-w-3xl mx-auto">
+        You&apos;re not currently acting as a Patrol Leader. Pick a role from the header above.
       </p>
     );
   }
@@ -24,7 +21,7 @@ export default async function PatrolLeaderPage() {
   });
 
   if (menus.length === 0) {
-    return <p>No menu has been assigned to your patrol yet.</p>;
+    return <p className="max-w-3xl mx-auto">No menu has been assigned to your patrol yet.</p>;
   }
 
   if (menus.length === 1) {
@@ -32,7 +29,7 @@ export default async function PatrolLeaderPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-3xl mx-auto space-y-4">
       <h1 className="text-xl">Your patrol&apos;s menus</h1>
       <ul className="space-y-1">
         {menus.map((menu) => (

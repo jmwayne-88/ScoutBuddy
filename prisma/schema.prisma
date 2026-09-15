@@ -42,6 +42,9 @@ model Campout {
   id                       String                    @id @default(cuid())
   name                     String
   date                     DateTime
+  location                 String?
+  description              String?
+  imageUrl                 String?
   createdAt                DateTime                  @default(now())
   menus                    Menu[]
   mealFrameworkExceptions  MealFrameworkException[]

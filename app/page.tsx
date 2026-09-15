@@ -7,7 +7,7 @@ export default async function HomePage() {
   const actor = await getActor();
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-3xl mx-auto space-y-6">
       <h1 className="text-xl">Who&apos;s using ScoutBuddy?</h1>
       {actor && (
         <p className="text-sm text-scout-gray">

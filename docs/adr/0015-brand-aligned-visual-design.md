@@ -1,7 +1,7 @@
 # 0015. Visual design aligned to Scouting America's brand guidelines, no trademarks
 
 Date: 2026-09-15
-Status: Accepted
+Status: Accepted — header color and link color specifics revised by [ADR 0016](0016-status-colors-and-header-blue.md); everything else here still applies
 
 ## Context
 

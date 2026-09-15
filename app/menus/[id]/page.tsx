@@ -45,7 +45,7 @@ export default async function MenuPage({
   const mealsByOccasion = new Map(menu.meals.map((m) => [m.occasion, m]));
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-3xl mx-auto space-y-8">
       <div className="space-y-1">
         <h1 className="text-xl flex items-center gap-2">
           <PatrolBadge patrol={menu.patrol} /> — {menu.campout.name}
