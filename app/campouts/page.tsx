@@ -10,7 +10,7 @@ export default async function CampoutsPage() {
     return (
       <p>
         You&apos;re not currently acting as the ASPL of Camping.{" "}
-        <Link href="/" className="underline">
+        <Link href="/" className="link">
           Switch role
         </Link>
       </p>
@@ -22,14 +22,14 @@ export default async function CampoutsPage() {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h1 className="text-xl font-semibold">Campouts</h1>
+        <h1 className="text-xl">Campouts</h1>
         {campouts.length === 0 ? (
-          <p className="text-sm text-slate-600">No campouts yet — create the first one below.</p>
+          <p className="text-sm text-scout-gray">No campouts yet — create the first one below.</p>
         ) : (
           <ul className="space-y-1">
             {campouts.map((campout) => (
               <li key={campout.id}>
-                <Link href={`/campouts/${campout.id}`} className="underline">
+                <Link href={`/campouts/${campout.id}`} className="link">
                   {campout.name}
                 </Link>{" "}
                 — {campout.date.toDateString()}
@@ -44,13 +44,13 @@ export default async function CampoutsPage() {
         <form action={createCampout} className="space-y-3">
           <div>
             <label className="block text-sm font-medium">Campout name</label>
-            <input name="name" required className="border rounded px-2 py-1 w-full" />
+            <input name="name" required className="border border-scout-gray-pale rounded px-2 py-1 w-full" />
           </div>
           <div>
             <label className="block text-sm font-medium">Date</label>
-            <input name="date" type="date" required className="border rounded px-2 py-1 w-full" />
+            <input name="date" type="date" required className="border border-scout-gray-pale rounded px-2 py-1 w-full" />
           </div>
-          <button type="submit" className="rounded bg-slate-900 px-4 py-2 text-white">
+          <button type="submit" className="btn-primary">
             Create campout
           </button>
         </form>

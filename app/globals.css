@@ -1,6 +1,58 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens sourced from the Scouting America brand guidelines
+ * (Scouts BSA sub-brand palette: neutral tan/gray/olive foundation,
+ * red as accent/action color — see docs/adr/0015-brand-aligned-visual-design.md).
+ * Patrol identity colors (components/PatrolBadge.tsx, lib/colors.ts) are a
+ * separate, pre-existing concept and are NOT drawn from this palette.
+ */
+@theme {
+  --color-scout-red: #ce1126;
+  --color-scout-olive: #243e2c;
+  --color-scout-tan: #d6cebd;
+  --color-scout-tan-light: #e9e9e4;
+  --color-scout-tan-dark: #ad9d7b;
+  --color-scout-gray: #515354;
+  --color-scout-gray-pale: #858787;
+  --color-scout-gray-dark: #232528;
+  --color-scout-blue: #003f87;
+  --font-heading: var(--font-montserrat), Arial, Helvetica, sans-serif;
+}
+
 body {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: var(--color-scout-tan-light);
+  color: var(--color-scout-gray-dark);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+a {
+  color: var(--color-scout-blue);
+}
+
+.btn-primary {
+  @apply rounded px-4 py-2 text-white bg-scout-red;
+}
+
+.btn-secondary {
+  @apply rounded px-4 py-2 text-white bg-scout-olive;
+}
+
+.link {
+  @apply underline text-scout-blue;
+}
+
+.link-muted {
+  @apply underline text-scout-gray;
+}
+
+.card {
+  @apply border border-scout-gray-pale rounded-lg bg-white;
 }

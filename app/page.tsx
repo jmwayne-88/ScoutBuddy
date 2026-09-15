@@ -8,9 +8,9 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold">Who&apos;s using ScoutBuddy?</h1>
+      <h1 className="text-xl">Who&apos;s using ScoutBuddy?</h1>
       {actor && (
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-scout-gray">
           Currently acting as{" "}
           {actor.role === "ASPL" ? "the ASPL of Camping" : `the Patrol Leader for ${patrolLabel(actor.patrol)}`}.
         </p>
@@ -34,7 +34,7 @@ export default async function HomePage() {
             </label>
           ))}
         </fieldset>
-        <button type="submit" className="rounded bg-slate-900 px-4 py-2 text-white">
+        <button type="submit" className="btn-primary">
           Continue
         </button>
       </form>

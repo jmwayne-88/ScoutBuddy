@@ -14,7 +14,7 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
     return (
       <p>
         You&apos;re not currently acting as the ASPL of Camping.{" "}
-        <Link href="/" className="underline">
+        <Link href="/" className="link">
           Switch role
         </Link>
       </p>
@@ -33,10 +33,10 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-xl font-semibold">{campout.name}</h1>
-        <p className="text-sm text-slate-600">{campout.date.toDateString()}</p>
+        <h1 className="text-xl">{campout.name}</h1>
+        <p className="text-sm text-scout-gray">{campout.date.toDateString()}</p>
         <p className="text-sm">
-          <Link href="/campouts" className="underline">
+          <Link href="/campouts" className="link">
             All campouts
           </Link>
         </p>
@@ -48,18 +48,23 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
           {PATROLS.map((p) => {
             const menu = menuByPatrol.get(p.value);
             return (
-              <li key={p.value} className="border rounded p-3 flex items-center justify-between gap-3">
+              <li key={p.value} className="card p-3 flex items-center justify-between gap-3">
                 <PatrolBadge patrol={p.value} />
                 {menu ? (
-                  <Link href={`/menus/${menu.id}`} className="text-sm underline">
+                  <Link href={`/menus/${menu.id}`} className="text-sm link">
                     {menu.status.replace(/_/g, " ")} — due {menu.dueDate.toDateString()}
                   </Link>
                 ) : (
                   <form action={assignMenu} className="flex items-end gap-2">
                     <input type="hidden" name="campoutId" value={campout.id} />
                     <input type="hidden" name="patrol" value={p.value} />
-                    <input name="dueDate" type="date" required className="border rounded px-2 py-1 text-sm" />
-                    <button type="submit" className="text-sm underline">
+                    <input
+                      name="dueDate"
+                      type="date"
+                      required
+                      className="border border-scout-gray-pale rounded px-2 py-1 text-sm"
+                    />
+                    <button type="submit" className="text-sm link">
                       Assign menu
                     </button>
                   </form>
@@ -70,7 +75,7 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
         </ul>
       </section>
 
-      <section className="space-y-3 border-t pt-4">
+      <section className="space-y-3 border-t border-scout-gray-pale pt-4">
         <h2 className="font-medium">Meal framework for this campout</h2>
         {campout.mealFrameworkExceptions.length > 0 && (
           <ul className="space-y-1 text-sm">
@@ -82,7 +87,7 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
                 </span>
                 <form action={restoreOccasion}>
                   <input type="hidden" name="exceptionId" value={exception.id} />
-                  <button type="submit" className="underline">
+                  <button type="submit" className="link-muted">
                     Restore
                   </button>
                 </form>
@@ -94,7 +99,7 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
           <input type="hidden" name="campoutId" value={campout.id} />
           <div>
             <label className="block text-sm font-medium">Occasion</label>
-            <select name="occasion" required className="border rounded px-2 py-1 text-sm">
+            <select name="occasion" required className="border border-scout-gray-pale rounded px-2 py-1 text-sm">
               {MEAL_OCCASIONS.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
@@ -104,7 +109,7 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
           </div>
           <div>
             <label className="block text-sm font-medium">For</label>
-            <select name="scope" required className="border rounded px-2 py-1 text-sm">
+            <select name="scope" required className="border border-scout-gray-pale rounded px-2 py-1 text-sm">
               <option value="ALL">All patrols</option>
               {PATROLS.map((p) => (
                 <option key={p.value} value={p.value}>
@@ -113,7 +118,7 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
               ))}
             </select>
           </div>
-          <button type="submit" className="rounded bg-slate-900 px-4 py-2 text-white text-sm">
+          <button type="submit" className="btn-secondary text-sm">
             Remove occasion
           </button>
         </form>

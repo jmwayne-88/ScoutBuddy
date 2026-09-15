@@ -18,3 +18,4 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0012 - Meal-framework removal modeled as a campout-scoped exception table](0012-meal-framework-exceptions.md)
 - [0013 - Editing a Submitted menu does not revert its status](0013-submitted-menu-edits-do-not-revert-status.md)
 - [0014 - Separate Neon branch for development and testing](0014-separate-dev-test-database-branch.md)
+- [0015 - Visual design aligned to Scouting America's brand guidelines, no trademarks](0015-brand-aligned-visual-design.md)

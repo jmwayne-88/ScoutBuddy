@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Montserrat } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import { getActor } from "@/lib/session";
 import { PatrolBadge } from "@/components/PatrolBadge";
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["700", "800"],
+  variable: "--font-montserrat",
+});
 
 export const metadata: Metadata = {
   title: "ScoutBuddy",
@@ -14,11 +21,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const actor = await getActor();
 
   return (
-    <html lang="en">
+    <html lang="en" className={montserrat.variable}>
       <body>
-        <header className="border-b border-slate-200 bg-white px-4 py-3 flex items-center justify-between gap-4">
-          <span className="font-semibold">ScoutBuddy</span>
-          <span className="text-sm text-slate-600 flex items-center gap-2">
+        <header className="bg-scout-gray-dark text-white px-4 py-3 flex items-center justify-between gap-4">
+          <span className="font-heading font-extrabold tracking-wide">ScoutBuddy</span>
+          <span className="text-sm flex items-center gap-2">
             {actor ? (
               actor.role === "ASPL" ? (
                 "Acting as: ASPL of Camping"
@@ -31,7 +38,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               "No role selected"
             )}
             {" · "}
-            <Link href="/" className="underline">
+            <Link href="/" className="underline text-white">
               Switch role
             </Link>
           </span>

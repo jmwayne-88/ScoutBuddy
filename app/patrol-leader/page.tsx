@@ -10,7 +10,7 @@ export default async function PatrolLeaderPage() {
     return (
       <p>
         You&apos;re not currently acting as a Patrol Leader.{" "}
-        <Link href="/" className="underline">
+        <Link href="/" className="link">
           Switch role
         </Link>
       </p>
@@ -33,11 +33,11 @@ export default async function PatrolLeaderPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold">Your patrol&apos;s menus</h1>
+      <h1 className="text-xl">Your patrol&apos;s menus</h1>
       <ul className="space-y-1">
         {menus.map((menu) => (
           <li key={menu.id}>
-            <Link href={`/menus/${menu.id}`} className="underline">
+            <Link href={`/menus/${menu.id}`} className="link">
               {menu.campout.name}
             </Link>{" "}
             — {menu.status.replace(/_/g, " ")} — due {menu.dueDate.toDateString()}

@@ -47,10 +47,10 @@ export default async function MenuPage({
   return (
     <div className="space-y-8">
       <div className="space-y-1">
-        <h1 className="text-xl font-semibold flex items-center gap-2">
+        <h1 className="text-xl flex items-center gap-2">
           <PatrolBadge patrol={menu.patrol} /> — {menu.campout.name}
         </h1>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-scout-gray">
           Due {menu.dueDate.toDateString()} · Status: {menu.status.replace(/_/g, " ")}
         </p>
       </div>
@@ -60,10 +60,10 @@ export default async function MenuPage({
           const meal = mealsByOccasion.get(value);
           if (!meal) return null;
           return (
-            <section key={value} className="border rounded p-4 space-y-3">
+            <section key={value} className="card p-4 space-y-3">
               <h2 className="font-medium">{label}</h2>
               {meal.dishes.length === 0 && (
-                <p className="text-sm text-slate-500">No dishes yet.</p>
+                <p className="text-sm text-scout-gray">No dishes yet.</p>
               )}
               <ul className="space-y-2">
                 {meal.dishes.map((dish) => (
@@ -74,13 +74,13 @@ export default async function MenuPage({
                         <form action={removeDish}>
                           <input type="hidden" name="menuId" value={menu.id} />
                           <input type="hidden" name="dishId" value={dish.id} />
-                          <button type="submit" className="text-sm text-red-600 underline">
+                          <button type="submit" className="text-sm link-muted">
                             Remove dish
                           </button>
                         </form>
                       )}
                     </div>
-                    <ul className="ml-4 text-sm text-slate-700 space-y-1">
+                    <ul className="ml-4 text-sm text-scout-gray space-y-1">
                       {dish.ingredients.map((ing) => (
                         <li key={ing.id} className="flex items-center gap-2">
                           <span>
@@ -90,7 +90,7 @@ export default async function MenuPage({
                             <form action={removeIngredient}>
                               <input type="hidden" name="menuId" value={menu.id} />
                               <input type="hidden" name="ingredientId" value={ing.id} />
-                              <button type="submit" className="text-red-600 underline">
+                              <button type="submit" className="link-muted">
                                 Remove
                               </button>
                             </form>
@@ -106,15 +106,15 @@ export default async function MenuPage({
                           name="name"
                           placeholder="Ingredient"
                           required
-                          className="border rounded px-2 py-1 text-sm"
+                          className="border border-scout-gray-pale rounded px-2 py-1 text-sm"
                         />
                         <input
                           name="quantity"
                           placeholder="Quantity"
                           required
-                          className="border rounded px-2 py-1 text-sm"
+                          className="border border-scout-gray-pale rounded px-2 py-1 text-sm"
                         />
-                        <button type="submit" className="text-sm underline">
+                        <button type="submit" className="text-sm link">
                           Add ingredient
                         </button>
                       </form>
@@ -126,8 +126,13 @@ export default async function MenuPage({
                 <form action={addDish} className="flex items-end gap-2">
                   <input type="hidden" name="menuId" value={menu.id} />
                   <input type="hidden" name="mealId" value={meal.id} />
-                  <input name="name" placeholder="Dish name" required className="border rounded px-2 py-1 text-sm" />
-                  <button type="submit" className="text-sm underline">
+                  <input
+                    name="name"
+                    placeholder="Dish name"
+                    required
+                    className="border border-scout-gray-pale rounded px-2 py-1 text-sm"
+                  />
+                  <button type="submit" className="text-sm link">
                     Add dish
                   </button>
                 </form>
@@ -147,7 +152,7 @@ export default async function MenuPage({
               <textarea
                 name="nutritionNote"
                 defaultValue={menu.nutritionNote}
-                className="border rounded px-2 py-1 w-full"
+                className="border border-scout-gray-pale rounded px-2 py-1 w-full"
                 rows={2}
               />
             </div>
@@ -156,11 +161,11 @@ export default async function MenuPage({
               <textarea
                 name="allergyNote"
                 defaultValue={menu.allergyNote}
-                className="border rounded px-2 py-1 w-full"
+                className="border border-scout-gray-pale rounded px-2 py-1 w-full"
                 rows={2}
               />
             </div>
-            <button type="submit" className="rounded bg-slate-900 px-4 py-2 text-white text-sm">
+            <button type="submit" className="btn-primary text-sm">
               Save notes
             </button>
           </form>
@@ -179,13 +184,13 @@ export default async function MenuPage({
       {canSubmit && (
         <div className="space-y-2">
           {error === "empty-occasions" && (
-            <p className="text-sm text-red-700">
+            <p className="text-sm text-scout-red font-medium">
               This menu can&apos;t be submitted yet — every meal occasion needs at least one dish.
             </p>
           )}
           <form action={submitMenu}>
             <input type="hidden" name="menuId" value={menu.id} />
-            <button type="submit" className="rounded bg-emerald-700 px-4 py-2 text-white">
+            <button type="submit" className="btn-primary">
               Submit menu
             </button>
           </form>
@@ -193,19 +198,19 @@ export default async function MenuPage({
       )}
 
       {canReviewMenu && (
-        <section className="space-y-4 border-t pt-4">
+        <section className="space-y-4 border-t border-scout-gray-pale pt-4">
           <h2 className="font-medium">Review</h2>
           <form action={approveMenu}>
             <input type="hidden" name="menuId" value={menu.id} />
-            <button type="submit" className="rounded bg-emerald-700 px-4 py-2 text-white">
+            <button type="submit" className="btn-primary">
               Approve
             </button>
           </form>
           <form action={rejectMenu} className="space-y-2">
             <input type="hidden" name="menuId" value={menu.id} />
             <label className="block text-sm font-medium">Comments (required to request changes)</label>
-            <textarea name="comment" required className="border rounded px-2 py-1 w-full" rows={2} />
-            <button type="submit" className="rounded bg-amber-700 px-4 py-2 text-white">
+            <textarea name="comment" required className="border border-scout-gray-pale rounded px-2 py-1 w-full" rows={2} />
+            <button type="submit" className="btn-secondary">
               Request changes
             </button>
           </form>
@@ -213,11 +218,11 @@ export default async function MenuPage({
       )}
 
       {menu.reviews.length > 0 && (
-        <section className="space-y-2 border-t pt-4">
+        <section className="space-y-2 border-t border-scout-gray-pale pt-4">
           <h2 className="font-medium">Review history</h2>
           <ul className="space-y-2 text-sm">
             {menu.reviews.map((review) => (
-              <li key={review.id} className="border rounded p-2">
+              <li key={review.id} className="card p-2">
                 <div className="font-medium">
                   {review.decision === "APPROVED" ? "Approved" : "Changes requested"} —{" "}
                   {review.createdAt.toDateString()}
@@ -230,7 +235,7 @@ export default async function MenuPage({
       )}
 
       <p className="text-sm">
-        <Link href="/" className="underline">
+        <Link href="/" className="link">
           Switch role
         </Link>
       </p>
