@@ -15,7 +15,9 @@ import { MEAL_OCCASIONS, mealOccasionLabel } from "@/lib/constants";
 import { contrastText } from "@/lib/colors";
 import { campoutProgress, menuDishCount, menuStatusColor } from "@/lib/progress";
 import { NavLink } from "@/components/NavLink";
-import { assignMenu, removeOccasion, restoreOccasion } from "./actions";
+import { RemoveFromCampoutDialog } from "@/components/RemoveFromCampoutDialog";
+import { AddPatrolToCampoutDialog } from "@/components/AddPatrolToCampoutDialog";
+import { assignMenu, removeOccasion, removePatrolFromCampout, restoreOccasion } from "./actions";
 
 export default async function CampoutDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -34,11 +36,13 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
   const allPatrols = await getAllPatrols();
 
   const menuByPatrolId = new Map(campout.menus.map((menu) => [menu.patrolId, menu]));
-  // Show every active patrol (so a new one can be assigned here) plus any
-  // inactive patrol that already has a menu on this campout — deactivating
-  // a patrol only blocks *new* assignment, it never hides existing history
-  // (Requirement 8, Decision 3).
-  const displayPatrols = allPatrols.filter((p) => p.isActive || menuByPatrolId.has(p.id));
+  // REQ-10: the patrol roster is unbounded (Requirement 8), so this page no
+  // longer shows a row for every active patrol — only for patrols that
+  // currently have a menu here (active or not, so deactivating a patrol
+  // still never hides its existing history — Requirement 8, Decision 3).
+  // Everything else is reachable through the single Add-patrol picker below.
+  const assignedPatrols = allPatrols.filter((p) => menuByPatrolId.has(p.id));
+  const addablePatrols = activePatrols.filter((p) => !menuByPatrolId.has(p.id));
   const progress = campoutProgress(
     campout.menus.map((m) => m.status),
     activePatrols.length
@@ -112,72 +116,67 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
         </Typography>
       )}
 
-      <Grid container spacing={2}>
-        {displayPatrols.map((p) => {
-          const menu = menuByPatrolId.get(p.id);
-          return (
-            <Grid key={p.id} size={{ xs: 12, sm: 6 }}>
-              <Paper variant="outlined" sx={{ overflow: "hidden" }}>
-                <Stack
-                  direction="row"
-                  sx={{
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    px: 2,
-                    py: 1.5,
-                    bgcolor: p.color,
-                    color: contrastText(p.color),
-                  }}
-                >
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                    {p.name}
-                  </Typography>
-                  {menu && (
+      <Stack spacing={2}>
+        <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Patrols
+          </Typography>
+          <AddPatrolToCampoutDialog
+            campoutId={campout.id}
+            patrols={addablePatrols}
+            assignAction={assignMenu}
+          />
+        </Stack>
+        <Grid container spacing={2}>
+          {assignedPatrols.map((p) => {
+            const menu = menuByPatrolId.get(p.id)!;
+            return (
+              <Grid key={p.id} size={{ xs: 12, sm: 6 }}>
+                <Paper variant="outlined" sx={{ overflow: "hidden" }}>
+                  <Stack
+                    direction="row"
+                    sx={{
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      px: 2,
+                      py: 1.5,
+                      bgcolor: p.color,
+                      color: contrastText(p.color),
+                    }}
+                  >
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                      {p.name}
+                    </Typography>
                     <Chip
                       label={menu.status.replace(/_/g, " ")}
                       size="small"
                       sx={{ bgcolor: menuStatusColor(menu.status).bg, color: menuStatusColor(menu.status).text }}
                     />
-                  )}
-                </Stack>
-                <Stack spacing={1.5} sx={{ p: 2 }}>
-                  {menu ? (
-                    <>
-                      <Typography variant="body2" color="text.secondary">
-                        Due {menu.dueDate.toDateString()} · {menuDishCount(menu.meals)} dishes planned
-                      </Typography>
+                  </Stack>
+                  <Stack spacing={1.5} sx={{ p: 2 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Due {menu.dueDate.toDateString()} · {menuDishCount(menu.meals)} dishes planned
+                    </Typography>
+                    <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
                       <NavLink href={`/menus/${menu.id}`} variant="body2">
                         View menu
                       </NavLink>
-                    </>
-                  ) : (
-                    <Stack
-                      component="form"
-                      action={assignMenu}
-                      direction="row"
-                      sx={{ flexWrap: "wrap", alignItems: "flex-end", gap: 1.5 }}
-                    >
-                      <input type="hidden" name="campoutId" value={campout.id} />
-                      <input type="hidden" name="patrolId" value={p.id} />
-                      <TextField
-                        name="dueDate"
-                        label="Due date"
-                        type="date"
-                        required
-                        size="small"
-                        slotProps={{ inputLabel: { shrink: true } }}
+                      <RemoveFromCampoutDialog
+                        campoutId={campout.id}
+                        patrolId={p.id}
+                        patrolName={p.name}
+                        dishCount={menuDishCount(menu.meals)}
+                        isApproved={menu.status === "APPROVED"}
+                        removeAction={removePatrolFromCampout}
                       />
-                      <Button type="submit" variant="contained" size="small">
-                        Assign menu
-                      </Button>
                     </Stack>
-                  )}
-                </Stack>
-              </Paper>
-            </Grid>
-          );
-        })}
-      </Grid>
+                  </Stack>
+                </Paper>
+              </Grid>
+            );
+          })}
+        </Grid>
+      </Stack>
 
       <Stack spacing={1.5} sx={{ borderTop: 1, borderColor: "divider", pt: 2 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>

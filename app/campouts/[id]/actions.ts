@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import type { MealOccasion } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
-import { canAssignMenu, canManageMealFramework } from "@/lib/permissions";
+import { canAssignMenu, canManageCampoutRoster, canManageMealFramework } from "@/lib/permissions";
 import { MEAL_OCCASIONS } from "@/lib/constants";
 import { requireString } from "@/lib/form-data";
 
@@ -38,6 +38,41 @@ export async function assignMenu(formData: FormData) {
 
   revalidatePath(`/campouts/${campoutId}`);
   redirect(`/menus/${menu.id}`);
+}
+
+// REQ-10.1/10.2: unassigns one patrol from one campout — a manual cascade
+// scoped to that single menu, mirroring deletePatrol's cascade (app/patrols/
+// actions.ts) but leaving the patrol itself and its meal-framework
+// exceptions for this campout untouched (REQ-10.7 relies on those surviving
+// so a re-add doesn't lose configured occasion removals).
+export async function removePatrolFromCampout(formData: FormData) {
+  const actor = await getActor();
+  if (!canManageCampoutRoster(actor)) {
+    throw new Error("Only the ASPL of Camping can manage a campout's patrols.");
+  }
+
+  const campoutId = requireString(formData, "campoutId");
+  const patrolId = requireString(formData, "patrolId");
+
+  const menu = await db.menu.findUnique({
+    where: { campoutId_patrolId: { campoutId, patrolId } },
+    include: { meals: { include: { dishes: true } } },
+  });
+  if (!menu) return;
+
+  const mealIds = menu.meals.map((m) => m.id);
+  const dishIds = menu.meals.flatMap((m) => m.dishes.map((d) => d.id));
+  if (dishIds.length > 0) {
+    await db.ingredient.deleteMany({ where: { dishId: { in: dishIds } } });
+    await db.dish.deleteMany({ where: { mealId: { in: mealIds } } });
+  }
+  await db.review.deleteMany({ where: { menuId: menu.id } });
+  if (mealIds.length > 0) {
+    await db.meal.deleteMany({ where: { id: { in: mealIds } } });
+  }
+  await db.menu.delete({ where: { id: menu.id } });
+
+  revalidatePath(`/campouts/${campoutId}`);
 }
 
 export async function removeOccasion(formData: FormData) {

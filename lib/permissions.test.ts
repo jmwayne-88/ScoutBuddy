@@ -3,6 +3,7 @@ import {
   canAssignMenu,
   canCreateCampout,
   canEditMenu,
+  canManageCampoutRoster,
   canReview,
   canSubmitMenu,
   type MenuForPermissions,
@@ -25,6 +26,14 @@ describe("canCreateCampout / canAssignMenu", () => {
 
     expect(canAssignMenu(aspl)).toBe(true);
     expect(canAssignMenu(eagleLeader)).toBe(false);
+  });
+});
+
+describe("canManageCampoutRoster", () => {
+  it("only the ASPL can add or remove a patrol from a specific campout", () => {
+    expect(canManageCampoutRoster(aspl)).toBe(true);
+    expect(canManageCampoutRoster(eagleLeader)).toBe(false);
+    expect(canManageCampoutRoster(null)).toBe(false);
   });
 });
 

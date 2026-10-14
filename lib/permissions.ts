@@ -26,6 +26,10 @@ export function canManagePatrols(actor: Actor | null): boolean {
   return isASPL(actor);
 }
 
+export function canManageCampoutRoster(actor: Actor | null): boolean {
+  return isASPL(actor);
+}
+
 export function canEditMenu(actor: Actor | null, menu: MenuForPermissions): boolean {
   if (actor?.role !== "PATROL_LEADER") return false;
   if (actor.patrolId !== menu.patrolId) return false;
