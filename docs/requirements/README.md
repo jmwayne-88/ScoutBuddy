@@ -11,3 +11,4 @@ One file per product iteration from [ROADMAP.md](../../ROADMAP.md) (01-05), each
 - [05 - Workflow Hardening & Polish](05-workflow-hardening-and-polish.md)
 - [06 - Test Database Isolation](06-test-database-isolation.md)
 - [07 - Campout Dashboard Layout & Status Visualization](07-campout-dashboard-layout.md)
+- [08 - Manage Patrols](08-manage-patrols.md)
