@@ -1,4 +1,5 @@
 import type { MenuStatus } from "@prisma/client";
+import { PATROLS } from "./constants";
 
 // Semantic status colors — distinct from the Scouts BSA brand chrome in
 // ADR 0015 (which governs buttons/backgrounds/links, not status indicators).
@@ -23,7 +24,7 @@ export type CampoutProgress = {
   dotColor: string;
 };
 
-const PATROL_COUNT = 4;
+const PATROL_COUNT = PATROLS.length;
 
 export function campoutProgress(menuStatuses: MenuStatus[]): CampoutProgress {
   const total = PATROL_COUNT;

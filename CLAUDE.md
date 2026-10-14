@@ -17,12 +17,13 @@ Use real troop terms throughout code, UI copy, and comments. Do not genericize:
 
 ## Fixed reference data
 
-Four patrols, not user-creatable, each with a background color (foreground text color is computed for contrast, never hand-set):
+The patrols, not user-creatable, each with a background color (foreground text color is computed for contrast, never hand-set):
 
 - Eagle Patrol — blue
 - Puma Patrol — gold
 - Raven Patrol — dark purple
 - Silver Fox Patrol — silver
+- Joe Patrol — brown
 
 Six standard meal-framework occasions, in this order: Friday Cracker Barrel, Saturday Breakfast, Saturday Lunch, Saturday Dinner, Saturday Cracker Barrel, Sunday Breakfast.
 

@@ -10,7 +10,7 @@ Status: documentation only, not yet built. Covers the "build first" scope from t
 ## Entities
 
 - **Campout** — name, date.
-- **Patrol** — fixed set of four, not user-creatable: Eagle (blue), Puma (gold), Raven (dark purple), Silver Fox (silver).
+- **Patrol** — fixed set, not user-creatable: Eagle (blue), Puma (gold), Raven (dark purple), Silver Fox (silver), Joe (brown).
 - **Menu** — one per (campout, patrol) pair. Has a due date, a status, and a set of active meal occasions (see Meal-Framework Variation below).
 - **Meal** — one per standard occasion, scoped to a menu. Only occasions the ASPL has left active appear.
 - **Dish** — one or more per meal, has a name.
@@ -81,6 +81,7 @@ Statuses: **Not Started → In Progress → Submitted → Changes Requested → 
   - Puma Patrol — gold
   - Raven Patrol — dark purple
   - Silver Fox Patrol — silver
+  - Joe Patrol — brown
 - Foreground text color is chosen automatically for readable contrast against each background; not manually set per patrol.
 
 ## Language
@@ -89,7 +90,7 @@ Use real troop language throughout, never genericized: Patrol Leader, ASPL of Ca
 
 ## Starting State
 
-- The app starts from a truly empty state: no seeded campouts, patrols' rosters, or menus beyond the fixed four patrols themselves.
+- The app starts from a truly empty state: no seeded campouts, patrols' rosters, or menus beyond the fixed patrols themselves.
 
 ## Explicitly Out of Scope (future, not built now)
 

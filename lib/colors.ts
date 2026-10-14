@@ -5,6 +5,7 @@ const PATROL_BACKGROUND: Record<Patrol, string> = {
   PUMA: "#d4af37",
   RAVEN: "#4c1d6b",
   SILVER_FOX: "#9ca3af",
+  JOE: "#8b4513",
 };
 
 export function patrolBackground(patrol: Patrol): string {

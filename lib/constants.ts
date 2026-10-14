@@ -14,6 +14,7 @@ export const PATROLS: { value: Patrol; label: string }[] = [
   { value: "PUMA", label: "Puma Patrol" },
   { value: "RAVEN", label: "Raven Patrol" },
   { value: "SILVER_FOX", label: "Silver Fox Patrol" },
+  { value: "JOE", label: "Joe Patrol" },
 ];
 
 export function mealOccasionLabel(occasion: MealOccasion): string {

@@ -14,6 +14,7 @@ enum Patrol {
   PUMA
   RAVEN
   SILVER_FOX
+  JOE
 }
 
 enum MealOccasion {

@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { contrastText, patrolBackground } from "./colors";
 
 describe("patrolBackground", () => {
-  it("returns a distinct hex color for each of the four patrols", () => {
+  it("returns a distinct hex color for each of the five patrols", () => {
     const colors = new Set(
-      (["EAGLE", "PUMA", "RAVEN", "SILVER_FOX"] as const).map((p) => patrolBackground(p))
+      (["EAGLE", "PUMA", "RAVEN", "SILVER_FOX", "JOE"] as const).map((p) => patrolBackground(p))
     );
-    expect(colors.size).toBe(4);
+    expect(colors.size).toBe(5);
     for (const color of colors) {
       expect(color).toMatch(/^#[0-9a-f]{6}$/i);
     }
@@ -24,5 +24,6 @@ describe("contrastText", () => {
     expect(contrastText("#000000")).toBe("#ffffff");
     expect(contrastText("#1d4ed8")).toBe("#ffffff"); // Eagle blue
     expect(contrastText("#4c1d6b")).toBe("#ffffff"); // Raven dark purple
+    expect(contrastText("#8b4513")).toBe("#ffffff"); // Joe brown
   });
 });

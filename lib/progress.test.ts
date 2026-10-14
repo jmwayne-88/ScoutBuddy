@@ -17,37 +17,37 @@ describe("menuStatusColor", () => {
 });
 
 describe("campoutProgress", () => {
-  it("computes approved/total and percent as approved-out-of-4", () => {
-    const p = campoutProgress(["APPROVED", "IN_PROGRESS", "NOT_STARTED", "NOT_STARTED"]);
+  it("computes approved/total and percent as approved-out-of-5 (one entry per patrol)", () => {
+    const p = campoutProgress(["APPROVED", "IN_PROGRESS", "NOT_STARTED", "NOT_STARTED", "NOT_STARTED"]);
     expect(p.approved).toBe(1);
-    expect(p.total).toBe(4);
-    expect(p.percent).toBe(25);
+    expect(p.total).toBe(5);
+    expect(p.percent).toBe(20);
   });
 
   it("prioritizes Changes Requested in the label over other states", () => {
-    const p = campoutProgress(["APPROVED", "SUBMITTED", "CHANGES_REQUESTED", "NOT_STARTED"]);
+    const p = campoutProgress(["APPROVED", "SUBMITTED", "CHANGES_REQUESTED", "NOT_STARTED", "NOT_STARTED"]);
     expect(p.label).toBe("1 Needs Revision");
   });
 
   it("falls back to Awaiting Review when there's a Submitted menu but no Changes Requested", () => {
-    const p = campoutProgress(["APPROVED", "SUBMITTED", "SUBMITTED", "NOT_STARTED"]);
+    const p = campoutProgress(["APPROVED", "SUBMITTED", "SUBMITTED", "NOT_STARTED", "NOT_STARTED"]);
     expect(p.label).toBe("2 Awaiting Review");
   });
 
   it("reports All Approved when every patrol is approved", () => {
-    const p = campoutProgress(["APPROVED", "APPROVED", "APPROVED", "APPROVED"]);
+    const p = campoutProgress(["APPROVED", "APPROVED", "APPROVED", "APPROVED", "APPROVED"]);
     expect(p.label).toBe("All Approved");
     expect(p.percent).toBe(100);
   });
 
   it("reports Not Started when nothing has begun", () => {
-    const p = campoutProgress(["NOT_STARTED", "NOT_STARTED", "NOT_STARTED", "NOT_STARTED"]);
+    const p = campoutProgress(["NOT_STARTED", "NOT_STARTED", "NOT_STARTED", "NOT_STARTED", "NOT_STARTED"]);
     expect(p.label).toBe("Not Started");
     expect(p.percent).toBe(0);
   });
 
   it("reports In Progress once any menu has started but nothing needs attention", () => {
-    const p = campoutProgress(["IN_PROGRESS", "NOT_STARTED", "NOT_STARTED", "NOT_STARTED"]);
+    const p = campoutProgress(["IN_PROGRESS", "NOT_STARTED", "NOT_STARTED", "NOT_STARTED", "NOT_STARTED"]);
     expect(p.label).toBe("In Progress");
   });
 });
