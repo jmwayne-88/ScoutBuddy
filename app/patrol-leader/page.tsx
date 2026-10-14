@@ -1,16 +1,18 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
+import { NavLink } from "@/components/NavLink";
 
 export default async function PatrolLeaderPage() {
   const actor = await getActor();
 
   if (actor?.role !== "PATROL_LEADER") {
     return (
-      <p className="max-w-3xl mx-auto">
+      <Typography>
         You&apos;re not currently acting as a Patrol Leader. Pick a role from the header above.
-      </p>
+      </Typography>
     );
   }
 
@@ -21,7 +23,7 @@ export default async function PatrolLeaderPage() {
   });
 
   if (menus.length === 0) {
-    return <p className="max-w-3xl mx-auto">No menu has been assigned to your patrol yet.</p>;
+    return <Typography>No menu has been assigned to your patrol yet.</Typography>;
   }
 
   if (menus.length === 1) {
@@ -29,18 +31,16 @@ export default async function PatrolLeaderPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4">
-      <h1 className="text-xl">Your patrol&apos;s menus</h1>
-      <ul className="space-y-1">
+    <Stack spacing={2} sx={{ maxWidth: 600 }}>
+      <Typography variant="h5">Your patrol&apos;s menus</Typography>
+      <Stack spacing={1} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
         {menus.map((menu) => (
-          <li key={menu.id}>
-            <Link href={`/menus/${menu.id}`} className="link">
-              {menu.campout.name}
-            </Link>{" "}
-            — {menu.status.replace(/_/g, " ")} — due {menu.dueDate.toDateString()}
-          </li>
+          <Typography key={menu.id} component="li" variant="body2">
+            <NavLink href={`/menus/${menu.id}`}>{menu.campout.name}</NavLink> — {menu.status.replace(/_/g, " ")} — due{" "}
+            {menu.dueDate.toDateString()}
+          </Typography>
         ))}
-      </ul>
-    </div>
+      </Stack>
+    </Stack>
   );
 }

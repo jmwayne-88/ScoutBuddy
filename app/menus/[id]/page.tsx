@@ -1,10 +1,17 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
 import { canEditMenu, canReview, canSubmitMenu } from "@/lib/permissions";
 import { MEAL_OCCASIONS } from "@/lib/constants";
 import { PatrolBadge } from "@/components/PatrolBadge";
+import { NavLink } from "@/components/NavLink";
 import {
   addDish,
   addIngredient,
@@ -45,200 +52,211 @@ export default async function MenuPage({
   const mealsByOccasion = new Map(menu.meals.map((m) => [m.occasion, m]));
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      <div className="space-y-1">
-        <h1 className="text-xl flex items-center gap-2">
-          <PatrolBadge patrol={menu.patrol} /> — {menu.campout.name}
-        </h1>
-        <p className="text-sm text-scout-gray">
+    <Stack spacing={4} sx={{ maxWidth: 900 }}>
+      <Stack spacing={0.5}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+          <Typography variant="h5" component="h1">
+            {menu.campout.name}
+          </Typography>
+          <PatrolBadge patrol={menu.patrol} />
+        </Stack>
+        <Typography variant="body2" color="text.secondary">
           Due {menu.dueDate.toDateString()} · Status: {menu.status.replace(/_/g, " ")}
-        </p>
-      </div>
+        </Typography>
+      </Stack>
 
-      <div className="space-y-6">
+      <Stack spacing={3}>
         {MEAL_OCCASIONS.map(({ value, label }) => {
           const meal = mealsByOccasion.get(value);
           if (!meal) return null;
           return (
-            <section key={value} className="card p-4 space-y-3">
-              <h2 className="font-medium">{label}</h2>
-              {meal.dishes.length === 0 && (
-                <p className="text-sm text-scout-gray">No dishes yet.</p>
-              )}
-              <ul className="space-y-2">
-                {meal.dishes.map((dish) => (
-                  <li key={dish.id} className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{dish.name}</span>
+            <Paper key={value} variant="outlined" sx={{ p: 2 }}>
+              <Stack spacing={1.5}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                  {label}
+                </Typography>
+                {meal.dishes.length === 0 && (
+                  <Typography variant="body2" color="text.secondary">
+                    No dishes yet.
+                  </Typography>
+                )}
+                <Stack spacing={1.5} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
+                  {meal.dishes.map((dish) => (
+                    <Stack key={dish.id} component="li" spacing={0.5}>
+                      <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
+                        <Typography sx={{ fontWeight: 500 }}>{dish.name}</Typography>
+                        {canEdit && (
+                          <Box component="form" action={removeDish}>
+                            <input type="hidden" name="menuId" value={menu.id} />
+                            <input type="hidden" name="dishId" value={dish.id} />
+                            <Button type="submit" variant="text" size="small" sx={{ color: "text.secondary" }}>
+                              Remove dish
+                            </Button>
+                          </Box>
+                        )}
+                      </Stack>
+                      <Stack spacing={0.5} component="ul" sx={{ listStyle: "none", m: 0, ml: 2, p: 0 }}>
+                        {dish.ingredients.map((ing) => (
+                          <Stack key={ing.id} component="li" direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                            <Typography variant="body2" color="text.secondary">
+                              {ing.name} — {ing.quantity}
+                            </Typography>
+                            {canEdit && (
+                              <Box component="form" action={removeIngredient}>
+                                <input type="hidden" name="menuId" value={menu.id} />
+                                <input type="hidden" name="ingredientId" value={ing.id} />
+                                <Button type="submit" variant="text" size="small" sx={{ color: "text.secondary" }}>
+                                  Remove
+                                </Button>
+                              </Box>
+                            )}
+                          </Stack>
+                        ))}
+                      </Stack>
                       {canEdit && (
-                        <form action={removeDish}>
+                        <Stack
+                          component="form"
+                          action={addIngredient}
+                          direction="row"
+                          sx={{ flexWrap: "wrap", alignItems: "flex-end", gap: 1, ml: 2 }}
+                        >
                           <input type="hidden" name="menuId" value={menu.id} />
                           <input type="hidden" name="dishId" value={dish.id} />
-                          <button type="submit" className="text-sm link-muted">
-                            Remove dish
-                          </button>
-                        </form>
+                          <TextField name="name" label="Ingredient" required size="small" />
+                          <TextField name="quantity" label="Quantity" required size="small" />
+                          <Button type="submit" variant="text" size="small">
+                            Add ingredient
+                          </Button>
+                        </Stack>
                       )}
-                    </div>
-                    <ul className="ml-4 text-sm text-scout-gray space-y-1">
-                      {dish.ingredients.map((ing) => (
-                        <li key={ing.id} className="flex items-center gap-2">
-                          <span>
-                            {ing.name} — {ing.quantity}
-                          </span>
-                          {canEdit && (
-                            <form action={removeIngredient}>
-                              <input type="hidden" name="menuId" value={menu.id} />
-                              <input type="hidden" name="ingredientId" value={ing.id} />
-                              <button type="submit" className="link-muted">
-                                Remove
-                              </button>
-                            </form>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                    {canEdit && (
-                      <form action={addIngredient} className="flex flex-wrap items-end gap-2 ml-4">
-                        <input type="hidden" name="menuId" value={menu.id} />
-                        <input type="hidden" name="dishId" value={dish.id} />
-                        <input
-                          name="name"
-                          placeholder="Ingredient"
-                          required
-                          className="border border-scout-gray-pale rounded px-2 py-1 text-sm"
-                        />
-                        <input
-                          name="quantity"
-                          placeholder="Quantity"
-                          required
-                          className="border border-scout-gray-pale rounded px-2 py-1 text-sm"
-                        />
-                        <button type="submit" className="text-sm link">
-                          Add ingredient
-                        </button>
-                      </form>
-                    )}
-                  </li>
-                ))}
-              </ul>
-              {canEdit && (
-                <form action={addDish} className="flex items-end gap-2">
-                  <input type="hidden" name="menuId" value={menu.id} />
-                  <input type="hidden" name="mealId" value={meal.id} />
-                  <input
-                    name="name"
-                    placeholder="Dish name"
-                    required
-                    className="border border-scout-gray-pale rounded px-2 py-1 text-sm"
-                  />
-                  <button type="submit" className="text-sm link">
-                    Add dish
-                  </button>
-                </form>
-              )}
-            </section>
+                    </Stack>
+                  ))}
+                </Stack>
+                {canEdit && (
+                  <Stack component="form" action={addDish} direction="row" sx={{ alignItems: "flex-end", gap: 1 }}>
+                    <input type="hidden" name="menuId" value={menu.id} />
+                    <input type="hidden" name="mealId" value={meal.id} />
+                    <TextField name="name" label="Dish name" required size="small" />
+                    <Button type="submit" variant="text" size="small">
+                      Add dish
+                    </Button>
+                  </Stack>
+                )}
+              </Stack>
+            </Paper>
           );
         })}
-      </div>
+      </Stack>
 
-      <section className="space-y-4">
-        <h2 className="font-medium">Notes</h2>
+      <Stack spacing={2}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          Notes
+        </Typography>
         {canEdit ? (
-          <form action={updateNotes} className="space-y-3">
+          <Stack component="form" action={updateNotes} spacing={2}>
             <input type="hidden" name="menuId" value={menu.id} />
-            <div>
-              <label className="block text-sm font-medium">Nutrition / MyPlate balance note</label>
-              <textarea
-                name="nutritionNote"
-                defaultValue={menu.nutritionNote}
-                className="border border-scout-gray-pale rounded px-2 py-1 w-full"
-                rows={2}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Patrol allergy note</label>
-              <textarea
-                name="allergyNote"
-                defaultValue={menu.allergyNote}
-                className="border border-scout-gray-pale rounded px-2 py-1 w-full"
-                rows={2}
-              />
-            </div>
-            <button type="submit" className="btn-primary text-sm">
+            <TextField
+              name="nutritionNote"
+              label="Nutrition / MyPlate balance note"
+              defaultValue={menu.nutritionNote}
+              multiline
+              rows={2}
+              fullWidth
+            />
+            <TextField
+              name="allergyNote"
+              label="Patrol allergy note"
+              defaultValue={menu.allergyNote}
+              multiline
+              rows={2}
+              fullWidth
+            />
+            <Button type="submit" variant="contained" size="small" sx={{ alignSelf: "flex-start" }}>
               Save notes
-            </button>
-          </form>
+            </Button>
+          </Stack>
         ) : (
-          <div className="text-sm space-y-2">
-            <p>
+          <Stack spacing={1} sx={{ typography: "body2" }}>
+            <Typography variant="body2">
               <strong>Nutrition / MyPlate balance:</strong> {menu.nutritionNote || "(none)"}
-            </p>
-            <p>
+            </Typography>
+            <Typography variant="body2">
               <strong>Patrol allergy note:</strong> {menu.allergyNote || "(none)"}
-            </p>
-          </div>
+            </Typography>
+          </Stack>
         )}
-      </section>
+      </Stack>
 
       {canSubmit && (
-        <div className="space-y-2">
+        <Stack spacing={1.5} sx={{ alignItems: "flex-start" }}>
           {error === "empty-occasions" && (
-            <p className="text-sm text-scout-red font-medium">
+            <Alert severity="error" sx={{ width: "100%" }}>
               This menu can&apos;t be submitted yet — every meal occasion needs at least one dish.
-            </p>
+            </Alert>
           )}
-          <form action={submitMenu}>
+          <Box component="form" action={submitMenu}>
             <input type="hidden" name="menuId" value={menu.id} />
-            <button type="submit" className="btn-primary">
+            <Button type="submit" variant="contained" color="primary">
               Submit menu
-            </button>
-          </form>
-        </div>
+            </Button>
+          </Box>
+        </Stack>
       )}
 
       {canReviewMenu && (
-        <section className="space-y-4 border-t border-scout-gray-pale pt-4">
-          <h2 className="font-medium">Review</h2>
-          <form action={approveMenu}>
+        <Stack spacing={2} sx={{ borderTop: 1, borderColor: "divider", pt: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Review
+          </Typography>
+          <Box component="form" action={approveMenu}>
             <input type="hidden" name="menuId" value={menu.id} />
-            <button type="submit" className="btn-primary">
+            <Button type="submit" variant="contained" color="primary">
               Approve
-            </button>
-          </form>
-          <form action={rejectMenu} className="space-y-2">
+            </Button>
+          </Box>
+          <Stack component="form" action={rejectMenu} spacing={1.5} sx={{ alignItems: "flex-start" }}>
             <input type="hidden" name="menuId" value={menu.id} />
-            <label className="block text-sm font-medium">Comments (required to request changes)</label>
-            <textarea name="comment" required className="border border-scout-gray-pale rounded px-2 py-1 w-full" rows={2} />
-            <button type="submit" className="btn-secondary">
+            <TextField
+              name="comment"
+              label="Comments (required to request changes)"
+              required
+              multiline
+              rows={2}
+              fullWidth
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{ bgcolor: "brand.olive", "&:hover": { bgcolor: "brand.olive", filter: "brightness(0.9)" } }}
+            >
               Request changes
-            </button>
-          </form>
-        </section>
+            </Button>
+          </Stack>
+        </Stack>
       )}
 
       {menu.reviews.length > 0 && (
-        <section className="space-y-2 border-t border-scout-gray-pale pt-4">
-          <h2 className="font-medium">Review history</h2>
-          <ul className="space-y-2 text-sm">
+        <Stack spacing={1.5} sx={{ borderTop: 1, borderColor: "divider", pt: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Review history
+          </Typography>
+          <Stack spacing={1} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
             {menu.reviews.map((review) => (
-              <li key={review.id} className="card p-2">
-                <div className="font-medium">
+              <Paper key={review.id} component="li" variant="outlined" sx={{ p: 1.5 }}>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
                   {review.decision === "APPROVED" ? "Approved" : "Changes requested"} —{" "}
                   {review.createdAt.toDateString()}
-                </div>
-                {review.comment && <p>{review.comment}</p>}
-              </li>
+                </Typography>
+                {review.comment && <Typography variant="body2">{review.comment}</Typography>}
+              </Paper>
             ))}
-          </ul>
-        </section>
+          </Stack>
+        </Stack>
       )}
 
-      <p className="text-sm">
-        <Link href="/" className="link">
-          Switch role
-        </Link>
-      </p>
-    </div>
+      <Typography variant="body2">
+        <NavLink href="/">Switch role</NavLink>
+      </Typography>
+    </Stack>
   );
 }

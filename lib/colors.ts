@@ -16,7 +16,7 @@ function srgbToLinear(channel: number): number {
   return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
 }
 
-function relativeLuminance(hex: string): number {
+export function relativeLuminance(hex: string): number {
   const value = hex.replace("#", "");
   const r = parseInt(value.substring(0, 2), 16) / 255;
   const g = parseInt(value.substring(2, 4), 16) / 255;

@@ -20,3 +20,4 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0014 - Separate Neon branch for development and testing](0014-separate-dev-test-database-branch.md)
 - [0015 - Visual design aligned to Scouting America's brand guidelines, no trademarks](0015-brand-aligned-visual-design.md)
 - [0016 - Semantic status colors, and a Scouting Blue header](0016-status-colors-and-header-blue.md)
+- [0017 - Adopt MUI as the design system; brand color roles revised; Tailwind removed](0017-adopt-mui-design-system.md)

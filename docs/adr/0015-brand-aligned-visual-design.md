@@ -1,7 +1,7 @@
 # 0015. Visual design aligned to Scouting America's brand guidelines, no trademarks
 
 Date: 2026-09-15
-Status: Accepted — header color and link color specifics revised by [ADR 0016](0016-status-colors-and-header-blue.md); everything else here still applies
+Status: Accepted — header color and link color specifics revised by [ADR 0016](0016-status-colors-and-header-blue.md); button/background color-role assignment (red primary, olive secondary) superseded by [ADR 0017](0017-adopt-mui-design-system.md) (MUI primary=blue, secondary=red-as-accent, olive preserved as a named `brand.olive` token); the brand hex values, typography choice, and trademark guardrails below still apply
 
 ## Context
 

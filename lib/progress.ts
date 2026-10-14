@@ -4,10 +4,13 @@ import { PATROLS } from "./constants";
 // Semantic status colors — distinct from the Scouts BSA brand chrome in
 // ADR 0015 (which governs buttons/backgrounds/links, not status indicators).
 // See ADR 0016.
+// Text colors are chosen per-background, not uniformly white — #858787 and
+// #b8860b are too light for white text to reach the WCAG 4.5:1 text
+// threshold (verified in lib/theme/contrast.test.ts, which caught this).
 const STATUS_COLORS: Record<MenuStatus, { bg: string; text: string }> = {
-  NOT_STARTED: { bg: "#858787", text: "#ffffff" }, // gray
+  NOT_STARTED: { bg: "#858787", text: "#000000" }, // gray
   IN_PROGRESS: { bg: "#003f87", text: "#ffffff" }, // blue
-  SUBMITTED: { bg: "#b8860b", text: "#ffffff" }, // amber
+  SUBMITTED: { bg: "#b8860b", text: "#000000" }, // amber
   CHANGES_REQUESTED: { bg: "#6b2d8c", text: "#ffffff" }, // purple
   APPROVED: { bg: "#1e7a3c", text: "#ffffff" }, // green
 };

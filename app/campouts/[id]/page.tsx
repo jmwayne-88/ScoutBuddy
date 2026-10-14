@@ -1,9 +1,19 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
+import Chip from "@mui/material/Chip";
+import Grid from "@mui/material/Grid";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import LinearProgress from "@mui/material/LinearProgress";
+import MenuItem from "@mui/material/MenuItem";
 import { db } from "@/lib/db";
 import { MEAL_OCCASIONS, PATROLS, mealOccasionLabel, patrolLabel } from "@/lib/constants";
 import { patrolBackground, contrastText } from "@/lib/colors";
 import { campoutProgress, menuDishCount, menuStatusColor } from "@/lib/progress";
+import { NavLink } from "@/components/NavLink";
 import { assignMenu, removeOccasion, restoreOccasion } from "./actions";
 
 export default async function CampoutDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -23,155 +33,204 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
   const progress = campoutProgress(campout.menus.map((m) => m.status));
 
   return (
-    <div className="space-y-6">
-      {/* Hero */}
-      <div
-        className="relative rounded-lg overflow-hidden h-48 flex items-end p-4 text-white"
-        style={
-          campout.imageUrl
+    <Stack spacing={4}>
+      <Box
+        sx={{
+          position: "relative",
+          borderRadius: 2,
+          overflow: "hidden",
+          height: 192,
+          display: "flex",
+          alignItems: "flex-end",
+          p: 2,
+          color: "common.white",
+          ...(campout.imageUrl
             ? { backgroundImage: `url(${campout.imageUrl})`, backgroundSize: "cover", backgroundPosition: "center" }
-            : { backgroundColor: "#243e2c" }
-        }
+            : { bgcolor: "brand.olive" }),
+        }}
       >
-        <div className="absolute inset-0 bg-black/40" aria-hidden="true" />
-        <span className="absolute top-3 right-3 rounded-full bg-black/60 px-3 py-1 text-xs font-medium">
-          {progress.approved}/{progress.total} approved
-        </span>
-        <div className="relative space-y-1">
-          <h1 className="text-2xl">{campout.name}</h1>
-          <p className="text-sm text-white/90">
+        <Box sx={{ position: "absolute", inset: 0, bgcolor: "rgba(0,0,0,0.4)" }} aria-hidden="true" />
+        <Chip
+          label={`${progress.approved}/${progress.total} approved`}
+          size="small"
+          sx={{ position: "absolute", top: 12, right: 12, bgcolor: "rgba(0,0,0,0.6)", color: "common.white" }}
+        />
+        <Stack sx={{ position: "relative" }} spacing={0.5}>
+          <Typography variant="h4" component="h1">
+            {campout.name}
+          </Typography>
+          <Typography variant="body2" sx={{ opacity: 0.9 }}>
             {campout.date.toDateString()}
             {campout.location && <> · {campout.location}</>}
-          </p>
-        </div>
-      </div>
+          </Typography>
+        </Stack>
+      </Box>
 
-      {/* Progress */}
-      <section className="card p-4 space-y-2">
-        <div className="flex items-center justify-between text-sm font-medium">
-          <span>MENU PROGRESS</span>
-          <span style={{ color: progress.dotColor }}>{progress.label}</span>
-        </div>
-        <div className="h-2 rounded bg-scout-tan-light overflow-hidden">
-          <div
-            className="h-full rounded"
-            style={{ width: `${progress.percent}%`, backgroundColor: progress.dotColor }}
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Stack spacing={1}>
+          <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              MENU PROGRESS
+            </Typography>
+            <Typography variant="body2" sx={{ color: progress.dotColor }}>
+              {progress.label}
+            </Typography>
+          </Stack>
+          <LinearProgress
+            variant="determinate"
+            value={progress.percent}
+            sx={{
+              height: 8,
+              borderRadius: 1,
+              bgcolor: "brand.lightTan",
+              "& .MuiLinearProgress-bar": { bgcolor: progress.dotColor },
+            }}
           />
-        </div>
-        <div className="text-right text-sm text-scout-gray">{progress.percent}%</div>
-      </section>
+          <Typography variant="body2" color="text.secondary" align="right">
+            {progress.percent}%
+          </Typography>
+        </Stack>
+      </Paper>
 
       {campout.description && (
-        <p className="border-l-4 border-scout-gray-pale pl-3 italic text-scout-gray">{campout.description}</p>
+        <Typography
+          sx={{ borderLeft: 4, borderColor: "divider", pl: 2, fontStyle: "italic", color: "text.secondary" }}
+        >
+          {campout.description}
+        </Typography>
       )}
 
-      {/* Patrol cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <Grid container spacing={2}>
         {PATROLS.map((p) => {
           const menu = menuByPatrol.get(p.value);
           const background = patrolBackground(p.value);
           return (
-            <div key={p.value} className="card overflow-hidden">
-              <div
-                className="px-4 py-3 flex items-center justify-between"
-                style={{ backgroundColor: background, color: contrastText(background) }}
-              >
-                <span className="font-heading font-bold">{patrolLabel(p.value)}</span>
-                {menu && (
-                  <span
-                    className="rounded-full px-2 py-0.5 text-xs font-medium"
-                    style={{
-                      backgroundColor: menuStatusColor(menu.status).bg,
-                      color: menuStatusColor(menu.status).text,
-                    }}
-                  >
-                    {menu.status.replace(/_/g, " ")}
-                  </span>
-                )}
-              </div>
-              <div className="p-4 space-y-3">
-                {menu ? (
-                  <>
-                    <p className="text-sm text-scout-gray">
-                      Due {menu.dueDate.toDateString()} · {menuDishCount(menu.meals)} dishes planned
-                    </p>
-                    <Link href={`/menus/${menu.id}`} className="link text-sm">
-                      View menu
-                    </Link>
-                  </>
-                ) : (
-                  <form action={assignMenu} className="flex flex-wrap items-end gap-2">
-                    <input type="hidden" name="campoutId" value={campout.id} />
-                    <input type="hidden" name="patrol" value={p.value} />
-                    <div>
-                      <label className="block text-xs font-medium">Due date</label>
-                      <input
+            <Grid key={p.value} size={{ xs: 12, sm: 6 }}>
+              <Paper variant="outlined" sx={{ overflow: "hidden" }}>
+                <Stack
+                  direction="row"
+                  sx={{
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    px: 2,
+                    py: 1.5,
+                    bgcolor: background,
+                    color: contrastText(background),
+                  }}
+                >
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                    {patrolLabel(p.value)}
+                  </Typography>
+                  {menu && (
+                    <Chip
+                      label={menu.status.replace(/_/g, " ")}
+                      size="small"
+                      sx={{ bgcolor: menuStatusColor(menu.status).bg, color: menuStatusColor(menu.status).text }}
+                    />
+                  )}
+                </Stack>
+                <Stack spacing={1.5} sx={{ p: 2 }}>
+                  {menu ? (
+                    <>
+                      <Typography variant="body2" color="text.secondary">
+                        Due {menu.dueDate.toDateString()} · {menuDishCount(menu.meals)} dishes planned
+                      </Typography>
+                      <NavLink href={`/menus/${menu.id}`} variant="body2">
+                        View menu
+                      </NavLink>
+                    </>
+                  ) : (
+                    <Stack
+                      component="form"
+                      action={assignMenu}
+                      direction="row"
+                      sx={{ flexWrap: "wrap", alignItems: "flex-end", gap: 1.5 }}
+                    >
+                      <input type="hidden" name="campoutId" value={campout.id} />
+                      <input type="hidden" name="patrol" value={p.value} />
+                      <TextField
                         name="dueDate"
+                        label="Due date"
                         type="date"
                         required
-                        className="border border-scout-gray-pale rounded px-2 py-1 text-sm"
+                        size="small"
+                        slotProps={{ inputLabel: { shrink: true } }}
                       />
-                    </div>
-                    <button type="submit" className="btn-primary text-sm">
-                      Assign menu
-                    </button>
-                  </form>
-                )}
-              </div>
-            </div>
+                      <Button type="submit" variant="contained" size="small">
+                        Assign menu
+                      </Button>
+                    </Stack>
+                  )}
+                </Stack>
+              </Paper>
+            </Grid>
           );
         })}
-      </section>
+      </Grid>
 
-      {/* Meal framework exceptions */}
-      <section className="space-y-3 border-t border-scout-gray-pale pt-4">
-        <h2 className="font-medium">Meal framework for this campout</h2>
+      <Stack spacing={1.5} sx={{ borderTop: 1, borderColor: "divider", pt: 2 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          Meal framework for this campout
+        </Typography>
         {campout.mealFrameworkExceptions.length > 0 && (
-          <ul className="space-y-1 text-sm">
+          <Stack spacing={1} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
             {campout.mealFrameworkExceptions.map((exception) => (
-              <li key={exception.id} className="flex items-center gap-2">
+              <Stack
+                key={exception.id}
+                component="li"
+                direction="row"
+                spacing={1}
+                sx={{ alignItems: "center", typography: "body2" }}
+              >
                 <span>
                   {mealOccasionLabel(exception.occasion)} removed for{" "}
                   {exception.patrol ? patrolLabel(exception.patrol) : "all patrols"}
                 </span>
-                <form action={restoreOccasion}>
+                <Box component="form" action={restoreOccasion}>
                   <input type="hidden" name="exceptionId" value={exception.id} />
-                  <button type="submit" className="link-muted">
+                  <Button type="submit" variant="text" size="small" sx={{ color: "text.secondary" }}>
                     Restore
-                  </button>
-                </form>
-              </li>
+                  </Button>
+                </Box>
+              </Stack>
             ))}
-          </ul>
+          </Stack>
         )}
-        <form action={removeOccasion} className="flex flex-wrap items-end gap-2">
+        <Stack
+          component="form"
+          action={removeOccasion}
+          direction="row"
+          sx={{ flexWrap: "wrap", alignItems: "flex-end", gap: 1.5 }}
+        >
           <input type="hidden" name="campoutId" value={campout.id} />
-          <div>
-            <label className="block text-sm font-medium">Occasion</label>
-            <select name="occasion" required className="border border-scout-gray-pale rounded px-2 py-1 text-sm">
-              {MEAL_OCCASIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium">For</label>
-            <select name="scope" required className="border border-scout-gray-pale rounded px-2 py-1 text-sm">
-              <option value="ALL">All patrols</option>
-              {PATROLS.map((p) => (
-                <option key={p.value} value={p.value}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button type="submit" className="btn-secondary text-sm">
+          <TextField
+            name="occasion"
+            label="Occasion"
+            select
+            required
+            size="small"
+            defaultValue={MEAL_OCCASIONS[0].value}
+            sx={{ minWidth: 200 }}
+          >
+            {MEAL_OCCASIONS.map((o) => (
+              <MenuItem key={o.value} value={o.value}>
+                {o.label}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField name="scope" label="For" select required size="small" defaultValue="ALL" sx={{ minWidth: 160 }}>
+            <MenuItem value="ALL">All patrols</MenuItem>
+            {PATROLS.map((p) => (
+              <MenuItem key={p.value} value={p.value}>
+                {p.label}
+              </MenuItem>
+            ))}
+          </TextField>
+          <Button type="submit" variant="contained" size="small" sx={{ bgcolor: "brand.olive", "&:hover": { bgcolor: "brand.olive", filter: "brightness(0.9)" } }}>
             Remove occasion
-          </button>
-        </form>
-      </section>
-    </div>
+          </Button>
+        </Stack>
+      </Stack>
+    </Stack>
   );
 }

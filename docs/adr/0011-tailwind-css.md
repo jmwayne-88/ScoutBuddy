@@ -1,7 +1,7 @@
 # 0011. Tailwind CSS for styling
 
 Date: 2026-09-14
-Status: Accepted
+Status: Superseded by [ADR 0017](0017-adopt-mui-design-system.md) — Tailwind has been removed in favor of MUI
 
 ## Context
 

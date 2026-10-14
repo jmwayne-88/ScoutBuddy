@@ -1,7 +1,7 @@
 # 0016. Semantic status colors, and a Scouting Blue header
 
 Date: 2026-09-15
-Status: Accepted
+Status: Accepted — this ADR's own Consequences note that "ADR 0015['s]... buttons (red/olive)... are unchanged" is corrected by [ADR 0017](0017-adopt-mui-design-system.md), which does revise button color roles; the header-blue and status-color decisions below are otherwise unaffected
 
 ## Context
 

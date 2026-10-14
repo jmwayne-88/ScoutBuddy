@@ -1,17 +1,22 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import AddIcon from "@mui/icons-material/Add";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
 import { campoutProgress } from "@/lib/progress";
+import { LinkButton } from "@/components/LinkButton";
+import { CampoutCard } from "@/components/CampoutCard";
 
 export default async function CampoutsLayout({ children }: { children: ReactNode }) {
   const actor = await getActor();
 
   if (actor?.role !== "ASPL") {
     return (
-      <p className="max-w-3xl mx-auto">
+      <Typography>
         You&apos;re not currently acting as the ASPL of Camping. Pick a role from the header above.
-      </p>
+      </Typography>
     );
   }
 
@@ -21,60 +26,50 @@ export default async function CampoutsLayout({ children }: { children: ReactNode
   });
 
   return (
-    <div className="flex gap-6 items-start">
-      <aside className="w-72 shrink-0 space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="font-heading font-bold">Campouts</h2>
-          <Link href="/campouts/new" className="btn-primary text-sm px-3 py-1" aria-label="New campout">
-            + New
-          </Link>
-        </div>
-        {campouts.length === 0 ? (
-          <p className="text-sm text-scout-gray">No campouts yet — create the first one.</p>
-        ) : (
-          <ul className="space-y-2">
-            {campouts.map((c) => {
-              const progress = campoutProgress(c.menus.map((m) => m.status));
-              return (
-                <li key={c.id}>
-                  <Link href={`/campouts/${c.id}`} className="card block p-3 space-y-2 hover:border-scout-blue">
-                    <div className="flex items-center gap-2">
-                      {c.imageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element -- arbitrary ASPL-supplied URL, not a build-known domain
-                        <img src={c.imageUrl} alt="" className="w-10 h-10 rounded object-cover shrink-0" />
-                      ) : (
-                        <span className="w-10 h-10 rounded bg-scout-tan-dark shrink-0" aria-hidden="true" />
-                      )}
-                      <span className="flex-1 min-w-0">
-                        <span className="block font-medium truncate">{c.name}</span>
-                        <span className="block text-xs text-scout-gray">{c.date.toDateString()}</span>
-                      </span>
-                      <span
-                        className="w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ backgroundColor: progress.dotColor }}
-                        aria-hidden="true"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="h-1.5 rounded bg-scout-tan-light overflow-hidden">
-                        <div
-                          className="h-full rounded"
-                          style={{ width: `${progress.percent}%`, backgroundColor: progress.dotColor }}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between text-xs">
-                        <span style={{ color: progress.dotColor }}>{progress.label}</span>
-                        <span className="text-scout-gray">{progress.percent}%</span>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </aside>
-      <div className="flex-1 min-w-0">{children}</div>
-    </div>
+    <Stack direction={{ xs: "column", md: "row" }} spacing={3} sx={{ alignItems: "flex-start" }}>
+      <Box component="aside" sx={{ width: { xs: "100%", md: 288 }, flexShrink: 0 }}>
+        <Stack spacing={1.5}>
+          <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
+            <Typography variant="h6" component="h2">
+              Campouts
+            </Typography>
+            <LinkButton
+              href="/campouts/new"
+              variant="contained"
+              size="small"
+              startIcon={<AddIcon />}
+              aria-label="New campout"
+            >
+              New
+            </LinkButton>
+          </Stack>
+          {campouts.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              No campouts yet — create the first one.
+            </Typography>
+          ) : (
+            <Stack spacing={1} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
+              {campouts.map((c) => {
+                const progress = campoutProgress(c.menus.map((m) => m.status));
+                return (
+                  <li key={c.id}>
+                    <CampoutCard
+                      href={`/campouts/${c.id}`}
+                      name={c.name}
+                      date={c.date.toDateString()}
+                      imageUrl={c.imageUrl}
+                      dotColor={progress.dotColor}
+                      percent={progress.percent}
+                      label={progress.label}
+                    />
+                  </li>
+                );
+              })}
+            </Stack>
+          )}
+        </Stack>
+      </Box>
+      <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>{children}</Box>
+    </Stack>
   );
 }

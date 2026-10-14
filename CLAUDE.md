@@ -15,6 +15,19 @@ Use real troop terms throughout code, UI copy, and comments. Do not genericize:
 - **Stack**: Next.js (React + TypeScript), API routes in the same project, Postgres via Neon, deployed on Vercel from the `jmwayne-88/ScoutBuddy` GitHub repo.
 - Full rationale for every architectural choice lives in [docs/adr/](docs/adr/README.md) as individual Architecture Decision Records — read those before proposing a stack or data-model change, and add a new ADR when a real decision is made rather than just editing code.
 
+## Design system
+
+MUI (Material UI) is the only component library, themed in `lib/theme/` (see [ADR 0017](docs/adr/0017-adopt-mui-design-system.md)) — Tailwind (ADR 0011) has been removed.
+
+- Never use a raw hex/rgb/hsl value in a component. Reference `theme.palette.*` (via `sx`, e.g. `sx={{ bgcolor: 'brand.olive' }}`) or, in plain CSS, `var(--mui-palette-*)`. Brand colors live once in `lib/theme/tokens.ts`.
+- `primary` (Scouting America Blue) is the general action/AppBar/link color; `secondary` (Scouting America Red) is a sparing high-emphasis accent only — it must never read as the default/dominant action color. `error` is its own distinct red; never reuse brand red for an error state.
+- `palette.brand.olive` carries the pre-existing "secondary action" meaning (Request Changes, Remove occasion) — a named token, not a raw hex.
+- Pale/tan brand colors (`paleBlue`, `tan`, `lightTan`, `darkTan`, `paleGray`) are backgrounds/borders/decorative only — never text on a light background.
+- Don't recreate or approximate Scouting America logos, the fleur-de-lis, or program marks. Reference files the user places in `public/brand/` if logos are ever needed.
+- Before finishing UI work: run `npm test` (includes `lib/theme/contrast.test.ts`, which fails if any theme color pairing drops below its WCAG 2.2 threshold) and check layouts at 360px and 1440px.
+- `/style-guide` is a living reference for every token, typography variant, and component default — not linked from production navigation.
+- **MUI + Server Components gotcha** (confirmed by running the app, not hypothetical): passing a `component` prop value (e.g. `component={Link}` for `next/link`) from a Server Component into an MUI Client Component — or passing a JSX element like `control={<Radio />}` into `FormControlLabel` — crashes at request time in this Next/React version ("Cannot read properties of undefined"), because the element doesn't survive the Server→Client serialization boundary as a plain object with `.props`. Build the whole composition (the `component={Link}` usage, or the `FormControlLabel`/`Radio` tree) inside a dedicated `"use client"` wrapper instead — see `components/LinkButton.tsx`, `components/NavLink.tsx`, `components/CampoutCard.tsx`, `components/RoleForm.tsx`.
+
 ## Fixed reference data
 
 The patrols, not user-creatable, each with a background color (foreground text color is computed for contrast, never hand-set):

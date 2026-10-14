@@ -1,6 +1,9 @@
 "use client";
 
-import { useTransition, type ChangeEvent } from "react";
+import { useTransition } from "react";
+import type { SelectChangeEvent } from "@mui/material/Select";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import { PATROLS } from "@/lib/constants";
 import { chooseRole } from "@/app/role-actions";
 import type { Actor } from "@/lib/session";
@@ -10,7 +13,7 @@ export function RoleSwitcher({ actor }: { actor: Actor | null }) {
 
   const currentValue = !actor ? "" : actor.role === "ASPL" ? "ASPL" : `PATROL_LEADER:${actor.patrol}`;
 
-  function handleChange(event: ChangeEvent<HTMLSelectElement>) {
+  function handleChange(event: SelectChangeEvent) {
     const value = event.target.value;
     if (!value) return;
     const formData = new FormData();
@@ -21,21 +24,30 @@ export function RoleSwitcher({ actor }: { actor: Actor | null }) {
   }
 
   return (
-    <select
+    <Select
       value={currentValue}
       onChange={handleChange}
       disabled={isPending}
-      className="rounded bg-white/15 text-white text-sm px-2 py-1 border border-white/40"
+      displayEmpty
+      size="small"
+      variant="standard"
+      disableUnderline
+      aria-label="Select a role"
+      sx={{
+        color: "inherit",
+        fontSize: "0.875rem",
+        "& .MuiSvgIcon-root": { color: "inherit" },
+      }}
     >
-      <option value="" disabled>
+      <MenuItem value="" disabled>
         Select a role
-      </option>
-      <option value="ASPL">ASPL of Camping</option>
+      </MenuItem>
+      <MenuItem value="ASPL">ASPL of Camping</MenuItem>
       {PATROLS.map((p) => (
-        <option key={p.value} value={`PATROL_LEADER:${p.value}`}>
+        <MenuItem key={p.value} value={`PATROL_LEADER:${p.value}`}>
           Patrol Leader — {p.label}
-        </option>
+        </MenuItem>
       ))}
-    </select>
+    </Select>
   );
 }
