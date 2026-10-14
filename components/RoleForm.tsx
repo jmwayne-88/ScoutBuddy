@@ -7,7 +7,6 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
 import Button from "@mui/material/Button";
-import type { Patrol } from "@prisma/client";
 import { PatrolBadge } from "@/components/PatrolBadge";
 
 // MUI's FormControlLabel reads `control.props.*` synchronously to derive
@@ -26,7 +25,7 @@ export function RoleForm({
 }: {
   action: (formData: FormData) => void | Promise<void>;
   defaultValue: string;
-  patrols: { value: Patrol; label: string }[];
+  patrols: { id: string; name: string; color: string }[];
 }) {
   return (
     <form action={action}>
@@ -37,13 +36,13 @@ export function RoleForm({
             <FormControlLabel value="ASPL" control={<Radio />} label="the ASPL of Camping" />
             {patrols.map((p) => (
               <FormControlLabel
-                key={p.value}
-                value={`PATROL_LEADER:${p.value}`}
+                key={p.id}
+                value={`PATROL_LEADER:${p.id}`}
                 control={<Radio />}
                 label={
                   <Stack direction="row" spacing={1} component="span" sx={{ alignItems: "center" }}>
                     <span>the Patrol Leader for</span>
-                    <PatrolBadge patrol={p.value} />
+                    <PatrolBadge name={p.name} color={p.color} />
                   </Stack>
                 }
               />

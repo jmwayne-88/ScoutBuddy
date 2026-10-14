@@ -9,7 +9,9 @@ import Stack from "@mui/material/Stack";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import { getActor } from "@/lib/session";
+import { getActivePatrols } from "@/lib/patrols";
 import { RoleSwitcher } from "@/components/RoleSwitcher";
+import { AppNav } from "@/components/AppNav";
 import { ThemeRegistry } from "@/components/ThemeRegistry";
 import { ColorModeToggle } from "@/components/ColorModeToggle";
 
@@ -26,10 +28,12 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const actor = await getActor();
+  const patrols = await getActivePatrols();
+  const navItems = actor?.role === "ASPL" ? [{ href: "/patrols", label: "Manage Patrols" }] : [];
 
   return (
     <html lang="en" className={montserrat.variable} suppressHydrationWarning>
-      <body>
+      <body suppressHydrationWarning>
         <InitColorSchemeScript />
         <ThemeRegistry>
           <AppBar position="static">
@@ -37,11 +41,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               <Typography variant="h6" component="span" sx={{ flexGrow: 1, fontWeight: 800, letterSpacing: 0.5 }}>
                 ScoutBuddy
               </Typography>
+              <AppNav items={navItems} />
               <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                 <Typography variant="body2" sx={{ opacity: 0.85, display: { xs: "none", sm: "block" } }}>
                   Viewing as:
                 </Typography>
-                <RoleSwitcher actor={actor} />
+                <RoleSwitcher actor={actor} patrols={patrols} />
                 <ColorModeToggle />
               </Stack>
             </Toolbar>

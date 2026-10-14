@@ -17,7 +17,7 @@ export default async function PatrolLeaderPage() {
   }
 
   const menus = await db.menu.findMany({
-    where: { patrol: actor.patrol },
+    where: { patrolId: actor.patrolId },
     include: { campout: true },
     orderBy: { campout: { date: "asc" } },
   });

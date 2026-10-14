@@ -1,5 +1,4 @@
 import type { MenuStatus } from "@prisma/client";
-import { PATROLS } from "./constants";
 
 // Semantic status colors — distinct from the Scouts BSA brand chrome in
 // ADR 0015 (which governs buttons/backgrounds/links, not status indicators).
@@ -27,14 +26,15 @@ export type CampoutProgress = {
   dotColor: string;
 };
 
-const PATROL_COUNT = PATROLS.length;
-
-export function campoutProgress(menuStatuses: MenuStatus[]): CampoutProgress {
-  const total = PATROL_COUNT;
+// `totalPatrols` is the count of currently-active patrols, queried by the
+// caller (lib/patrols.ts) — patrols are admin-managed data now (Requirement
+// 8), not a fixed compile-time list, so this can no longer be a constant.
+export function campoutProgress(menuStatuses: MenuStatus[], totalPatrols: number): CampoutProgress {
+  const total = totalPatrols;
   const approved = menuStatuses.filter((s) => s === "APPROVED").length;
   const changesRequested = menuStatuses.filter((s) => s === "CHANGES_REQUESTED").length;
   const submitted = menuStatuses.filter((s) => s === "SUBMITTED").length;
-  const percent = Math.round((approved / total) * 100);
+  const percent = total === 0 ? 0 : Math.round((approved / total) * 100);
 
   let label: string;
   let dotColor: string;

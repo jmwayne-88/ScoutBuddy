@@ -1,17 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { contrastText, patrolBackground } from "./colors";
-
-describe("patrolBackground", () => {
-  it("returns a distinct hex color for each of the five patrols", () => {
-    const colors = new Set(
-      (["EAGLE", "PUMA", "RAVEN", "SILVER_FOX", "JOE"] as const).map((p) => patrolBackground(p))
-    );
-    expect(colors.size).toBe(5);
-    for (const color of colors) {
-      expect(color).toMatch(/^#[0-9a-f]{6}$/i);
-    }
-  });
-});
+import { contrastText } from "./colors";
 
 describe("contrastText", () => {
   it("picks black text on light backgrounds", () => {

@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import type { Patrol } from "@prisma/client";
+import { db } from "@/lib/db";
 import { setActor } from "@/lib/session";
 
 export async function chooseRole(formData: FormData) {
@@ -15,7 +15,12 @@ export async function chooseRole(formData: FormData) {
     redirect("/campouts");
   }
 
-  const [, patrol] = value.split(":");
-  await setActor({ role: "PATROL_LEADER", patrol: patrol as Patrol });
+  const [, patrolId] = value.split(":");
+  const patrol = await db.patrol.findFirst({ where: { id: patrolId, isActive: true } });
+  if (!patrol) {
+    throw new Error("That patrol isn't available to select.");
+  }
+
+  await setActor({ role: "PATROL_LEADER", patrolId: patrol.id });
   redirect("/patrol-leader");
 }

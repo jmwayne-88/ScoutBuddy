@@ -4,14 +4,19 @@ import { useTransition } from "react";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import { PATROLS } from "@/lib/constants";
 import { chooseRole } from "@/app/role-actions";
 import type { Actor } from "@/lib/session";
 
-export function RoleSwitcher({ actor }: { actor: Actor | null }) {
+export function RoleSwitcher({
+  actor,
+  patrols,
+}: {
+  actor: Actor | null;
+  patrols: { id: string; name: string }[];
+}) {
   const [isPending, startTransition] = useTransition();
 
-  const currentValue = !actor ? "" : actor.role === "ASPL" ? "ASPL" : `PATROL_LEADER:${actor.patrol}`;
+  const currentValue = !actor ? "" : actor.role === "ASPL" ? "ASPL" : `PATROL_LEADER:${actor.patrolId}`;
 
   function handleChange(event: SelectChangeEvent) {
     const value = event.target.value;
@@ -43,9 +48,9 @@ export function RoleSwitcher({ actor }: { actor: Actor | null }) {
         Select a role
       </MenuItem>
       <MenuItem value="ASPL">ASPL of Camping</MenuItem>
-      {PATROLS.map((p) => (
-        <MenuItem key={p.value} value={`PATROL_LEADER:${p.value}`}>
-          Patrol Leader — {p.label}
+      {patrols.map((p) => (
+        <MenuItem key={p.id} value={`PATROL_LEADER:${p.id}`}>
+          Patrol Leader — {p.name}
         </MenuItem>
       ))}
     </Select>

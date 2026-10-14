@@ -9,12 +9,21 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum Patrol {
-  EAGLE
-  PUMA
-  RAVEN
-  SILVER_FOX
-  JOE
+enum PatrolType {
+  YOUTH
+  ADULT
+}
+
+model Patrol {
+  id                      String                    @id @default(cuid())
+  name                    String
+  color                   String
+  order                   Int
+  type                    PatrolType                @default(YOUTH)
+  isActive                Boolean                   @default(true)
+  createdAt               DateTime                  @default(now())
+  menus                   Menu[]
+  mealFrameworkExceptions MealFrameworkException[]
 }
 
 enum MealOccasion {
@@ -55,7 +64,8 @@ model Menu {
   id             String     @id @default(cuid())
   campoutId      String
   campout        Campout    @relation(fields: [campoutId], references: [id])
-  patrol         Patrol
+  patrolId       String
+  patrol         Patrol     @relation(fields: [patrolId], references: [id])
   dueDate        DateTime
   status         MenuStatus @default(NOT_STARTED)
   nutritionNote  String     @default("")
@@ -65,7 +75,7 @@ model Menu {
   meals          Meal[]
   reviews        Review[]
 
-  @@unique([campoutId, patrol])
+  @@unique([campoutId, patrolId])
 }
 
 model Meal {
@@ -112,7 +122,8 @@ model MealFrameworkException {
   id        String       @id @default(cuid())
   campoutId String
   campout   Campout      @relation(fields: [campoutId], references: [id])
-  patrol    Patrol?
+  patrolId  String?
+  patrol    Patrol?      @relation(fields: [patrolId], references: [id])
   occasion  MealOccasion
   createdAt DateTime     @default(now())
 }

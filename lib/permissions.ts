@@ -1,8 +1,8 @@
-import type { MenuStatus, Patrol } from "@prisma/client";
+import type { MenuStatus } from "@prisma/client";
 import type { Actor } from "./session";
 
 export type MenuForPermissions = {
-  patrol: Patrol;
+  patrolId: string;
   status: MenuStatus;
 };
 
@@ -22,9 +22,13 @@ export function canManageMealFramework(actor: Actor | null): boolean {
   return isASPL(actor);
 }
 
+export function canManagePatrols(actor: Actor | null): boolean {
+  return isASPL(actor);
+}
+
 export function canEditMenu(actor: Actor | null, menu: MenuForPermissions): boolean {
   if (actor?.role !== "PATROL_LEADER") return false;
-  if (actor.patrol !== menu.patrol) return false;
+  if (actor.patrolId !== menu.patrolId) return false;
   return menu.status !== "APPROVED";
 }
 

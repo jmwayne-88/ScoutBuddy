@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { MealOccasion, Patrol } from "@prisma/client";
+import type { MealOccasion } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
 import { canAssignMenu, canManageMealFramework } from "@/lib/permissions";
@@ -16,11 +16,11 @@ export async function assignMenu(formData: FormData) {
   }
 
   const campoutId = requireString(formData, "campoutId");
-  const patrol = requireString(formData, "patrol") as Patrol;
+  const patrolId = requireString(formData, "patrolId");
   const dueDate = requireString(formData, "dueDate");
 
   const exceptions = await db.mealFrameworkException.findMany({
-    where: { campoutId, OR: [{ patrol: null }, { patrol }] },
+    where: { campoutId, OR: [{ patrolId: null }, { patrolId }] },
   });
   const excludedOccasions = new Set(exceptions.map((e) => e.occasion));
   const activeOccasions = MEAL_OCCASIONS.filter((o) => !excludedOccasions.has(o.value));
@@ -28,7 +28,7 @@ export async function assignMenu(formData: FormData) {
   const menu = await db.menu.create({
     data: {
       campoutId,
-      patrol,
+      patrolId,
       dueDate: new Date(dueDate),
       meals: {
         create: activeOccasions.map((o) => ({ occasion: o.value })),
@@ -49,13 +49,13 @@ export async function removeOccasion(formData: FormData) {
   const campoutId = requireString(formData, "campoutId");
   const occasion = requireString(formData, "occasion") as MealOccasion;
   const scope = requireString(formData, "scope");
-  const patrol = scope === "ALL" ? null : (scope as Patrol);
+  const patrolId = scope === "ALL" ? null : scope;
 
-  await db.mealFrameworkException.deleteMany({ where: { campoutId, occasion, patrol } });
-  await db.mealFrameworkException.create({ data: { campoutId, occasion, patrol } });
+  await db.mealFrameworkException.deleteMany({ where: { campoutId, occasion, patrolId } });
+  await db.mealFrameworkException.create({ data: { campoutId, occasion, patrolId } });
 
   const affectedMenus = await db.menu.findMany({
-    where: { campoutId, ...(patrol ? { patrol } : {}) },
+    where: { campoutId, ...(patrolId ? { patrolId } : {}) },
     include: { meals: { where: { occasion }, include: { dishes: true } } },
   });
 
@@ -84,7 +84,7 @@ export async function restoreOccasion(formData: FormData) {
   await db.mealFrameworkException.delete({ where: { id: exceptionId } });
 
   const candidateMenus = await db.menu.findMany({
-    where: { campoutId: exception.campoutId, ...(exception.patrol ? { patrol: exception.patrol } : {}) },
+    where: { campoutId: exception.campoutId, ...(exception.patrolId ? { patrolId: exception.patrolId } : {}) },
     include: { meals: { where: { occasion: exception.occasion } } },
   });
 
@@ -94,7 +94,7 @@ export async function restoreOccasion(formData: FormData) {
 
   for (const menu of candidateMenus) {
     const stillExcluded = remainingExceptions.some(
-      (e) => e.patrol === null || e.patrol === menu.patrol
+      (e) => e.patrolId === null || e.patrolId === menu.patrolId
     );
     if (stillExcluded) continue;
     if (menu.meals.length === 0) {

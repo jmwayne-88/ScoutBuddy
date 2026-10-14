@@ -10,8 +10,9 @@ import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
 import MenuItem from "@mui/material/MenuItem";
 import { db } from "@/lib/db";
-import { MEAL_OCCASIONS, PATROLS, mealOccasionLabel, patrolLabel } from "@/lib/constants";
-import { patrolBackground, contrastText } from "@/lib/colors";
+import { getActivePatrols, getAllPatrols } from "@/lib/patrols";
+import { MEAL_OCCASIONS, mealOccasionLabel } from "@/lib/constants";
+import { contrastText } from "@/lib/colors";
 import { campoutProgress, menuDishCount, menuStatusColor } from "@/lib/progress";
 import { NavLink } from "@/components/NavLink";
 import { assignMenu, removeOccasion, restoreOccasion } from "./actions";
@@ -22,15 +23,26 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
   const campout = await db.campout.findUnique({
     where: { id },
     include: {
-      menus: { include: { meals: { include: { dishes: true } } } },
-      mealFrameworkExceptions: { orderBy: { createdAt: "asc" } },
+      menus: { include: { patrol: true, meals: { include: { dishes: true } } } },
+      mealFrameworkExceptions: { include: { patrol: true }, orderBy: { createdAt: "asc" } },
     },
   });
 
   if (!campout) notFound();
 
-  const menuByPatrol = new Map(campout.menus.map((menu) => [menu.patrol, menu]));
-  const progress = campoutProgress(campout.menus.map((m) => m.status));
+  const activePatrols = await getActivePatrols();
+  const allPatrols = await getAllPatrols();
+
+  const menuByPatrolId = new Map(campout.menus.map((menu) => [menu.patrolId, menu]));
+  // Show every active patrol (so a new one can be assigned here) plus any
+  // inactive patrol that already has a menu on this campout — deactivating
+  // a patrol only blocks *new* assignment, it never hides existing history
+  // (Requirement 8, Decision 3).
+  const displayPatrols = allPatrols.filter((p) => p.isActive || menuByPatrolId.has(p.id));
+  const progress = campoutProgress(
+    campout.menus.map((m) => m.status),
+    activePatrols.length
+  );
 
   return (
     <Stack spacing={4}>
@@ -101,11 +113,10 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
       )}
 
       <Grid container spacing={2}>
-        {PATROLS.map((p) => {
-          const menu = menuByPatrol.get(p.value);
-          const background = patrolBackground(p.value);
+        {displayPatrols.map((p) => {
+          const menu = menuByPatrolId.get(p.id);
           return (
-            <Grid key={p.value} size={{ xs: 12, sm: 6 }}>
+            <Grid key={p.id} size={{ xs: 12, sm: 6 }}>
               <Paper variant="outlined" sx={{ overflow: "hidden" }}>
                 <Stack
                   direction="row"
@@ -114,12 +125,12 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
                     justifyContent: "space-between",
                     px: 2,
                     py: 1.5,
-                    bgcolor: background,
-                    color: contrastText(background),
+                    bgcolor: p.color,
+                    color: contrastText(p.color),
                   }}
                 >
                   <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                    {patrolLabel(p.value)}
+                    {p.name}
                   </Typography>
                   {menu && (
                     <Chip
@@ -147,7 +158,7 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
                       sx={{ flexWrap: "wrap", alignItems: "flex-end", gap: 1.5 }}
                     >
                       <input type="hidden" name="campoutId" value={campout.id} />
-                      <input type="hidden" name="patrol" value={p.value} />
+                      <input type="hidden" name="patrolId" value={p.id} />
                       <TextField
                         name="dueDate"
                         label="Due date"
@@ -184,7 +195,7 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
               >
                 <span>
                   {mealOccasionLabel(exception.occasion)} removed for{" "}
-                  {exception.patrol ? patrolLabel(exception.patrol) : "all patrols"}
+                  {exception.patrol ? exception.patrol.name : "all patrols"}
                 </span>
                 <Box component="form" action={restoreOccasion}>
                   <input type="hidden" name="exceptionId" value={exception.id} />
@@ -220,13 +231,18 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
           </TextField>
           <TextField name="scope" label="For" select required size="small" defaultValue="ALL" sx={{ minWidth: 160 }}>
             <MenuItem value="ALL">All patrols</MenuItem>
-            {PATROLS.map((p) => (
-              <MenuItem key={p.value} value={p.value}>
-                {p.label}
+            {activePatrols.map((p) => (
+              <MenuItem key={p.id} value={p.id}>
+                {p.name}
               </MenuItem>
             ))}
           </TextField>
-          <Button type="submit" variant="contained" size="small" sx={{ bgcolor: "brand.olive", "&:hover": { bgcolor: "brand.olive", filter: "brightness(0.9)" } }}>
+          <Button
+            type="submit"
+            variant="contained"
+            size="small"
+            sx={{ bgcolor: "brand.olive", "&:hover": { bgcolor: "brand.olive", filter: "brightness(0.9)" } }}
+          >
             Remove occasion
           </Button>
         </Stack>

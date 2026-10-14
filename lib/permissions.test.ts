@@ -10,11 +10,11 @@ import {
 import type { Actor } from "./session";
 
 const aspl: Actor = { role: "ASPL" };
-const eagleLeader: Actor = { role: "PATROL_LEADER", patrol: "EAGLE" };
-const pumaLeader: Actor = { role: "PATROL_LEADER", patrol: "PUMA" };
+const eagleLeader: Actor = { role: "PATROL_LEADER", patrolId: "eagle" };
+const pumaLeader: Actor = { role: "PATROL_LEADER", patrolId: "puma" };
 
 function menu(overrides: Partial<MenuForPermissions> = {}): MenuForPermissions {
-  return { patrol: "EAGLE", status: "NOT_STARTED", ...overrides };
+  return { patrolId: "eagle", status: "NOT_STARTED", ...overrides };
 }
 
 describe("canCreateCampout / canAssignMenu", () => {
@@ -38,7 +38,7 @@ describe("canEditMenu", () => {
   });
 
   it("denies a Patrol Leader from a different patrol", () => {
-    expect(canEditMenu(pumaLeader, menu({ patrol: "EAGLE" }))).toBe(false);
+    expect(canEditMenu(pumaLeader, menu({ patrolId: "eagle" }))).toBe(false);
   });
 
   it("denies the ASPL from editing dishes/ingredients directly", () => {
@@ -68,7 +68,7 @@ describe("canReview", () => {
   });
 
   it("a Patrol Leader can never review their own or another patrol's menu", () => {
-    expect(canReview(eagleLeader, menu({ patrol: "EAGLE", status: "SUBMITTED" }))).toBe(false);
-    expect(canReview(pumaLeader, menu({ patrol: "EAGLE", status: "SUBMITTED" }))).toBe(false);
+    expect(canReview(eagleLeader, menu({ patrolId: "eagle", status: "SUBMITTED" }))).toBe(false);
+    expect(canReview(pumaLeader, menu({ patrolId: "eagle", status: "SUBMITTED" }))).toBe(false);
   });
 });

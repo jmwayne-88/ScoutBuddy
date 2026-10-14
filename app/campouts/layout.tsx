@@ -5,6 +5,7 @@ import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
+import { getActivePatrols } from "@/lib/patrols";
 import { campoutProgress } from "@/lib/progress";
 import { LinkButton } from "@/components/LinkButton";
 import { CampoutCard } from "@/components/CampoutCard";
@@ -24,6 +25,7 @@ export default async function CampoutsLayout({ children }: { children: ReactNode
     orderBy: { date: "asc" },
     include: { menus: { select: { status: true } } },
   });
+  const activePatrols = await getActivePatrols();
 
   return (
     <Stack direction={{ xs: "column", md: "row" }} spacing={3} sx={{ alignItems: "flex-start" }}>
@@ -50,7 +52,7 @@ export default async function CampoutsLayout({ children }: { children: ReactNode
           ) : (
             <Stack spacing={1} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
               {campouts.map((c) => {
-                const progress = campoutProgress(c.menus.map((m) => m.status));
+                const progress = campoutProgress(c.menus.map((m) => m.status), activePatrols.length);
                 return (
                   <li key={c.id}>
                     <CampoutCard

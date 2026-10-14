@@ -1,17 +1,14 @@
 import Chip from "@mui/material/Chip";
-import type { Patrol } from "@prisma/client";
-import { contrastText, patrolBackground } from "@/lib/colors";
-import { patrolLabel } from "@/lib/constants";
+import { contrastText } from "@/lib/colors";
 
-export function PatrolBadge({ patrol }: { patrol: Patrol }) {
-  const background = patrolBackground(patrol);
+export function PatrolBadge({ name, color }: { name: string; color: string }) {
   return (
     <Chip
-      label={patrolLabel(patrol)}
+      label={name}
       size="small"
       sx={{
-        bgcolor: background,
-        color: contrastText(background),
+        bgcolor: color,
+        color: contrastText(color),
         fontWeight: 500,
       }}
     />

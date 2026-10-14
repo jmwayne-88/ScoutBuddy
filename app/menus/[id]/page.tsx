@@ -38,6 +38,7 @@ export default async function MenuPage({
     where: { id },
     include: {
       campout: true,
+      patrol: true,
       meals: { include: { dishes: { include: { ingredients: true } } } },
       reviews: { orderBy: { createdAt: "asc" } },
     },
@@ -58,7 +59,7 @@ export default async function MenuPage({
           <Typography variant="h5" component="h1">
             {menu.campout.name}
           </Typography>
-          <PatrolBadge patrol={menu.patrol} />
+          <PatrolBadge name={menu.patrol.name} color={menu.patrol.color} />
         </Stack>
         <Typography variant="body2" color="text.secondary">
           Due {menu.dueDate.toDateString()} · Status: {menu.status.replace(/_/g, " ")}

@@ -21,3 +21,4 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0015 - Visual design aligned to Scouting America's brand guidelines, no trademarks](0015-brand-aligned-visual-design.md)
 - [0016 - Semantic status colors, and a Scouting Blue header](0016-status-colors-and-header-blue.md)
 - [0017 - Adopt MUI as the design system; brand color roles revised; Tailwind removed](0017-adopt-mui-design-system.md)
+- [0018 - Patrols become admin-managed database rows, not a fixed enum](0018-patrols-as-database-rows.md)

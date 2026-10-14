@@ -1,4 +1,4 @@
-import type { MealOccasion, Patrol } from "@prisma/client";
+import type { MealOccasion } from "@prisma/client";
 
 export const MEAL_OCCASIONS: { value: MealOccasion; label: string }[] = [
   { value: "FRIDAY_CRACKER_BARREL", label: "Friday Cracker Barrel" },
@@ -9,18 +9,6 @@ export const MEAL_OCCASIONS: { value: MealOccasion; label: string }[] = [
   { value: "SUNDAY_BREAKFAST", label: "Sunday Breakfast" },
 ];
 
-export const PATROLS: { value: Patrol; label: string }[] = [
-  { value: "EAGLE", label: "Eagle Patrol" },
-  { value: "PUMA", label: "Puma Patrol" },
-  { value: "RAVEN", label: "Raven Patrol" },
-  { value: "SILVER_FOX", label: "Silver Fox Patrol" },
-  { value: "JOE", label: "Joe Patrol" },
-];
-
 export function mealOccasionLabel(occasion: MealOccasion): string {
   return MEAL_OCCASIONS.find((o) => o.value === occasion)?.label ?? occasion;
-}
-
-export function patrolLabel(patrol: Patrol): string {
-  return PATROLS.find((p) => p.value === patrol)?.label ?? patrol;
 }
