@@ -1,7 +1,7 @@
 # Requirement 8 — Manage Patrols
 
 Status: Not started — documentation only, per instruction
-Depends on: Requirements 1-7 (patrols are currently referenced everywhere via a fixed Prisma enum); this requirement replaces that foundation rather than building on top of it
+Depends on: Requirements 1-7 (patrols are currently referenced everywhere via a fixed Prisma enum); this requirement replaces that foundation rather than building on top of it. Also affected by [Requirement 9](09-adopt-mui-design-system.md) — see "Impact from Requirement 9" below.
 
 ## Goal
 
@@ -18,6 +18,18 @@ Patrols are currently a Prisma **enum** (`EAGLE | PUMA | RAVEN | SILVER_FOX | JO
 
 None of that makes the feature a bad idea — it's exactly what "admin-managed patrols" has to mean — but it's a foundational change touching the app's identity/permission system, not an additive page bolted on the side.
 
+## Impact from Requirement 9 (MUI adoption)
+
+Requirement 9's doc says "documentation only, do not build yet," but as of this revision the working tree already has it substantially built (uncommitted): MUI is in, Tailwind (`app/globals.css`, `postcss.config.mjs`, the `tailwindcss` dependency) is fully removed, and a real `lib/theme/` module exists — `tokens.ts` (the Scouting America brand hex values), `palette.ts` (MUI light/dark palette mapping), `theme.ts`, and a genuine WCAG contrast utility (`contrast.ts`'s `contrastRatio`/`meetsContrast`, backed by an automated `contrast.test.ts`). A light/dark mode toggle now exists too (`components/ColorModeToggle.tsx`), which didn't factor into this requirement's original drafting at all. That status mismatch is worth your attention on its own, separate from what follows — but regardless of where Requirement 9's own status line ends up, this is the real foundation Requirement 8 will be built on, so the requirements below are written against it.
+
+What that changes for this requirement, concretely:
+
+- **Build the Manage Patrols UI in MUI**, matching the rest of the app (`Paper`/`Stack`/`TextField`/`Button`/`Chip`, the same patterns already used on the campout pages). The delete confirmation (Decision 2) is a natural fit for MUI's `Dialog`.
+- **Patrol colors stay outside `lib/theme/tokens.ts`.** That file's own comment already states this boundary explicitly — it's the Scouting America brand palette, not troop-specific patrol identity. Nothing in this requirement should try to register admin-entered patrol colors as theme tokens; they're per-row data, fundamentally different from the fixed brand palette.
+- **The simple contrast heuristic in `lib/colors.ts` (`contrastText`) isn't rigorous enough for colors an admin can pick freely.** It was good enough for five hand-picked, eyeballed patrol colors, but Requirement 9's own contrast test caught it failing actual WCAG 4.5:1 for two of the five fixed status colors, which had to be manually corrected (`STATUS_COLORS` in `lib/progress.ts` now hand-overrides text color per status rather than trusting the heuristic). An admin choosing an arbitrary patrol color through Manage Patrols can hit the same failure — see REQ-8.17.
+- **Dark mode now exists and needs to work here too.** Whatever Manage Patrols builds (forms, the patrol list, color previews) needs to render correctly in both color schemes, not just light — see REQ-8.18.
+- **No AppBar nav-link infrastructure exists yet.** The current `AppBar` (`app/layout.tsx`) only has the title, the role switcher, and the color-mode toggle — no nav links, no mobile Drawer, despite Requirement 9's own REQ-9.18 calling for one. Requirement 8's nav link is likely the first thing that actually needs that infrastructure built, not just a link dropped into an existing nav — see the revised REQ-8.8.
+
 ## Decisions (confirmed)
 
 1. **Admin = ASPL of Camping.** No separate Admin role. Patrol management is gated the same way campout creation and meal-framework management already are.
@@ -25,6 +37,10 @@ None of that makes the feature a bad idea — it's exactly what "admin-managed p
 3. **Inactive patrols are excluded from new assignment; existing history stays visible.** Deactivating a patrol blocks it from the role picker, the "Viewing as" dropdown, and from being assigned to any *new* campout menu. Menus it already has on existing campouts keep showing, unaffected. **Reactivating** a patrol prompts the admin to choose which campouts to assign it to — a picker over campouts that don't already have a menu for this patrol (not limited to future-only the way initial creation is, since this is a deliberate per-campout choice rather than a blanket yes/no) — creating a Not Started menu for each one picked, using the same due-date default as REQ-8.10 (see REQ-8.16).
 4. **Youth vs. Adult is label-only for now.** No behavioral difference anywhere in the app today. Explicitly expected to matter later — a future requirement, not this one.
 5. **Due-date default: first Monday of the month before the campout.** Applies specifically to menus created in bulk, where there's no per-menu form to type a due date into (the new-patrol "assign to future campouts" prompt, and the reactivation campout picker) — see REQ-8.16 for the exact rule. General due-date editing after a menu is assigned remains unaddressed, as before; this only defines the default for these two bulk-creation flows.
+
+## Open decision (new, from Requirement 9's impact)
+
+6. **What happens when an admin picks a patrol color that can't pass WCAG contrast with either black or white text?** This couldn't happen with the old fixed five colors (all manually verified to work), but it's a real possibility now that color is a free-form admin input, and the rough heuristic in `lib/colors.ts` isn't a reliable guarantee (see above). Two reasonable options, needing a call before REQ-8.17 is built: **(a)** block saving the patrol and say why, or **(b)** allow it but show a visible warning in the Manage Patrols UI next to that patrol going forward. No default assumed here — this one actually needs an answer.
 
 ## Requirements
 
@@ -38,7 +54,7 @@ None of that makes the feature a bad idea — it's exactly what "admin-managed p
 - **REQ-8.5** The admin can edit an existing patrol's name, color, order, and type.
 - **REQ-8.6** The admin can mark a patrol inactive, or reactivate it (see REQ-8.15 for what reactivation triggers).
 - **REQ-8.7** The admin can permanently delete a patrol (see REQ-8.12-8.13 for what this requires).
-- **REQ-8.8** A nav link to the Manage Patrols page is visible wherever the admin would expect to find it (e.g., the header), and only to the admin.
+- **REQ-8.8** A nav link to the Manage Patrols page is visible only to the admin. The app's `AppBar` currently has no nav-link slot at all (just the title, role switcher, and color-mode toggle) — this requirement likely means adding real navigation to it for the first time: an inline link at `md`+ widths and a Drawer behind a hamburger icon at mobile widths, per Requirement 9's own (not-yet-built) AppBar spec, rather than squeezing one link into the existing `Toolbar` as a one-off.
 
 ### Ordering
 - **REQ-8.9** The admin-specified order is used consistently everywhere patrols are listed: the "Viewing as" dropdown, the role picker, and every campout's patrol grid — one order, defined once, not independently sorted per screen.
@@ -56,6 +72,11 @@ None of that makes the feature a bad idea — it's exactly what "admin-managed p
 - **REQ-8.15** Reactivating a previously-inactive patrol prompts the admin to pick which campouts (from those that don't already have a menu for it) to assign it to. For each one picked, a Not Started menu is created using the due-date default in REQ-8.16. Not limited to future-only campouts, since the admin is choosing deliberately, per campout, rather than answering a single yes/no for "all upcoming."
 - **REQ-8.16** Due-date default for REQ-8.10 and REQ-8.15's bulk-created menus: the first Monday of the calendar month immediately before the campout's own month (e.g., a campout on any date in November gets a due date on the first Monday of October).
 
+### MUI / design-system integration (from Requirement 9's impact)
+- **REQ-8.17** When the admin sets or changes a patrol's color, it's checked with the real WCAG contrast utility (`lib/theme/contrast.ts`'s `contrastRatio`/`meetsContrast`, 4.5:1 text threshold) against both black and white — not just `lib/colors.ts`'s rough luminance heuristic — and handled per Open Decision 6 once that's answered (blocked, or saved with a visible warning).
+- **REQ-8.18** The Manage Patrols page, its create/edit forms, and any color preview work correctly in both light and dark color scheme (toggleable via `ColorModeToggle`) — patrol badges/previews stay legible in both, the same way every other page in the app now has to.
+- **REQ-8.19** Patrol colors are never added to `lib/theme/tokens.ts` or the static MUI theme — they remain runtime, per-row data read from the database, consistent with that file's existing documented boundary between Scouting America's brand palette and troop-specific patrol identity.
+
 ## Acceptance Criteria
 
 - [ ] A new patrol created through Manage Patrols appears, in the chosen order, in the role picker, the header dropdown, and every campout's patrol grid (unless marked inactive).
@@ -67,6 +88,9 @@ None of that makes the feature a bad idea — it's exactly what "admin-managed p
 - [ ] After confirming, the patrol and all of its menus, meals, dishes, ingredients, reviews, and meal-framework exceptions are gone — and the patrol itself is gone from every dropdown and grid, including ones already open in another tab after a refresh.
 - [ ] A Patrol Leader whose patrol was deleted mid-session is routed back to the role picker rather than erroring.
 - [ ] All five existing patrols are present, correctly colored, and in their current order immediately after the migration — nothing about today's app regresses.
+- [ ] Picking a patrol color that fails WCAG 4.5:1 against both black and white is caught and handled per Open Decision 6 — not silently saved with illegible badge text.
+- [ ] The Manage Patrols page and its forms are legible and usable with the color-mode toggle switched to dark.
+- [ ] The "Manage Patrols" nav link is reachable at both mobile and desktop widths, visible only to the admin.
 
 ## Out of Scope for This Requirement
 
@@ -79,4 +103,6 @@ None of that makes the feature a bad idea — it's exactly what "admin-managed p
 
 - This will need its own ADR when built — replacing the "patrols as a fixed enum" assumption that's held since Iteration 1 is exactly the kind of real architecture change CLAUDE.md's working conventions ask to be documented, not just coded.
 - [Requirement 2 - All Four Patrols + Visual Identity](02-four-patrols-and-visual-identity.md) — the original "fixed four" decision this requirement replaces (the Joe Patrol addition already showed the pattern of hand-editing the enum; this requirement is what makes that no longer necessary).
+- [Requirement 9 - Adopt MUI with the Scouting America Brand Palette](09-adopt-mui-design-system.md) — see "Impact from Requirement 9" above; this requirement's UI is built on whatever Requirement 9 actually leaves in place (MUI components, `lib/theme/`, dark mode, the still-missing AppBar nav).
 - `lib/constants.ts`, `lib/colors.ts`, `lib/progress.ts`, `lib/session.ts`, `lib/permissions.ts` — every one of these has a static, compile-time assumption about patrols that this requirement removes.
+- `lib/theme/tokens.ts`, `lib/theme/contrast.ts` — the brand-token boundary this requirement respects (REQ-8.19) and the contrast utility it reuses (REQ-8.17).
