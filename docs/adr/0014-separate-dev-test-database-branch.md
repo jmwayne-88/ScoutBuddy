@@ -1,7 +1,7 @@
 # 0014. Separate Neon branch for development and testing
 
 Date: 2026-09-15
-Status: Accepted
+Status: Accepted; partially superseded by [ADR 0019](0019-local-production-credentials-and-automated-migrations.md), which allows `production`'s connection strings to also be stored locally (gitignored) for one specific script, and automates the "distinct, later step" this ADR's Consequences section describes for applying a migration to `production`. The branch-separation decision itself, and production data never being copied anywhere, are unchanged.
 
 ## Context
 

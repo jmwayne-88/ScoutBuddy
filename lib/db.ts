@@ -1,4 +1,7 @@
 import { PrismaClient } from "@prisma/client";
+import { assertCorrectDatabaseHost } from "./db-environment-guard";
+
+assertCorrectDatabaseHost();
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;

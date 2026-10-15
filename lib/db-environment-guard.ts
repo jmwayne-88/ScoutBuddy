@@ -1,0 +1,68 @@
+// REQ-11.2: a startup check that the database this process is about to
+// talk to actually matches where it's running. Requirement 8's enum->table
+// migration reached the "development" Neon branch but never reached
+// "production", and nothing caught that until the live site started
+// throwing on every page. Comparing hostnames catches the same class of
+// mistake automatically, going forward.
+//
+// A Neon host (e.g. "ep-fragrant-haze-b4zn25pb.c-6.us-east-2.aws.neon.tech")
+// carries no credentials -- user/password are a separate part of the
+// connection string -- so these are safe to commit in plain text, unlike
+// DATABASE_URL/DIRECT_URL themselves.
+export const NEON_DEVELOPMENT_HOST = "ep-fragrant-haze-b4zn25pb.c-6.us-east-2.aws.neon.tech";
+
+// TODO(production rollout): replace with the real production Neon host
+// (just the hostname, from Vercel's Production DATABASE_URL) before this
+// reaches `main` -- see docs/requirements/11-production-deployment-pipeline.md
+// and the plan's "Rollout safety" note. Until replaced, a real Production
+// deploy would otherwise immediately fail this guard's own check, so an
+// unfilled placeholder is treated below as "not yet configured" (warn)
+// rather than "mismatched" (throw), to avoid causing the exact kind of
+// outage this requirement exists to prevent.
+export const NEON_PRODUCTION_HOST = "REPLACE_WITH_PRODUCTION_NEON_HOST";
+
+function resolveHost(url: string | undefined): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).host;
+  } catch {
+    return null;
+  }
+}
+
+export function assertCorrectDatabaseHost(
+  env: { DATABASE_URL?: string; VERCEL_ENV?: string; [key: string]: string | undefined } = process.env
+): void {
+  const host = resolveHost(env.DATABASE_URL);
+  if (!host) return;
+
+  const isProductionDeploy = env.VERCEL_ENV === "production";
+  const productionHostConfigured = NEON_PRODUCTION_HOST !== "REPLACE_WITH_PRODUCTION_NEON_HOST";
+
+  if (!productionHostConfigured) {
+    if (isProductionDeploy) {
+      console.warn(
+        "[db-environment-guard] NEON_PRODUCTION_HOST is still a placeholder -- " +
+          "this guard cannot verify a production deploy yet. Fill it in " +
+          "(lib/db-environment-guard.ts) before relying on this check."
+      );
+    }
+    return;
+  }
+
+  if (isProductionDeploy && host !== NEON_PRODUCTION_HOST) {
+    throw new Error(
+      `Refusing to start: VERCEL_ENV is "production" but DATABASE_URL's host ` +
+        `(${host}) does not match the known production host. Check Vercel's ` +
+        `Production environment variables.`
+    );
+  }
+
+  if (!isProductionDeploy && host === NEON_PRODUCTION_HOST) {
+    throw new Error(
+      `Refusing to start: this looks like a non-production environment, but ` +
+        `DATABASE_URL points at the production host (${host}). Check .env for ` +
+        `an accidentally-pasted production connection string.`
+    );
+  }
+}

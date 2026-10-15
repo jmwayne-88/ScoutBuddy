@@ -22,3 +22,4 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0016 - Semantic status colors, and a Scouting Blue header](0016-status-colors-and-header-blue.md)
 - [0017 - Adopt MUI as the design system; brand color roles revised; Tailwind removed](0017-adopt-mui-design-system.md)
 - [0018 - Patrols become admin-managed database rows, not a fixed enum](0018-patrols-as-database-rows.md)
+- [0019 - Local production credentials, automated migrations, and a startup environment guard](0019-local-production-credentials-and-automated-migrations.md)

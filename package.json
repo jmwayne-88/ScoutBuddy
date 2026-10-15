@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "description": "Campout menu planning and approval for a youth-led Scouting troop.",
   "private": true,
+  "engines": {
+    "node": ">=20.6.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
+    "migrate:production": "node --env-file=.env.production.local scripts/migrate-production.js",
     "postinstall": "prisma generate"
   },
   "repository": {
