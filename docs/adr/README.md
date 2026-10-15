@@ -25,3 +25,4 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0019 - Local production credentials, automated migrations, and a startup environment guard](0019-local-production-credentials-and-automated-migrations.md)
 - [0020 - Print view route group and padding-as-margin pagination](0020-print-view-route-group-and-pagination.md)
 - [0021 - Claude API ingredient categorization, cached per name](0021-claude-api-ingredient-categorization.md)
+- [0022 - Shrink-to-fit via real DOM measurement, replacing the row-count heuristic](0022-shrink-to-fit-via-real-dom-measurement.md)

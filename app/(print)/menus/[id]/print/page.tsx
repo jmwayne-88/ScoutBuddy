@@ -5,10 +5,10 @@ import Typography from "@mui/material/Typography";
 import { db } from "@/lib/db";
 import { MEAL_OCCASIONS, mealOccasionLabel } from "@/lib/constants";
 import { CATEGORY_ORDER, CATEGORY_LABELS } from "@/lib/ingredient-categorization";
-import { pickFontSize, pickShoppingListFontSize } from "@/lib/print-layout";
 import { PatrolBadge } from "@/components/PatrolBadge";
 import { NavLink } from "@/components/NavLink";
 import { PrintButton } from "@/components/PrintButton";
+import { ShrinkToFitPage } from "@/components/ShrinkToFitPage";
 import styles from "./print.module.css";
 
 type ShoppingRow = {
@@ -37,12 +37,6 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
   const mealsByOccasion = new Map(menu.meals.map((m) => [m.occasion, m]));
   const occasionsWithDishes = MEAL_OCCASIONS.filter(({ value }) => (mealsByOccasion.get(value)?.dishes.length ?? 0) > 0);
 
-  const page1ItemCount = occasionsWithDishes.reduce((sum, { value }) => {
-    const meal = mealsByOccasion.get(value)!;
-    return sum + meal.dishes.length + meal.dishes.reduce((s, d) => s + d.ingredients.length, 0);
-  }, 0);
-  const page1FontSize = pickFontSize(page1ItemCount);
-
   const shoppingRows: ShoppingRow[] = menu.meals.flatMap((meal) =>
     meal.dishes.flatMap((dish) =>
       dish.ingredients.map((ingredient) => ({
@@ -61,8 +55,6 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
     items: shoppingRows.filter((row) => row.category === category).sort((a, b) => a.name.localeCompare(b.name)),
   })).filter((group) => group.items.length > 0);
 
-  const page2FontSize = pickShoppingListFontSize(shoppingRows.length, groupedShoppingRows.length);
-
   return (
     <Box className={styles.printPreviewBackdrop}>
       <Stack direction="row" spacing={2} className={styles.noPrint}>
@@ -71,8 +63,8 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
       </Stack>
 
       {/* Page 1 — cooking reference */}
-      <Box className={styles.printPage} sx={{ fontSize: `${page1FontSize}pt` }}>
-        <Stack spacing={1.5} sx={{ height: "100%" }}>
+      <ShrinkToFitPage className={styles.printPage}>
+        <Stack spacing={1.5}>
           <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", justifyContent: "space-between" }}>
             <Stack spacing={0.25}>
               <Typography sx={{ fontSize: "1.6em", fontWeight: 700 }}>{menu.campout.name}</Typography>
@@ -99,7 +91,7 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
             </Box>
           )}
 
-          <Stack spacing={1} sx={{ flex: 1, overflow: "hidden" }}>
+          <Stack spacing={1}>
             {occasionsWithDishes.map(({ value, label }, index) => {
               const meal = mealsByOccasion.get(value)!;
               return (
@@ -125,10 +117,10 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
             })}
           </Stack>
         </Stack>
-      </Box>
+      </ShrinkToFitPage>
 
       {/* Page 2 — shopping list */}
-      <Box className={`${styles.printPage} ${styles.printPageSecond}`} sx={{ fontSize: `${page2FontSize}pt` }}>
+      <ShrinkToFitPage className={`${styles.printPage} ${styles.printPageSecond}`}>
         <Stack spacing={0.75}>
           <Typography sx={{ fontSize: "1.4em", fontWeight: 700 }}>
             Shopping List — {menu.patrol.name}, {menu.campout.name}
@@ -172,7 +164,7 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
             ))
           )}
         </Stack>
-      </Box>
+      </ShrinkToFitPage>
     </Box>
   );
 }

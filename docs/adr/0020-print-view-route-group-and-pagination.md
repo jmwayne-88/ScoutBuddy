@@ -1,7 +1,7 @@
 # 0020. A chrome-free route group for print views, with a padding-as-margin pagination strategy
 
 Date: 2026-10-15
-Status: Accepted
+Status: Accepted; the font-sizing decision (the row-count heuristic) is superseded by [ADR 0022](0022-shrink-to-fit-via-real-dom-measurement.md), which replaces it with real DOM measurement. The route-group and padding-as-margin decisions below are unchanged.
 
 ## Context
 
