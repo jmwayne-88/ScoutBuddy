@@ -1,7 +1,7 @@
 # 0005. Secrets kept in gitignored env files
 
 Date: 2026-09-14
-Status: Accepted; partially superseded by [ADR 0019](0019-local-production-credentials-and-automated-migrations.md), which allows production secrets to also live locally in a gitignored `.env.production.local` for one specific, explicitly-loaded script — the git-exclusion decision below is otherwise unchanged.
+Status: Accepted; partially superseded by [ADR 0019](0019-local-production-credentials-and-automated-migrations.md), which allows production secrets to also live locally in a gitignored `.env.migrate-production.local` for one specific, explicitly-loaded script — the git-exclusion decision below is otherwise unchanged.
 
 ## Context
 

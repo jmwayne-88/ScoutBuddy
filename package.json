@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
-    "migrate:production": "node --env-file=.env.production.local scripts/migrate-production.js",
+    "migrate:production": "node --env-file=.env.migrate-production.local scripts/migrate-production.js",
     "postinstall": "prisma generate"
   },
   "repository": {

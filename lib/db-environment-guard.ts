@@ -16,15 +16,12 @@
 // for the same branch have different hostnames (a "-pooler" suffix).
 export const NEON_DEVELOPMENT_HOST = "ep-fragrant-haze-b4zn25pb-pooler.c-6.us-east-2.aws.neon.tech";
 
-// TODO(production rollout): replace with the real production Neon host
-// (just the hostname, from Vercel's Production DATABASE_URL) before this
-// reaches `main` -- see docs/requirements/11-production-deployment-pipeline.md
-// and the plan's "Rollout safety" note. Until replaced, a real Production
-// deploy would otherwise immediately fail this guard's own check, so an
-// unfilled placeholder is treated below as "not yet configured" (warn)
-// rather than "mismatched" (throw), to avoid causing the exact kind of
-// outage this requirement exists to prevent.
-export const NEON_PRODUCTION_HOST = "REPLACE_WITH_PRODUCTION_NEON_HOST";
+// Production's pooled DATABASE_URL host (see docs/requirements/11-production-deployment-pipeline.md).
+// Before this was filled in, the constant held a literal placeholder
+// ("REPLACE_WITH_PRODUCTION_NEON_HOST") and the guard below treated an
+// unfilled placeholder as "not yet configured" (warn, not throw) so that
+// shipping this file before rollout couldn't itself cause an outage.
+export const NEON_PRODUCTION_HOST: string = "ep-empty-butterfly-b4hr93ek-pooler.c-6.us-east-2.aws.neon.tech";
 
 function resolveHost(url: string | undefined): string | null {
   if (!url) return null;
