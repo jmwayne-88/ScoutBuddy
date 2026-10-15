@@ -13,10 +13,12 @@ import { MEAL_OCCASIONS } from "@/lib/constants";
 import { PatrolBadge } from "@/components/PatrolBadge";
 import { NavLink } from "@/components/NavLink";
 import { RenameDishDialog } from "@/components/RenameDishDialog";
+import { EditIngredientDialog } from "@/components/EditIngredientDialog";
 import {
   addDish,
   addIngredient,
   approveMenu,
+  editIngredient,
   rejectMenu,
   removeDish,
   removeIngredient,
@@ -116,13 +118,22 @@ export default async function MenuPage({
                               {ing.name} — {ing.quantity}
                             </Typography>
                             {canEdit && (
-                              <Box component="form" action={removeIngredient}>
-                                <input type="hidden" name="menuId" value={menu.id} />
-                                <input type="hidden" name="ingredientId" value={ing.id} />
-                                <Button type="submit" variant="text" size="small" sx={{ color: "text.secondary" }}>
-                                  Remove
-                                </Button>
-                              </Box>
+                              <>
+                                <EditIngredientDialog
+                                  menuId={menu.id}
+                                  ingredientId={ing.id}
+                                  name={ing.name}
+                                  quantity={ing.quantity}
+                                  editAction={editIngredient}
+                                />
+                                <Box component="form" action={removeIngredient}>
+                                  <input type="hidden" name="menuId" value={menu.id} />
+                                  <input type="hidden" name="ingredientId" value={ing.id} />
+                                  <Button type="submit" variant="text" size="small" sx={{ color: "text.secondary" }}>
+                                    Remove
+                                  </Button>
+                                </Box>
+                              </>
                             )}
                           </Stack>
                         ))}

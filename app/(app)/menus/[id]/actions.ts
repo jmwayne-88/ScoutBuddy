@@ -25,6 +25,18 @@ async function bumpNotStarted(menuId: string, currentStatus: MenuStatus) {
   }
 }
 
+// REQ-12.11: classify once per distinct ingredient name, not once per row --
+// reuse whatever category a prior ingredient of the same name (any dish, any
+// menu, any patrol) already has before paying for a fresh classification call.
+async function resolveIngredientCategory(name: string) {
+  const trimmedName = name.trim();
+  const cached = await db.ingredient.findFirst({
+    where: { name: { equals: trimmedName, mode: "insensitive" }, category: { not: null } },
+    select: { category: true },
+  });
+  return cached?.category ?? (await classifyIngredientWithClaude(trimmedName));
+}
+
 export async function updateNotes(formData: FormData) {
   const menuId = requireString(formData, "menuId");
   const menu = await requireEditableMenu(menuId);
@@ -100,18 +112,35 @@ export async function addIngredient(formData: FormData) {
   const dish = await db.dish.findFirst({ where: { id: dishId, meal: { menuId } } });
   if (!dish) throw new Error("That dish doesn't belong to this menu.");
 
-  // REQ-12.11: classify once per distinct ingredient name, not once per row
-  // -- reuse whatever category a prior ingredient of the same name (any
-  // dish, any menu, any patrol) already has before paying for a fresh
-  // classification call.
-  const trimmedName = name.trim();
-  const cached = await db.ingredient.findFirst({
-    where: { name: { equals: trimmedName, mode: "insensitive" }, category: { not: null } },
-    select: { category: true },
-  });
-  const category = cached?.category ?? (await classifyIngredientWithClaude(trimmedName));
+  const category = await resolveIngredientCategory(name);
 
   await db.ingredient.create({ data: { dishId, name, quantity, category } });
+  await bumpNotStarted(menuId, menu.status);
+
+  revalidatePath(`/menus/${menuId}`);
+}
+
+export async function editIngredient(formData: FormData) {
+  const menuId = requireString(formData, "menuId");
+  const ingredientId = requireString(formData, "ingredientId");
+  const name = requireString(formData, "name");
+  const quantity = requireString(formData, "quantity");
+
+  const menu = await requireEditableMenu(menuId);
+
+  const ingredient = await db.ingredient.findFirst({
+    where: { id: ingredientId, dish: { meal: { menuId } } },
+  });
+  if (!ingredient) throw new Error("That ingredient doesn't belong to this menu.");
+
+  // Only reclassify if the name actually changed -- a quantity-only edit
+  // keeps the existing category rather than paying for a fresh lookup.
+  const category =
+    ingredient.name.trim().toLowerCase() === name.trim().toLowerCase()
+      ? ingredient.category
+      : await resolveIngredientCategory(name);
+
+  await db.ingredient.update({ where: { id: ingredientId }, data: { name, quantity, category } });
   await bumpNotStarted(menuId, menu.status);
 
   revalidatePath(`/menus/${menuId}`);
