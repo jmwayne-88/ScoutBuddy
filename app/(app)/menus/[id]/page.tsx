@@ -12,6 +12,7 @@ import { canEditMenu, canReview, canSubmitMenu } from "@/lib/permissions";
 import { MEAL_OCCASIONS } from "@/lib/constants";
 import { PatrolBadge } from "@/components/PatrolBadge";
 import { NavLink } from "@/components/NavLink";
+import { RenameDishDialog } from "@/components/RenameDishDialog";
 import {
   addDish,
   addIngredient,
@@ -19,6 +20,7 @@ import {
   rejectMenu,
   removeDish,
   removeIngredient,
+  renameDish,
   submitMenu,
   updateNotes,
 } from "./actions";
@@ -90,13 +92,21 @@ export default async function MenuPage({
                       <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
                         <Typography sx={{ fontWeight: 500 }}>{dish.name}</Typography>
                         {canEdit && (
-                          <Box component="form" action={removeDish}>
-                            <input type="hidden" name="menuId" value={menu.id} />
-                            <input type="hidden" name="dishId" value={dish.id} />
-                            <Button type="submit" variant="text" size="small" sx={{ color: "text.secondary" }}>
-                              Remove dish
-                            </Button>
-                          </Box>
+                          <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+                            <RenameDishDialog
+                              menuId={menu.id}
+                              dishId={dish.id}
+                              dishName={dish.name}
+                              renameAction={renameDish}
+                            />
+                            <Box component="form" action={removeDish}>
+                              <input type="hidden" name="menuId" value={menu.id} />
+                              <input type="hidden" name="dishId" value={dish.id} />
+                              <Button type="submit" variant="text" size="small" sx={{ color: "text.secondary" }}>
+                                Remove dish
+                              </Button>
+                            </Box>
+                          </Stack>
                         )}
                       </Stack>
                       <Stack spacing={0.5} component="ul" sx={{ listStyle: "none", m: 0, ml: 2, p: 0 }}>

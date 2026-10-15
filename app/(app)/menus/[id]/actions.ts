@@ -57,6 +57,22 @@ export async function addDish(formData: FormData) {
   revalidatePath(`/menus/${menuId}`);
 }
 
+export async function renameDish(formData: FormData) {
+  const menuId = requireString(formData, "menuId");
+  const dishId = requireString(formData, "dishId");
+  const name = requireString(formData, "name");
+
+  const menu = await requireEditableMenu(menuId);
+
+  const dish = await db.dish.findFirst({ where: { id: dishId, meal: { menuId } } });
+  if (!dish) throw new Error("That dish doesn't belong to this menu.");
+
+  await db.dish.update({ where: { id: dishId }, data: { name } });
+  await bumpNotStarted(menuId, menu.status);
+
+  revalidatePath(`/menus/${menuId}`);
+}
+
 export async function removeDish(formData: FormData) {
   const menuId = requireString(formData, "menuId");
   const dishId = requireString(formData, "dishId");
