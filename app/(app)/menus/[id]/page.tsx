@@ -12,6 +12,7 @@ import { canEditMenu, canReview, canSubmitMenu } from "@/lib/permissions";
 import { MEAL_OCCASIONS } from "@/lib/constants";
 import { PatrolBadge } from "@/components/PatrolBadge";
 import { NavLink } from "@/components/NavLink";
+import { LinkButton } from "@/components/LinkButton";
 import { RenameDishDialog } from "@/components/RenameDishDialog";
 import { EditIngredientDialog } from "@/components/EditIngredientDialog";
 import {
@@ -59,11 +60,16 @@ export default async function MenuPage({
   return (
     <Stack spacing={4} sx={{ maxWidth: 900 }}>
       <Stack spacing={0.5}>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <Typography variant="h5" component="h1">
-            {menu.campout.name}
-          </Typography>
-          <PatrolBadge name={menu.patrol.name} color={menu.patrol.color} />
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between" }}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+            <Typography variant="h5" component="h1">
+              {menu.campout.name}
+            </Typography>
+            <PatrolBadge name={menu.patrol.name} color={menu.patrol.color} />
+          </Stack>
+          <LinkButton href={`/campouts/${menu.campout.id}`} variant="outlined" size="small">
+            Close
+          </LinkButton>
         </Stack>
         <Typography variant="body2" color="text.secondary">
           Due {menu.dueDate.toDateString()} · Status: {menu.status.replace(/_/g, " ")}
