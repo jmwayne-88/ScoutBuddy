@@ -15,3 +15,4 @@ One file per product iteration from [ROADMAP.md](../../ROADMAP.md) (01-05), each
 - [09 - Adopt MUI with the Scouting America Brand Palette](09-adopt-mui-design-system.md)
 - [10 - Per-Campout Patrol Roster (Add/Remove)](10-per-campout-patrol-roster.md)
 - [11 - Production Deployment Pipeline & Environment Isolation](11-production-deployment-pipeline.md)
+- [12 - Menu Print Preview & Shopping List](12-menu-print-preview.md)
