@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import { db } from "@/lib/db";
 import { MEAL_OCCASIONS, mealOccasionLabel } from "@/lib/constants";
 import { CATEGORY_ORDER, CATEGORY_LABELS } from "@/lib/ingredient-categorization";
-import { pickFontSize } from "@/lib/print-layout";
+import { pickFontSize, pickShoppingListFontSize } from "@/lib/print-layout";
 import { PatrolBadge } from "@/components/PatrolBadge";
 import { NavLink } from "@/components/NavLink";
 import { PrintButton } from "@/components/PrintButton";
@@ -61,7 +61,7 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
     items: shoppingRows.filter((row) => row.category === category).sort((a, b) => a.name.localeCompare(b.name)),
   })).filter((group) => group.items.length > 0);
 
-  const page2FontSize = pickFontSize(shoppingRows.length);
+  const page2FontSize = pickShoppingListFontSize(shoppingRows.length, groupedShoppingRows.length);
 
   return (
     <Box className={styles.printPreviewBackdrop}>
@@ -100,18 +100,19 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
           )}
 
           <Stack spacing={1} sx={{ flex: 1, overflow: "hidden" }}>
-            {occasionsWithDishes.map(({ value, label }) => {
+            {occasionsWithDishes.map(({ value, label }, index) => {
               const meal = mealsByOccasion.get(value)!;
               return (
                 <Box key={value}>
-                  <Typography sx={{ fontSize: "1.1em", fontWeight: 700, textDecoration: "underline" }}>
-                    {label}
-                  </Typography>
-                  <Stack spacing={0.5} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
+                  {index > 0 && (
+                    <Box aria-hidden sx={{ borderTop: "1px solid", borderColor: "grey.400", mb: 1 }} />
+                  )}
+                  <Typography sx={{ fontSize: "1.1em", fontWeight: 700 }}>{label}</Typography>
+                  <Stack spacing={0.5} component="ul" sx={{ listStyle: "none", m: 0, mt: 0.5, p: 0, pl: "1.25em" }}>
                     {meal.dishes.map((dish) => (
                       <Box component="li" key={dish.id}>
                         <Typography sx={{ fontSize: "1em", fontWeight: 600 }}>{dish.name}</Typography>
-                        <Typography sx={{ fontSize: "0.75em", color: "text.secondary" }}>
+                        <Typography sx={{ fontSize: "0.75em", color: "text.secondary", pl: "1.25em" }}>
                           {dish.ingredients.length === 0
                             ? "No ingredients listed."
                             : dish.ingredients.map((i) => `${i.name} (${i.quantity})`).join(" · ")}
@@ -128,7 +129,7 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
 
       {/* Page 2 — shopping list */}
       <Box className={`${styles.printPage} ${styles.printPageSecond}`} sx={{ fontSize: `${page2FontSize}pt` }}>
-        <Stack spacing={1.5}>
+        <Stack spacing={0.75}>
           <Typography sx={{ fontSize: "1.4em", fontWeight: 700 }}>
             Shopping List — {menu.patrol.name}, {menu.campout.name}
           </Typography>
@@ -140,7 +141,7 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
                 <Typography sx={{ fontSize: "1.1em", fontWeight: 700, textDecoration: "underline" }}>
                   {CATEGORY_LABELS[category]}
                 </Typography>
-                <Stack spacing={0.4} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
+                <Stack spacing={0.2} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
                   {items.map((row) => (
                     <Stack
                       component="li"
