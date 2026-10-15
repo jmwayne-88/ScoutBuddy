@@ -29,7 +29,13 @@ export function RenameDishDialog({
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogTitle>Rename dish</DialogTitle>
         <DialogContent>
-          <form id={`rename-dish-${dishId}`} action={renameAction}>
+          <form
+            id={`rename-dish-${dishId}`}
+            action={async (formData) => {
+              await renameAction(formData);
+              setOpen(false);
+            }}
+          >
             <input type="hidden" name="menuId" value={menuId} />
             <input type="hidden" name="dishId" value={dishId} />
             <TextField

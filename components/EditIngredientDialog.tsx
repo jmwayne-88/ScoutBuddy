@@ -32,7 +32,16 @@ export function EditIngredientDialog({
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogTitle>Edit ingredient</DialogTitle>
         <DialogContent>
-          <Stack component="form" id={`edit-ingredient-${ingredientId}`} action={editAction} spacing={2} sx={{ pt: 1 }}>
+          <Stack
+            component="form"
+            id={`edit-ingredient-${ingredientId}`}
+            action={async (formData) => {
+              await editAction(formData);
+              setOpen(false);
+            }}
+            spacing={2}
+            sx={{ pt: 1 }}
+          >
             <input type="hidden" name="menuId" value={menuId} />
             <input type="hidden" name="ingredientId" value={ingredientId} />
             <TextField name="name" label="Ingredient" defaultValue={name} required autoFocus size="small" />
