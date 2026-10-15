@@ -5,11 +5,16 @@
 // throwing on every page. Comparing hostnames catches the same class of
 // mistake automatically, going forward.
 //
-// A Neon host (e.g. "ep-fragrant-haze-b4zn25pb.c-6.us-east-2.aws.neon.tech")
+// A Neon host (e.g. "ep-fragrant-haze-b4zn25pb-pooler.c-6.us-east-2.aws.neon.tech")
 // carries no credentials -- user/password are a separate part of the
 // connection string -- so these are safe to commit in plain text, unlike
 // DATABASE_URL/DIRECT_URL themselves.
-export const NEON_DEVELOPMENT_HOST = "ep-fragrant-haze-b4zn25pb.c-6.us-east-2.aws.neon.tech";
+//
+// This is DATABASE_URL's host (the pooled connection), not DIRECT_URL's --
+// the guard below only ever checks DATABASE_URL (what Prisma's client
+// actually connects with at runtime), and Neon's pooled/direct endpoints
+// for the same branch have different hostnames (a "-pooler" suffix).
+export const NEON_DEVELOPMENT_HOST = "ep-fragrant-haze-b4zn25pb-pooler.c-6.us-east-2.aws.neon.tech";
 
 // TODO(production rollout): replace with the real production Neon host
 // (just the hostname, from Vercel's Production DATABASE_URL) before this
