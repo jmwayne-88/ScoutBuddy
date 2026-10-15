@@ -25,7 +25,7 @@ export async function assignMenu(formData: FormData) {
   const excludedOccasions = new Set(exceptions.map((e) => e.occasion));
   const activeOccasions = MEAL_OCCASIONS.filter((o) => !excludedOccasions.has(o.value));
 
-  const menu = await db.menu.create({
+  await db.menu.create({
     data: {
       campoutId,
       patrolId,
@@ -36,8 +36,12 @@ export async function assignMenu(formData: FormData) {
     },
   });
 
+  // REQ-10.5 revision: land back on the campout overview, not the new
+  // menu's own page -- the ASPL just picked a patrol to add from the
+  // campout's "Add patrol" dialog and is managing the roster there, not
+  // about to start building that patrol's menu themselves.
   revalidatePath(`/campouts/${campoutId}`);
-  redirect(`/menus/${menu.id}`);
+  redirect(`/campouts/${campoutId}`);
 }
 
 // REQ-10.1/10.2: unassigns one patrol from one campout — a manual cascade
