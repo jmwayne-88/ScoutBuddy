@@ -148,7 +148,7 @@ export default async function MenuPage({
                           <input type="hidden" name="menuId" value={menu.id} />
                           <input type="hidden" name="dishId" value={dish.id} />
                           <TextField name="name" label="Ingredient" required size="small" />
-                          <TextField name="quantity" label="Quantity" required size="small" />
+                          <TextField name="quantity" label="Quantity (per person)" required size="small" />
                           <Button type="submit" variant="text" size="small">
                             Add ingredient
                           </Button>

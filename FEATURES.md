@@ -14,7 +14,7 @@ Status: documentation only, not yet built. Covers the "build first" scope from t
 - **Menu** — one per (campout, patrol) pair. Has a due date, a status, and a set of active meal occasions (see Meal-Framework Variation below).
 - **Meal** — one per standard occasion, scoped to a menu. Only occasions the ASPL has left active appear.
 - **Dish** — one or more per meal, has a name.
-- **Ingredient** — belongs to a dish, has a name and quantity.
+- **Ingredient** — belongs to a dish, has a name and a quantity (per person).
 - **Review** — the ASPL's approve/reject decision on a submission, with comments on reject.
 
 ## Standard Meal Framework

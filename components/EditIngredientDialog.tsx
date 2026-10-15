@@ -36,7 +36,7 @@ export function EditIngredientDialog({
             <input type="hidden" name="menuId" value={menuId} />
             <input type="hidden" name="ingredientId" value={ingredientId} />
             <TextField name="name" label="Ingredient" defaultValue={name} required autoFocus size="small" />
-            <TextField name="quantity" label="Quantity" defaultValue={quantity} required size="small" />
+            <TextField name="quantity" label="Quantity (per person)" defaultValue={quantity} required size="small" />
           </Stack>
         </DialogContent>
         <DialogActions>
