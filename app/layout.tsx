@@ -2,18 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Montserrat } from "next/font/google";
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Stack from "@mui/material/Stack";
-import Container from "@mui/material/Container";
-import Box from "@mui/material/Box";
-import { getActor } from "@/lib/session";
-import { getActivePatrols } from "@/lib/patrols";
-import { RoleSwitcher } from "@/components/RoleSwitcher";
-import { AppNav } from "@/components/AppNav";
 import { ThemeRegistry } from "@/components/ThemeRegistry";
-import { ColorModeToggle } from "@/components/ColorModeToggle";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -26,35 +15,15 @@ export const metadata: Metadata = {
   description: "Campout menu planning and approval for the troop",
 };
 
-export default async function RootLayout({ children }: { children: ReactNode }) {
-  const actor = await getActor();
-  const patrols = await getActivePatrols();
-  const navItems = actor?.role === "ASPL" ? [{ href: "/patrols", label: "Manage Patrols" }] : [];
-
+// Deliberately minimal -- the AppBar/nav chrome lives in app/(app)/layout.tsx
+// instead, so routes outside that group (the print view, app/(print)/...)
+// never get it, on screen or in print. See docs/requirements/12-menu-print-preview.md.
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={montserrat.variable} suppressHydrationWarning>
       <body suppressHydrationWarning>
         <InitColorSchemeScript />
-        <ThemeRegistry>
-          <AppBar position="static">
-            <Toolbar sx={{ gap: 2 }}>
-              <Typography variant="h6" component="span" sx={{ flexGrow: 1, fontWeight: 800, letterSpacing: 0.5 }}>
-                ScoutBuddy
-              </Typography>
-              <AppNav items={navItems} />
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                <Typography variant="body2" sx={{ opacity: 0.85, display: { xs: "none", sm: "block" } }}>
-                  Viewing as:
-                </Typography>
-                <RoleSwitcher actor={actor} patrols={patrols} />
-                <ColorModeToggle />
-              </Stack>
-            </Toolbar>
-          </AppBar>
-          <Container component="main" maxWidth="lg" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 2, sm: 3 } }}>
-            <Box>{children}</Box>
-          </Container>
-        </ThemeRegistry>
+        <ThemeRegistry>{children}</ThemeRegistry>
       </body>
     </html>
   );

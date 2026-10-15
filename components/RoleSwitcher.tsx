@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import { chooseRole } from "@/app/role-actions";
+import { chooseRole } from "@/app/(app)/role-actions";
 import type { Actor } from "@/lib/session";
 
 export function RoleSwitcher({
