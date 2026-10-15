@@ -8,6 +8,7 @@ import { getActor } from "@/lib/session";
 import { canEditMenu, canReview, canSubmitMenu } from "@/lib/permissions";
 import { menuHasEmptyOccasion } from "@/lib/validation";
 import { requireString } from "@/lib/form-data";
+import { classifyIngredientWithClaude } from "@/lib/ingredient-categorization";
 
 async function requireEditableMenu(menuId: string) {
   const actor = await getActor();
@@ -83,7 +84,18 @@ export async function addIngredient(formData: FormData) {
   const dish = await db.dish.findFirst({ where: { id: dishId, meal: { menuId } } });
   if (!dish) throw new Error("That dish doesn't belong to this menu.");
 
-  await db.ingredient.create({ data: { dishId, name, quantity } });
+  // REQ-12.11: classify once per distinct ingredient name, not once per row
+  // -- reuse whatever category a prior ingredient of the same name (any
+  // dish, any menu, any patrol) already has before paying for a fresh
+  // classification call.
+  const trimmedName = name.trim();
+  const cached = await db.ingredient.findFirst({
+    where: { name: { equals: trimmedName, mode: "insensitive" }, category: { not: null } },
+    select: { category: true },
+  });
+  const category = cached?.category ?? (await classifyIngredientWithClaude(trimmedName));
+
+  await db.ingredient.create({ data: { dishId, name, quantity, category } });
   await bumpNotStarted(menuId, menu.status);
 
   revalidatePath(`/menus/${menuId}`);

@@ -1,0 +1,63 @@
+/*
+ * The one deliberate exception to "MUI only" (CLAUDE.md) in this app --
+ * @page/break-before/print media queries have no MUI equivalent. Every
+ * actual component on this page still uses MUI; only the page geometry and
+ * pagination mechanics live here. See docs/requirements/12-menu-print-preview.md.
+ *
+ * `@page { margin: 0 }` plus each .printPage's own 0.5in padding means the
+ * padding *is* the margin, identically on screen and on paper -- this
+ * avoids relying on the browser print dialog's own margin setting, which
+ * can silently override a CSS @page margin.
+ */
+@page {
+  size: letter;
+  margin: 0;
+}
+
+.printPreviewBackdrop {
+  background: #e8e8e8;
+  min-height: 100vh;
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.printPage {
+  width: 8.5in;
+  height: 11in;
+  padding: 0.5in;
+  box-sizing: border-box;
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.printPageSecond {
+  break-before: page;
+  page-break-before: always;
+}
+
+.noPrint {
+  /* Screen-only chrome (the Print/Back controls) -- never shows on paper. */
+}
+
+@media print {
+  .printPreviewBackdrop {
+    background: none;
+    padding: 0;
+    gap: 0;
+  }
+
+  .printPage {
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .noPrint {
+    display: none;
+  }
+}

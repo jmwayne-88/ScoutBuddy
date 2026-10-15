@@ -64,6 +64,9 @@ export default async function MenuPage({
         <Typography variant="body2" color="text.secondary">
           Due {menu.dueDate.toDateString()} · Status: {menu.status.replace(/_/g, " ")}
         </Typography>
+        <Typography variant="body2">
+          <NavLink href={`/menus/${menu.id}/print`}>Print preview</NavLink>
+        </Typography>
       </Stack>
 
       <Stack spacing={3}>

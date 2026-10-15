@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/jmwayne-88/ScoutBuddy#readme",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.134.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^9.5.0",

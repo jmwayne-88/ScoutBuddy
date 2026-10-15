@@ -96,12 +96,32 @@ model Dish {
   ingredients Ingredient[]
 }
 
+// A patrol-leader-entered free-text item, never tagged by hand with a
+// category — `category` is inferred automatically (REQ-12.9/12.10) and
+// cached per distinct ingredient name, not re-classified per row. Null
+// means "not yet classified" (e.g. pre-existing rows from before this
+// column existed) and is treated identically to OTHER wherever it's
+// displayed, never as an error state.
 model Ingredient {
-  id       String @id @default(cuid())
+  id       String              @id @default(cuid())
   dishId   String
-  dish     Dish   @relation(fields: [dishId], references: [id])
+  dish     Dish                @relation(fields: [dishId], references: [id])
   name     String
   quantity String
+  category IngredientCategory?
+}
+
+enum IngredientCategory {
+  PRODUCE
+  MEAT_PROTEIN
+  DAIRY_EGGS
+  BREAD_BAKERY
+  PANTRY_DRY_GOODS
+  CONDIMENTS_SAUCES
+  SPICES_SEASONINGS
+  FROZEN
+  BEVERAGES
+  OTHER
 }
 
 model Review {

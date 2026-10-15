@@ -23,3 +23,5 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0017 - Adopt MUI as the design system; brand color roles revised; Tailwind removed](0017-adopt-mui-design-system.md)
 - [0018 - Patrols become admin-managed database rows, not a fixed enum](0018-patrols-as-database-rows.md)
 - [0019 - Local production credentials, automated migrations, and a startup environment guard](0019-local-production-credentials-and-automated-migrations.md)
+- [0020 - Print view route group and padding-as-margin pagination](0020-print-view-route-group-and-pagination.md)
+- [0021 - Claude API ingredient categorization, cached per name](0021-claude-api-ingredient-categorization.md)
