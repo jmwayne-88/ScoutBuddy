@@ -41,12 +41,15 @@
   page-break-before: always;
 }
 
-.noPrint {
-  /* Screen-only chrome (the Print/Back controls) -- never shows on paper. */
-}
-
 @media print {
   .printPreviewBackdrop {
+    /* CSS fragmentation (break-before/page-break-before) is unreliable
+       inside a flex formatting context in Chrome's print engine -- it
+       caused a spurious blank page between the two real pages, confirmed
+       via an actual rendered PDF. Switching to normal block flow for
+       print makes break-before: page behave the way the spec actually
+       guarantees. */
+    display: block;
     background: none;
     padding: 0;
     gap: 0;
@@ -55,9 +58,5 @@
   .printPage {
     box-shadow: none;
     overflow: visible;
-  }
-
-  .noPrint {
-    display: none;
   }
 }

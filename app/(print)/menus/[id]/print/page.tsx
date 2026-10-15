@@ -57,7 +57,7 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
 
   return (
     <Box className={styles.printPreviewBackdrop}>
-      <Stack direction="row" spacing={2} className={styles.noPrint}>
+      <Stack direction="row" spacing={2} sx={{ "@media print": { display: "none" } }}>
         <PrintButton />
         <NavLink href={`/menus/${menu.id}`}>Back to menu</NavLink>
       </Stack>
@@ -67,8 +67,8 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
         <Stack spacing={1.5}>
           <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", justifyContent: "space-between" }}>
             <Stack spacing={0.25}>
-              <Typography sx={{ fontSize: "1.6em", fontWeight: 700 }}>{menu.campout.name}</Typography>
-              <Typography sx={{ fontSize: "0.9em", color: "text.secondary" }}>
+              <Typography variant="inherit" sx={{ fontSize: "1.6em", fontWeight: 700 }}>{menu.campout.name}</Typography>
+              <Typography variant="inherit" sx={{ fontSize: "0.9em", color: "text.secondary" }}>
                 {menu.campout.date.toDateString()}
                 {menu.campout.location && <> · {menu.campout.location}</>}
               </Typography>
@@ -79,12 +79,12 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
           {(menu.allergyNote || menu.nutritionNote) && (
             <Box sx={{ border: "2px solid #000", borderRadius: 1, p: 1 }}>
               {menu.allergyNote && (
-                <Typography sx={{ fontSize: "1em" }}>
+                <Typography variant="inherit" sx={{ fontSize: "1em" }}>
                   <strong>Allergies:</strong> {menu.allergyNote}
                 </Typography>
               )}
               {menu.nutritionNote && (
-                <Typography sx={{ fontSize: "0.85em" }}>
+                <Typography variant="inherit" sx={{ fontSize: "0.85em" }}>
                   <strong>Nutrition note:</strong> {menu.nutritionNote}
                 </Typography>
               )}
@@ -99,12 +99,12 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
                   {index > 0 && (
                     <Box aria-hidden sx={{ borderTop: "1px solid", borderColor: "grey.400", mb: 1 }} />
                   )}
-                  <Typography sx={{ fontSize: "1.1em", fontWeight: 700 }}>{label}</Typography>
+                  <Typography variant="inherit" sx={{ fontSize: "1.1em", fontWeight: 700 }}>{label}</Typography>
                   <Stack spacing={0.5} component="ul" sx={{ listStyle: "none", m: 0, mt: 0.5, p: 0, pl: "1.25em" }}>
                     {meal.dishes.map((dish) => (
                       <Box component="li" key={dish.id}>
-                        <Typography sx={{ fontSize: "1em", fontWeight: 600 }}>{dish.name}</Typography>
-                        <Typography sx={{ fontSize: "0.75em", color: "text.secondary", pl: "1.25em" }}>
+                        <Typography variant="inherit" sx={{ fontSize: "1em", fontWeight: 600 }}>{dish.name}</Typography>
+                        <Typography variant="inherit" sx={{ fontSize: "0.75em", color: "text.secondary", pl: "1.25em" }}>
                           {dish.ingredients.length === 0
                             ? "No ingredients listed."
                             : dish.ingredients.map((i) => `${i.name} (${i.quantity})`).join(" · ")}
@@ -122,15 +122,15 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
       {/* Page 2 — shopping list */}
       <ShrinkToFitPage className={`${styles.printPage} ${styles.printPageSecond}`}>
         <Stack spacing={0.75}>
-          <Typography sx={{ fontSize: "1.4em", fontWeight: 700 }}>
+          <Typography variant="inherit" sx={{ fontSize: "1.4em", fontWeight: 700 }}>
             Shopping List — {menu.patrol.name}, {menu.campout.name}
           </Typography>
           {groupedShoppingRows.length === 0 ? (
-            <Typography sx={{ fontSize: "1em", color: "text.secondary" }}>No ingredients listed yet.</Typography>
+            <Typography variant="inherit" sx={{ fontSize: "1em", color: "text.secondary" }}>No ingredients listed yet.</Typography>
           ) : (
             groupedShoppingRows.map(({ category, items }) => (
               <Box key={category}>
-                <Typography sx={{ fontSize: "1.1em", fontWeight: 700, textDecoration: "underline" }}>
+                <Typography variant="inherit" sx={{ fontSize: "1.1em", fontWeight: 700, textDecoration: "underline" }}>
                   {CATEGORY_LABELS[category]}
                 </Typography>
                 <Stack spacing={0.2} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
@@ -151,10 +151,10 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
                           flexShrink: 0,
                         }}
                       />
-                      <Typography sx={{ fontSize: "1em" }}>
+                      <Typography variant="inherit" sx={{ fontSize: "1em" }}>
                         {row.name} — {row.quantity}
                       </Typography>
-                      <Typography sx={{ fontSize: "0.7em", color: "text.secondary" }}>
+                      <Typography variant="inherit" sx={{ fontSize: "0.7em", color: "text.secondary" }}>
                         ({row.occasionLabel} · {row.dishName})
                       </Typography>
                     </Stack>
