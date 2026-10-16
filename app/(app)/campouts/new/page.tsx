@@ -1,7 +1,7 @@
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
+import { SubmitButton } from "@/components/SubmitButton";
 import { createCampout } from "../actions";
 
 export default function NewCampoutPage() {
@@ -22,9 +22,9 @@ export default function NewCampoutPage() {
           <TextField name="location" label="Location (optional)" placeholder="e.g. Eagle Lake, Pine Ridge" fullWidth />
           <TextField name="description" label="Description (optional)" multiline rows={2} fullWidth />
           <TextField name="imageUrl" label="Photo URL (optional)" type="url" placeholder="https://..." fullWidth />
-          <Button type="submit" variant="contained" color="primary" sx={{ alignSelf: "flex-start" }}>
+          <SubmitButton variant="contained" color="primary" sx={{ alignSelf: "flex-start" }}>
             Create campout
-          </Button>
+          </SubmitButton>
         </Stack>
       </form>
     </Stack>

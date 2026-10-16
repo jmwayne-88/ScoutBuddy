@@ -7,6 +7,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
+import { SubmitButton } from "@/components/SubmitButton";
 
 // REQ-8.10: shown once, right after a new patrol is created.
 export function AssignFutureCampoutsPrompt({
@@ -36,9 +37,9 @@ export function AssignFutureCampoutsPrompt({
         <Button onClick={close}>No, not yet</Button>
         <form action={assignAction}>
           <input type="hidden" name="patrolId" value={patrolId} />
-          <Button type="submit" variant="contained">
+          <SubmitButton variant="contained">
             Yes, assign
-          </Button>
+          </SubmitButton>
         </form>
       </DialogActions>
     </Dialog>

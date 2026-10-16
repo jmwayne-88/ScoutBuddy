@@ -6,7 +6,6 @@ import Paper from "@mui/material/Paper";
 import Chip from "@mui/material/Chip";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
 import MenuItem from "@mui/material/MenuItem";
 import { db } from "@/lib/db";
@@ -20,6 +19,7 @@ import { MenuStatusChip } from "@/components/MenuStatusChip";
 import { NavLink } from "@/components/NavLink";
 import { RemoveFromCampoutDialog } from "@/components/RemoveFromCampoutDialog";
 import { AddPatrolToCampoutDialog } from "@/components/AddPatrolToCampoutDialog";
+import { SubmitButton } from "@/components/SubmitButton";
 import { assignMenu, removeOccasion, removePatrolFromCampout, restoreOccasion } from "./actions";
 
 export default async function CampoutDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -197,9 +197,9 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
                 </span>
                 <Box component="form" action={restoreOccasion}>
                   <input type="hidden" name="exceptionId" value={exception.id} />
-                  <Button type="submit" variant="text" size="small" sx={{ color: "text.secondary" }}>
+                  <SubmitButton variant="text" size="small" sx={{ color: "text.secondary" }}>
                     Restore
-                  </Button>
+                  </SubmitButton>
                 </Box>
               </Stack>
             ))}
@@ -235,14 +235,13 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
               </MenuItem>
             ))}
           </TextField>
-          <Button
-            type="submit"
+          <SubmitButton
             variant="contained"
             size="small"
             sx={{ bgcolor: "brand.olive", "&:hover": { bgcolor: "brand.olive", filter: "brightness(0.9)" } }}
           >
             Remove occasion
-          </Button>
+          </SubmitButton>
         </Stack>
       </Stack>
     </Stack>

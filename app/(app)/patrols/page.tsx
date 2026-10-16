@@ -3,7 +3,6 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
@@ -13,6 +12,7 @@ import { db } from "@/lib/db";
 import { LinkButton } from "@/components/LinkButton";
 import { NavLink } from "@/components/NavLink";
 import { RoleMismatchNotice } from "@/components/RoleMismatchNotice";
+import { SubmitButton } from "@/components/SubmitButton";
 import { movePatrol, setPatrolActive } from "./actions";
 
 export default async function PatrolsPage() {
@@ -43,21 +43,21 @@ export default async function PatrolsPage() {
                 <Box component="form" action={movePatrol}>
                   <input type="hidden" name="patrolId" value={p.id} />
                   <input type="hidden" name="direction" value="up" />
-                  <Button type="submit" size="small" disabled={index === 0} sx={{ minWidth: 0, p: 0.5 }}>
+                  <SubmitButton iconOnly size="small" disabled={index === 0} sx={{ minWidth: 44, p: 0.5 }}>
                     <ArrowUpwardIcon fontSize="small" />
-                  </Button>
+                  </SubmitButton>
                 </Box>
                 <Box component="form" action={movePatrol}>
                   <input type="hidden" name="patrolId" value={p.id} />
                   <input type="hidden" name="direction" value="down" />
-                  <Button
-                    type="submit"
+                  <SubmitButton
+                    iconOnly
                     size="small"
                     disabled={index === patrols.length - 1}
-                    sx={{ minWidth: 0, p: 0.5 }}
+                    sx={{ minWidth: 44, p: 0.5 }}
                   >
                     <ArrowDownwardIcon fontSize="small" />
-                  </Button>
+                  </SubmitButton>
                 </Box>
               </Stack>
 
@@ -78,9 +78,9 @@ export default async function PatrolsPage() {
               <Box component="form" action={setPatrolActive}>
                 <input type="hidden" name="patrolId" value={p.id} />
                 <input type="hidden" name="isActive" value={(!p.isActive).toString()} />
-                <Button type="submit" size="small" variant="outlined">
+                <SubmitButton size="small" variant="outlined">
                   {p.isActive ? "Deactivate" : "Activate"}
-                </Button>
+                </SubmitButton>
               </Box>
             </Stack>
           </Paper>

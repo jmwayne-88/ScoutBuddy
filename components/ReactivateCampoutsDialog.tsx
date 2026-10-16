@@ -1,5 +1,6 @@
 "use client";
 
+import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -10,6 +11,7 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import Button from "@mui/material/Button";
+import { SubmitButton } from "@/components/SubmitButton";
 
 // REQ-8.15: shown when reactivating a previously-inactive patrol. Unlike the
 // new-patrol prompt (all-future-campouts, yes/no), this is a deliberate
@@ -34,6 +36,7 @@ export function ReactivateCampoutsDialog({
 }) {
   const router = useRouter();
   const close = () => router.push(`/patrols/${patrolId}`);
+  const [isPending, startTransition] = useTransition();
 
   return (
     <Dialog open={open} onClose={close}>
@@ -45,7 +48,19 @@ export function ReactivateCampoutsDialog({
         {campouts.length === 0 ? (
           <DialogContentText>Every campout already has a menu for this patrol.</DialogContentText>
         ) : (
-          <form id="reactivate-form" action={assignAction}>
+          <form
+            id="reactivate-form"
+            action={(formData) => {
+              // REQ-14.4: the "Assign to selected" button lives in
+              // DialogActions, linked to this form only by the `form` HTML
+              // attribute (not real JSX nesting), so useFormStatus can't
+              // see it -- track pending with useTransition instead and
+              // pass it to SubmitButton explicitly.
+              startTransition(async () => {
+                await assignAction(formData);
+              });
+            }}
+          >
             <input type="hidden" name="patrolId" value={patrolId} />
             <FormGroup>
               {campouts.map((c) => (
@@ -62,9 +77,9 @@ export function ReactivateCampoutsDialog({
       <DialogActions>
         <Button onClick={close}>Close</Button>
         {campouts.length > 0 && (
-          <Button type="submit" form="reactivate-form" variant="contained">
+          <SubmitButton form="reactivate-form" variant="contained" pendingOverride={isPending}>
             Assign to selected
-          </Button>
+          </SubmitButton>
         )}
       </DialogActions>
     </Dialog>

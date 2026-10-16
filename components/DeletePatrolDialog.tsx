@@ -7,6 +7,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
+import { SubmitButton } from "@/components/SubmitButton";
 
 // REQ-8.12/8.13: deleting a patrol is a real, cascading data loss (its
 // menus, dishes, ingredients, reviews). This requires an explicit,
@@ -50,9 +51,9 @@ export function DeletePatrolDialog({
           <Button onClick={() => setOpen(false)}>Cancel</Button>
           <form action={deleteAction}>
             <input type="hidden" name="patrolId" value={patrolId} />
-            <Button type="submit" color="error" variant="contained">
+            <SubmitButton color="error" variant="contained">
               Yes, delete
-            </Button>
+            </SubmitButton>
           </form>
         </DialogActions>
       </Dialog>

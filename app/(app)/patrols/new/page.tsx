@@ -2,9 +2,9 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
-import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import { PatrolColorField } from "@/components/PatrolColorField";
+import { SubmitButton } from "@/components/SubmitButton";
 import { createPatrol } from "../actions";
 
 export default async function NewPatrolPage({
@@ -32,9 +32,9 @@ export default async function NewPatrolPage({
           defaultValue={order ?? ""}
           fullWidth
         />
-        <Button type="submit" variant="contained" sx={{ alignSelf: "flex-start" }}>
+        <SubmitButton variant="contained" sx={{ alignSelf: "flex-start" }}>
           Create patrol
-        </Button>
+        </SubmitButton>
       </Stack>
     </Stack>
   );

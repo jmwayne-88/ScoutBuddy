@@ -1,6 +1,6 @@
 # Requirement 13 — UX Quick-Win Polish Pass
 
-Status: Not started
+Status: Implemented. See [ADR 0023](../adr/0023-redirect-based-toast-notifications.md) for the toast-mechanism decision made along the way.
 Depends on: none tied to a single ROADMAP iteration (cross-cutting, like Requirements 6+); builds on the status-color and progress conventions from [Requirement 7](07-campout-dashboard-layout.md)
 
 ## Goal

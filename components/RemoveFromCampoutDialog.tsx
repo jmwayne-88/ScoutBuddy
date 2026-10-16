@@ -7,6 +7,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
+import { SubmitButton } from "@/components/SubmitButton";
 
 // REQ-10.1/10.3: removing a patrol's menu from one campout is scoped and
 // permanent (dishes/ingredients/reviews included), so it gets the same
@@ -49,9 +50,9 @@ export function RemoveFromCampoutDialog({
           <form action={removeAction}>
             <input type="hidden" name="campoutId" value={campoutId} />
             <input type="hidden" name="patrolId" value={patrolId} />
-            <Button type="submit" color="error" variant="contained">
+            <SubmitButton color="error" variant="contained">
               Yes, remove
-            </Button>
+            </SubmitButton>
           </form>
         </DialogActions>
       </Dialog>

@@ -3,7 +3,6 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -20,6 +19,7 @@ import { NavLink } from "@/components/NavLink";
 import { LinkButton } from "@/components/LinkButton";
 import { RenameDishDialog } from "@/components/RenameDishDialog";
 import { EditIngredientDialog } from "@/components/EditIngredientDialog";
+import { SubmitButton } from "@/components/SubmitButton";
 import {
   addDish,
   addIngredient,
@@ -147,9 +147,9 @@ export default async function MenuPage({
                             <Box component="form" action={removeDish}>
                               <input type="hidden" name="menuId" value={menu.id} />
                               <input type="hidden" name="dishId" value={dish.id} />
-                              <Button type="submit" variant="text" size="small" sx={{ color: "text.secondary" }}>
+                              <SubmitButton variant="text" size="small" sx={{ color: "text.secondary" }}>
                                 Remove dish
-                              </Button>
+                              </SubmitButton>
                             </Box>
                           </Stack>
                         )}
@@ -172,9 +172,9 @@ export default async function MenuPage({
                                 <Box component="form" action={removeIngredient}>
                                   <input type="hidden" name="menuId" value={menu.id} />
                                   <input type="hidden" name="ingredientId" value={ing.id} />
-                                  <Button type="submit" variant="text" size="small" sx={{ color: "text.secondary" }}>
+                                  <SubmitButton variant="text" size="small" sx={{ color: "text.secondary" }}>
                                     Remove
-                                  </Button>
+                                  </SubmitButton>
                                 </Box>
                               </>
                             )}
@@ -192,9 +192,9 @@ export default async function MenuPage({
                           <input type="hidden" name="dishId" value={dish.id} />
                           <TextField name="name" label="Ingredient" required size="small" />
                           <TextField name="quantity" label="Quantity (per person)" required size="small" />
-                          <Button type="submit" variant="text" size="small">
+                          <SubmitButton variant="text" size="small">
                             Add ingredient
-                          </Button>
+                          </SubmitButton>
                         </Stack>
                       )}
                     </Stack>
@@ -205,9 +205,9 @@ export default async function MenuPage({
                     <input type="hidden" name="menuId" value={menu.id} />
                     <input type="hidden" name="mealId" value={meal.id} />
                     <TextField name="name" label="Dish name" required size="small" />
-                    <Button type="submit" variant="text" size="small">
+                    <SubmitButton variant="text" size="small">
                       Add dish
-                    </Button>
+                    </SubmitButton>
                   </Stack>
                 )}
               </Stack>
@@ -239,9 +239,9 @@ export default async function MenuPage({
               rows={2}
               fullWidth
             />
-            <Button type="submit" variant="contained" size="small" sx={{ alignSelf: "flex-start" }}>
+            <SubmitButton variant="contained" size="small" sx={{ alignSelf: "flex-start" }}>
               Save notes
-            </Button>
+            </SubmitButton>
           </Stack>
         ) : (
           <Stack spacing={1} sx={{ typography: "body2" }}>
@@ -264,9 +264,9 @@ export default async function MenuPage({
           )}
           <Box component="form" action={submitMenu}>
             <input type="hidden" name="menuId" value={menu.id} />
-            <Button type="submit" variant="contained" color="primary">
+            <SubmitButton variant="contained" color="primary">
               Submit menu
-            </Button>
+            </SubmitButton>
           </Box>
         </Stack>
       )}
@@ -278,9 +278,9 @@ export default async function MenuPage({
           </Typography>
           <Box component="form" action={approveMenu}>
             <input type="hidden" name="menuId" value={menu.id} />
-            <Button type="submit" variant="contained" color="primary">
+            <SubmitButton variant="contained" color="primary">
               Approve
-            </Button>
+            </SubmitButton>
           </Box>
           <Stack component="form" action={rejectMenu} spacing={1.5} sx={{ alignItems: "flex-start" }}>
             <input type="hidden" name="menuId" value={menu.id} />
@@ -292,13 +292,12 @@ export default async function MenuPage({
               rows={2}
               fullWidth
             />
-            <Button
-              type="submit"
+            <SubmitButton
               variant="contained"
               sx={{ bgcolor: "brand.olive", "&:hover": { bgcolor: "brand.olive", filter: "brightness(0.9)" } }}
             >
               Request changes
-            </Button>
+            </SubmitButton>
           </Stack>
         </Stack>
       )}

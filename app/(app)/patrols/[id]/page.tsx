@@ -3,10 +3,10 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
-import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import { db } from "@/lib/db";
 import { PatrolColorField } from "@/components/PatrolColorField";
+import { SubmitButton } from "@/components/SubmitButton";
 import { DeletePatrolDialog } from "@/components/DeletePatrolDialog";
 import { AssignFutureCampoutsPrompt } from "@/components/AssignFutureCampoutsPrompt";
 import { ReactivateCampoutsDialog } from "@/components/ReactivateCampoutsDialog";
@@ -51,9 +51,9 @@ export default async function EditPatrolPage({
           <MenuItem value="ADULT">Adult</MenuItem>
         </TextField>
         <TextField name="order" label="Order" type="number" defaultValue={patrol.order} required fullWidth />
-        <Button type="submit" variant="contained" sx={{ alignSelf: "flex-start" }}>
+        <SubmitButton variant="contained" sx={{ alignSelf: "flex-start" }}>
           Save changes
-        </Button>
+        </SubmitButton>
       </Stack>
 
       <Stack spacing={1.5} sx={{ borderTop: 1, borderColor: "divider", pt: 3 }}>

@@ -6,8 +6,8 @@ import FormLabel from "@mui/material/FormLabel";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
-import Button from "@mui/material/Button";
 import { PatrolBadge } from "@/components/PatrolBadge";
+import { SubmitButton } from "@/components/SubmitButton";
 
 // MUI's FormControlLabel reads `control.props.*` synchronously to derive
 // `disabled`/`required`/`checked`/etc. When `control={<Radio />}` is
@@ -49,9 +49,9 @@ export function RoleForm({
             ))}
           </RadioGroup>
         </FormControl>
-        <Button type="submit" variant="contained" color="primary" sx={{ alignSelf: "flex-start" }}>
+        <SubmitButton variant="contained" color="primary" sx={{ alignSelf: "flex-start" }}>
           Continue
-        </Button>
+        </SubmitButton>
       </Stack>
     </form>
   );

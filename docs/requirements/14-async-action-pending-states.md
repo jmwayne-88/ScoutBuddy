@@ -1,6 +1,6 @@
 # Requirement 14 — Async Action Pending States
 
-Status: Not started
+Status: Implemented
 Depends on: none tied to a single ROADMAP iteration (cross-cutting, like Requirements 6+); complements [Requirement 13](13-ux-quick-win-polish.md)'s toast feedback
 
 ## Goal

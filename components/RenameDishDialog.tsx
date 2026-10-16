@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export function RenameDishDialog({
   menuId,
@@ -20,6 +21,7 @@ export function RenameDishDialog({
   renameAction: (formData: FormData) => void | Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   return (
     <>
@@ -31,16 +33,23 @@ export function RenameDishDialog({
         <DialogContent>
           <form
             id={`rename-dish-${dishId}`}
-            action={async (formData) => {
-              // The rename action now redirects (to deliver a toast per
-              // REQ-13.1), which throws a control-flow exception on
-              // success -- `finally` guarantees the dialog still closes
-              // regardless of whether that throw happens.
-              try {
-                await renameAction(formData);
-              } finally {
-                setOpen(false);
-              }
+            action={(formData) => {
+              // REQ-14.4: this Save button lives in DialogActions, linked
+              // to this form only by the `form` HTML attribute (not real
+              // JSX nesting), so useFormStatus can't see it -- track
+              // pending with useTransition instead and pass it to
+              // SubmitButton explicitly.
+              startTransition(async () => {
+                // The rename action now redirects (to deliver a toast per
+                // REQ-13.1), which throws a control-flow exception on
+                // success -- `finally` guarantees the dialog still closes
+                // regardless of whether that throw happens.
+                try {
+                  await renameAction(formData);
+                } finally {
+                  setOpen(false);
+                }
+              });
             }}
           >
             <input type="hidden" name="menuId" value={menuId} />
@@ -59,9 +68,9 @@ export function RenameDishDialog({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button type="submit" form={`rename-dish-${dishId}`} variant="contained">
+          <SubmitButton form={`rename-dish-${dishId}`} variant="contained" pendingOverride={isPending}>
             Save
-          </Button>
+          </SubmitButton>
         </DialogActions>
       </Dialog>
     </>
