@@ -32,8 +32,15 @@ export function RenameDishDialog({
           <form
             id={`rename-dish-${dishId}`}
             action={async (formData) => {
-              await renameAction(formData);
-              setOpen(false);
+              // The rename action now redirects (to deliver a toast per
+              // REQ-13.1), which throws a control-flow exception on
+              // success -- `finally` guarantees the dialog still closes
+              // regardless of whether that throw happens.
+              try {
+                await renameAction(formData);
+              } finally {
+                setOpen(false);
+              }
             }}
           >
             <input type="hidden" name="menuId" value={menuId} />

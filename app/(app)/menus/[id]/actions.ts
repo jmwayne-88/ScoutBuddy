@@ -9,6 +9,7 @@ import { canEditMenu, canReview, canSubmitMenu } from "@/lib/permissions";
 import { menuHasEmptyOccasion } from "@/lib/validation";
 import { requireString } from "@/lib/form-data";
 import { classifyIngredientWithClaude } from "@/lib/ingredient-categorization";
+import { withToast } from "@/lib/toast";
 
 async function requireEditableMenu(menuId: string) {
   const actor = await getActor();
@@ -51,6 +52,7 @@ export async function updateNotes(formData: FormData) {
   await bumpNotStarted(menuId, menu.status);
 
   revalidatePath(`/menus/${menuId}`);
+  redirect(withToast(`/menus/${menuId}`, "Notes saved"));
 }
 
 export async function addDish(formData: FormData) {
@@ -67,6 +69,7 @@ export async function addDish(formData: FormData) {
   await bumpNotStarted(menuId, menu.status);
 
   revalidatePath(`/menus/${menuId}`);
+  redirect(withToast(`/menus/${menuId}`, "Dish added"));
 }
 
 export async function renameDish(formData: FormData) {
@@ -83,6 +86,7 @@ export async function renameDish(formData: FormData) {
   await bumpNotStarted(menuId, menu.status);
 
   revalidatePath(`/menus/${menuId}`);
+  redirect(withToast(`/menus/${menuId}`, "Dish renamed"));
 }
 
 export async function removeDish(formData: FormData) {
@@ -99,6 +103,7 @@ export async function removeDish(formData: FormData) {
   await bumpNotStarted(menuId, menu.status);
 
   revalidatePath(`/menus/${menuId}`);
+  redirect(withToast(`/menus/${menuId}`, "Dish removed"));
 }
 
 export async function addIngredient(formData: FormData) {
@@ -118,6 +123,7 @@ export async function addIngredient(formData: FormData) {
   await bumpNotStarted(menuId, menu.status);
 
   revalidatePath(`/menus/${menuId}`);
+  redirect(withToast(`/menus/${menuId}`, "Ingredient added"));
 }
 
 export async function editIngredient(formData: FormData) {
@@ -144,6 +150,7 @@ export async function editIngredient(formData: FormData) {
   await bumpNotStarted(menuId, menu.status);
 
   revalidatePath(`/menus/${menuId}`);
+  redirect(withToast(`/menus/${menuId}`, "Ingredient updated"));
 }
 
 export async function removeIngredient(formData: FormData) {
@@ -161,6 +168,7 @@ export async function removeIngredient(formData: FormData) {
   await bumpNotStarted(menuId, menu.status);
 
   revalidatePath(`/menus/${menuId}`);
+  redirect(withToast(`/menus/${menuId}`, "Ingredient removed"));
 }
 
 export async function submitMenu(formData: FormData) {
@@ -181,6 +189,7 @@ export async function submitMenu(formData: FormData) {
 
   await db.menu.update({ where: { id: menuId }, data: { status: "SUBMITTED" } });
   revalidatePath(`/menus/${menuId}`);
+  redirect(withToast(`/menus/${menuId}`, "Menu submitted — nice work!"));
 }
 
 export async function approveMenu(formData: FormData) {
@@ -198,6 +207,9 @@ export async function approveMenu(formData: FormData) {
   ]);
 
   revalidatePath(`/menus/${menuId}`);
+  // REQ-13.4: approval is the end of the workflow, not a routine edit --
+  // `celebrate` tells ToastListener to show a distinct, celebratory toast.
+  redirect(withToast(`/menus/${menuId}`, "Menu approved!", { celebrate: true }));
 }
 
 export async function rejectMenu(formData: FormData) {
@@ -216,4 +228,5 @@ export async function rejectMenu(formData: FormData) {
   ]);
 
   revalidatePath(`/menus/${menuId}`);
+  redirect(withToast(`/menus/${menuId}`, "Changes requested"));
 }

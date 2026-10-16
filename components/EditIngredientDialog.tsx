@@ -36,8 +36,15 @@ export function EditIngredientDialog({
             component="form"
             id={`edit-ingredient-${ingredientId}`}
             action={async (formData) => {
-              await editAction(formData);
-              setOpen(false);
+              // The edit action now redirects (to deliver a toast per
+              // REQ-13.1), which throws a control-flow exception on
+              // success -- `finally` guarantees the dialog still closes
+              // regardless of whether that throw happens.
+              try {
+                await editAction(formData);
+              } finally {
+                setOpen(false);
+              }
             }}
             spacing={2}
             sx={{ pt: 1 }}

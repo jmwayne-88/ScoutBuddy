@@ -6,11 +6,16 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import LinearProgress from "@mui/material/LinearProgress";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
 import { canEditMenu, canReview, canSubmitMenu } from "@/lib/permissions";
 import { MEAL_OCCASIONS } from "@/lib/constants";
+import { formatDueDate } from "@/lib/dates";
+import { menuMealProgress, menuStatusColor } from "@/lib/progress";
 import { PatrolBadge } from "@/components/PatrolBadge";
+import { RelativeDate } from "@/components/RelativeDate";
+import { MenuStatusChip } from "@/components/MenuStatusChip";
 import { NavLink } from "@/components/NavLink";
 import { LinkButton } from "@/components/LinkButton";
 import { RenameDishDialog } from "@/components/RenameDishDialog";
@@ -56,6 +61,8 @@ export default async function MenuPage({
   const canReviewMenu = canReview(actor, menu);
 
   const mealsByOccasion = new Map(menu.meals.map((m) => [m.occasion, m]));
+  const mealProgress = menuMealProgress(menu.meals);
+  const statusColor = menuStatusColor(menu.status);
 
   return (
     <Stack spacing={4} sx={{ maxWidth: 900 }}>
@@ -75,13 +82,39 @@ export default async function MenuPage({
             Close
           </LinkButton>
         </Stack>
-        <Typography variant="body2" color="text.secondary">
-          Due {menu.dueDate.toDateString()} · Status: {menu.status.replace(/_/g, " ")}
-        </Typography>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+          <Typography variant="body2" color="text.secondary">
+            Due <RelativeDate {...formatDueDate(menu.dueDate)} />
+          </Typography>
+          <MenuStatusChip status={menu.status} />
+        </Stack>
         <Typography variant="body2">
           <NavLink href={`/menus/${menu.id}/print`}>Print preview</NavLink>
         </Typography>
       </Stack>
+
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Stack spacing={1}>
+          <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              MEAL PROGRESS
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {mealProgress.withDishes}/{mealProgress.total} meals have dishes
+            </Typography>
+          </Stack>
+          <LinearProgress
+            variant="determinate"
+            value={mealProgress.percent}
+            sx={{
+              height: 8,
+              borderRadius: 1,
+              bgcolor: "brand.lightTan",
+              "& .MuiLinearProgress-bar": { bgcolor: statusColor.bg },
+            }}
+          />
+        </Stack>
+      </Paper>
 
       <Stack spacing={3}>
         {MEAL_OCCASIONS.map(({ value, label }) => {
@@ -288,10 +321,6 @@ export default async function MenuPage({
           </Stack>
         </Stack>
       )}
-
-      <Typography variant="body2">
-        <NavLink href="/">Switch role</NavLink>
-      </Typography>
     </Stack>
   );
 }

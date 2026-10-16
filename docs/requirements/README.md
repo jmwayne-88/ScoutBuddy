@@ -16,3 +16,4 @@ One file per product iteration from [ROADMAP.md](../../ROADMAP.md) (01-05), each
 - [10 - Per-Campout Patrol Roster (Add/Remove)](10-per-campout-patrol-roster.md)
 - [11 - Production Deployment Pipeline & Environment Isolation](11-production-deployment-pipeline.md)
 - [12 - Menu Print Preview & Shopping List](12-menu-print-preview.md)
+- [13 - UX Quick-Win Polish Pass](13-ux-quick-win-polish.md)

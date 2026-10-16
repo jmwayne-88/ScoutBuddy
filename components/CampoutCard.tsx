@@ -6,6 +6,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import LinearProgress from "@mui/material/LinearProgress";
+import Tooltip from "@mui/material/Tooltip";
 
 // See components/LinkButton.tsx for why `Link` must be resolved inside a
 // client module rather than passed in as a `component` prop value from the
@@ -14,6 +15,7 @@ export function CampoutCard({
   href,
   name,
   date,
+  dateTitle,
   imageUrl,
   dotColor,
   percent,
@@ -22,6 +24,7 @@ export function CampoutCard({
   href: string;
   name: string;
   date: string;
+  dateTitle?: string;
   imageUrl: string | null;
   dotColor: string;
   percent: number;
@@ -58,9 +61,11 @@ export function CampoutCard({
             <Typography noWrap sx={{ fontWeight: 500 }}>
               {name}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {date}
-            </Typography>
+            <Tooltip title={dateTitle ?? ""} disableHoverListener={!dateTitle}>
+              <Typography variant="caption" color="text.secondary">
+                {date}
+              </Typography>
+            </Tooltip>
           </Box>
           <Box aria-hidden sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: dotColor, flexShrink: 0 }} />
         </Stack>

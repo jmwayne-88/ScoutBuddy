@@ -62,3 +62,16 @@ export function campoutProgress(menuStatuses: MenuStatus[], totalPatrols: number
 export function menuDishCount(meals: { dishes: unknown[] }[]): number {
   return meals.reduce((sum, meal) => sum + meal.dishes.length, 0);
 }
+
+export type MenuMealProgress = { withDishes: number; total: number; percent: number };
+
+// REQ-13.14/13.15: the same progress-calculation convention as
+// campoutProgress, but at the single-menu level -- how many of this menu's
+// *active* meal occasions (the only ones that exist as Meal rows at all,
+// per the meal-framework-exception model) have at least one dish.
+export function menuMealProgress(meals: { dishes: unknown[] }[]): MenuMealProgress {
+  const total = meals.length;
+  const withDishes = meals.filter((meal) => meal.dishes.length > 0).length;
+  const percent = total === 0 ? 0 : Math.round((withDishes / total) * 100);
+  return { withDishes, total, percent };
+}

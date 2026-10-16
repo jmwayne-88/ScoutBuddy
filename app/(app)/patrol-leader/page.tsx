@@ -4,16 +4,15 @@ import Typography from "@mui/material/Typography";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
 import { NavLink } from "@/components/NavLink";
+import { RoleMismatchNotice } from "@/components/RoleMismatchNotice";
+import { formatDueDate } from "@/lib/dates";
+import { RelativeDate } from "@/components/RelativeDate";
 
 export default async function PatrolLeaderPage() {
   const actor = await getActor();
 
   if (actor?.role !== "PATROL_LEADER") {
-    return (
-      <Typography>
-        You&apos;re not currently acting as a Patrol Leader. Pick a role from the header above.
-      </Typography>
-    );
+    return <RoleMismatchNotice actor={actor} requiredRoleLabel="a Patrol Leader" />;
   }
 
   const menus = await db.menu.findMany({
@@ -36,8 +35,8 @@ export default async function PatrolLeaderPage() {
       <Stack spacing={1} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
         {menus.map((menu) => (
           <Typography key={menu.id} component="li" variant="body2">
-            <NavLink href={`/menus/${menu.id}`}>{menu.campout.name}</NavLink> — {menu.status.replace(/_/g, " ")} — due{" "}
-            {menu.dueDate.toDateString()}
+            <NavLink href={`/menus/${menu.id}`}>{menu.campout.name}</NavLink> — {menu.status.replace(/_/g, " ")} —{" "}
+            <RelativeDate {...formatDueDate(menu.dueDate)} />
           </Typography>
         ))}
       </Stack>

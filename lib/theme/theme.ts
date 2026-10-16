@@ -33,7 +33,7 @@ const baseTheme = createTheme({
     borderRadius: 8,
   },
   typography: {
-    fontFamily: "Arial, Helvetica, sans-serif",
+    fontFamily: "var(--font-inter), Arial, Helvetica, sans-serif",
     // Minimum 16px body size on mobile prevents iOS Safari from zooming in
     // on focused inputs.
     fontSize: 16,

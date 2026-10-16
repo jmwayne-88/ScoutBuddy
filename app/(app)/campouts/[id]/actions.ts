@@ -8,6 +8,7 @@ import { getActor } from "@/lib/session";
 import { canAssignMenu, canManageCampoutRoster, canManageMealFramework } from "@/lib/permissions";
 import { MEAL_OCCASIONS } from "@/lib/constants";
 import { requireString } from "@/lib/form-data";
+import { withToast } from "@/lib/toast";
 
 export async function assignMenu(formData: FormData) {
   const actor = await getActor();
@@ -41,7 +42,7 @@ export async function assignMenu(formData: FormData) {
   // campout's "Add patrol" dialog and is managing the roster there, not
   // about to start building that patrol's menu themselves.
   revalidatePath(`/campouts/${campoutId}`);
-  redirect(`/campouts/${campoutId}`);
+  redirect(withToast(`/campouts/${campoutId}`, "Patrol added"));
 }
 
 // REQ-10.1/10.2: unassigns one patrol from one campout — a manual cascade
@@ -77,6 +78,7 @@ export async function removePatrolFromCampout(formData: FormData) {
   await db.menu.delete({ where: { id: menu.id } });
 
   revalidatePath(`/campouts/${campoutId}`);
+  redirect(withToast(`/campouts/${campoutId}`, "Patrol removed from campout"));
 }
 
 export async function removeOccasion(formData: FormData) {
@@ -110,6 +112,7 @@ export async function removeOccasion(formData: FormData) {
   }
 
   revalidatePath(`/campouts/${campoutId}`);
+  redirect(withToast(`/campouts/${campoutId}`, "Meal occasion removed"));
 }
 
 export async function restoreOccasion(formData: FormData) {
@@ -142,4 +145,5 @@ export async function restoreOccasion(formData: FormData) {
   }
 
   revalidatePath(`/campouts/${exception.campoutId}`);
+  redirect(withToast(`/campouts/${exception.campoutId}`, "Meal occasion restored"));
 }

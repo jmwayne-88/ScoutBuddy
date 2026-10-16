@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Suspense } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -10,6 +11,7 @@ import { getActivePatrols } from "@/lib/patrols";
 import { RoleSwitcher } from "@/components/RoleSwitcher";
 import { AppNav } from "@/components/AppNav";
 import { ColorModeToggle } from "@/components/ColorModeToggle";
+import { ToastListener } from "@/components/ToastListener";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const actor = await getActor();
@@ -36,6 +38,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       <Container component="main" maxWidth="lg" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 2, sm: 3 } }}>
         <Box>{children}</Box>
       </Container>
+      <Suspense fallback={null}>
+        <ToastListener />
+      </Suspense>
     </>
   );
 }

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
 import { canCreateCampout } from "@/lib/permissions";
+import { withToast } from "@/lib/toast";
 
 function optionalString(formData: FormData, key: string): string | undefined {
   const value = formData.get(key);
@@ -35,5 +36,5 @@ export async function createCampout(formData: FormData) {
   });
 
   revalidatePath("/campouts");
-  redirect(`/campouts/${campout.id}`);
+  redirect(withToast(`/campouts/${campout.id}`, "Campout created"));
 }

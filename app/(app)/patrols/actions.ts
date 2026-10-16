@@ -10,6 +10,7 @@ import { requireString } from "@/lib/form-data";
 import { meetsContrast } from "@/lib/theme/contrast";
 import { firstMondayOfMonthBefore } from "@/lib/dates";
 import { MEAL_OCCASIONS } from "@/lib/constants";
+import { withToast } from "@/lib/toast";
 
 function normalizeHex(value: string): string {
   const v = value.trim();
@@ -70,7 +71,7 @@ export async function createPatrol(formData: FormData) {
 
   revalidatePath("/patrols");
   revalidatePath("/");
-  redirect(`/patrols/${patrol.id}?prompt=assign`);
+  redirect(withToast(`/patrols/${patrol.id}?prompt=assign`, "Patrol created"));
 }
 
 export async function updatePatrol(formData: FormData) {
@@ -95,7 +96,7 @@ export async function updatePatrol(formData: FormData) {
   revalidatePath("/patrols");
   revalidatePath("/");
   revalidatePath("/campouts");
-  redirect("/patrols");
+  redirect(withToast("/patrols", "Patrol updated"));
 }
 
 export async function setPatrolActive(formData: FormData) {
@@ -116,8 +117,9 @@ export async function setPatrolActive(formData: FormData) {
   // REQ-8.15: reactivating prompts a campout picker, rather than silently
   // flipping the flag.
   if (isActive) {
-    redirect(`/patrols/${patrolId}?prompt=reactivate`);
+    redirect(withToast(`/patrols/${patrolId}?prompt=reactivate`, "Patrol reactivated"));
   }
+  redirect(withToast("/patrols", "Patrol deactivated"));
 }
 
 export async function deletePatrol(formData: FormData) {
@@ -157,7 +159,7 @@ export async function deletePatrol(formData: FormData) {
   revalidatePath("/patrols");
   revalidatePath("/");
   revalidatePath("/campouts");
-  redirect("/patrols");
+  redirect(withToast("/patrols", "Patrol deleted"));
 }
 
 async function createMenusForPatrol(patrolId: string, campoutIds: string[]) {
@@ -205,7 +207,7 @@ export async function assignToFutureCampouts(formData: FormData) {
   await createMenusForPatrol(patrolId, futureCampouts.map((c) => c.id));
 
   revalidatePath("/campouts");
-  redirect(`/patrols/${patrolId}`);
+  redirect(withToast(`/patrols/${patrolId}`, "Patrol assigned to upcoming campouts"));
 }
 
 // REQ-8.15: the reactivation campout picker's submit action.
@@ -221,7 +223,7 @@ export async function assignPatrolToCampouts(formData: FormData) {
   await createMenusForPatrol(patrolId, campoutIds);
 
   revalidatePath("/campouts");
-  redirect(`/patrols/${patrolId}`);
+  redirect(withToast(`/patrols/${patrolId}`, "Patrol assigned to selected campouts"));
 }
 
 export async function movePatrol(formData: FormData) {
@@ -251,4 +253,5 @@ export async function movePatrol(formData: FormData) {
   revalidatePath("/patrols");
   revalidatePath("/");
   revalidatePath("/campouts");
+  redirect(withToast("/patrols", "Patrol order updated"));
 }

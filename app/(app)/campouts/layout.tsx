@@ -7,18 +7,16 @@ import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
 import { getActivePatrols } from "@/lib/patrols";
 import { campoutProgress } from "@/lib/progress";
+import { formatEventDate } from "@/lib/dates";
 import { LinkButton } from "@/components/LinkButton";
 import { CampoutCard } from "@/components/CampoutCard";
+import { RoleMismatchNotice } from "@/components/RoleMismatchNotice";
 
 export default async function CampoutsLayout({ children }: { children: ReactNode }) {
   const actor = await getActor();
 
   if (actor?.role !== "ASPL") {
-    return (
-      <Typography>
-        You&apos;re not currently acting as the ASPL of Camping. Pick a role from the header above.
-      </Typography>
-    );
+    return <RoleMismatchNotice actor={actor} requiredRoleLabel="the ASPL of Camping" />;
   }
 
   const campouts = await db.campout.findMany({
@@ -53,12 +51,14 @@ export default async function CampoutsLayout({ children }: { children: ReactNode
             <Stack spacing={1} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
               {campouts.map((c) => {
                 const progress = campoutProgress(c.menus.map((m) => m.status), activePatrols.length);
+                const eventDate = formatEventDate(c.date);
                 return (
                   <li key={c.id}>
                     <CampoutCard
                       href={`/campouts/${c.id}`}
                       name={c.name}
-                      date={c.date.toDateString()}
+                      date={eventDate.display}
+                      dateTitle={eventDate.absolute}
                       imageUrl={c.imageUrl}
                       dotColor={progress.dotColor}
                       percent={progress.percent}

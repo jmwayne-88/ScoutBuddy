@@ -13,7 +13,10 @@ import { db } from "@/lib/db";
 import { getActivePatrols, getAllPatrols } from "@/lib/patrols";
 import { MEAL_OCCASIONS, mealOccasionLabel } from "@/lib/constants";
 import { contrastText } from "@/lib/colors";
-import { campoutProgress, menuDishCount, menuStatusColor } from "@/lib/progress";
+import { campoutProgress, menuDishCount } from "@/lib/progress";
+import { formatDueDate, formatEventDate } from "@/lib/dates";
+import { RelativeDate } from "@/components/RelativeDate";
+import { MenuStatusChip } from "@/components/MenuStatusChip";
 import { NavLink } from "@/components/NavLink";
 import { RemoveFromCampoutDialog } from "@/components/RemoveFromCampoutDialog";
 import { AddPatrolToCampoutDialog } from "@/components/AddPatrolToCampoutDialog";
@@ -76,7 +79,7 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
             {campout.name}
           </Typography>
           <Typography variant="body2" sx={{ opacity: 0.9 }}>
-            {campout.date.toDateString()}
+            <RelativeDate {...formatEventDate(campout.date)} />
             {campout.location && <> · {campout.location}</>}
           </Typography>
         </Stack>
@@ -147,15 +150,11 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
                     <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                       {p.name}
                     </Typography>
-                    <Chip
-                      label={menu.status.replace(/_/g, " ")}
-                      size="small"
-                      sx={{ bgcolor: menuStatusColor(menu.status).bg, color: menuStatusColor(menu.status).text }}
-                    />
+                    <MenuStatusChip status={menu.status} />
                   </Stack>
                   <Stack spacing={1.5} sx={{ p: 2 }}>
                     <Typography variant="body2" color="text.secondary">
-                      Due {menu.dueDate.toDateString()} · {menuDishCount(menu.meals)} dishes planned
+                      Due <RelativeDate {...formatDueDate(menu.dueDate)} /> · {menuDishCount(menu.meals)} dishes planned
                     </Typography>
                     <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
                       <NavLink href={`/menus/${menu.id}`} variant="body2">

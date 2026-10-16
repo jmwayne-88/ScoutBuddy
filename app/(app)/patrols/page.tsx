@@ -12,15 +12,14 @@ import { getAllPatrols } from "@/lib/patrols";
 import { db } from "@/lib/db";
 import { LinkButton } from "@/components/LinkButton";
 import { NavLink } from "@/components/NavLink";
+import { RoleMismatchNotice } from "@/components/RoleMismatchNotice";
 import { movePatrol, setPatrolActive } from "./actions";
 
 export default async function PatrolsPage() {
   const actor = await getActor();
 
   if (actor?.role !== "ASPL") {
-    return (
-      <Typography>You&apos;re not currently acting as the ASPL of Camping. Pick a role from the header above.</Typography>
-    );
+    return <RoleMismatchNotice actor={actor} requiredRoleLabel="the ASPL of Camping" />;
   }
 
   const patrols = await getAllPatrols();
