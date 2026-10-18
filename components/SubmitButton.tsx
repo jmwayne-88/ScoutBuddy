@@ -1,5 +1,6 @@
 "use client";
 
+import { forwardRef } from "react";
 import { useFormStatus } from "react-dom";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -18,14 +19,16 @@ import type { ButtonProps } from "@mui/material/Button";
 // useFormStatus can't see it there; those callers track pending themselves
 // (useTransition) and pass it in as `pendingOverride` instead -- see
 // components/RenameDishDialog.tsx.
-export function SubmitButton({
-  children,
-  startIcon,
-  iconOnly = false,
-  pendingOverride,
-  disabled,
-  ...props
-}: ButtonProps & { iconOnly?: boolean; pendingOverride?: boolean }) {
+//
+// forwardRef (REQ-16): Tooltip clones its child to attach a ref/listeners
+// for positioning -- see components/RemoveIconButton.tsx, which wraps this
+// in a Tooltip. Without forwarding the ref through to the underlying
+// Button, React warns ("Function components cannot be given refs") and
+// Tooltip can't anchor to it correctly.
+export const SubmitButton = forwardRef<
+  HTMLButtonElement,
+  ButtonProps & { iconOnly?: boolean; pendingOverride?: boolean }
+>(function SubmitButton({ children, startIcon, iconOnly = false, pendingOverride, disabled, ...props }, ref) {
   const formStatus = useFormStatus();
   const pending = pendingOverride ?? formStatus.pending;
   const spinner = <CircularProgress size={16} color="inherit" />;
@@ -33,6 +36,7 @@ export function SubmitButton({
   return (
     <Button
       {...props}
+      ref={ref}
       type="submit"
       disabled={pending || disabled}
       startIcon={!iconOnly ? (pending ? spinner : startIcon) : undefined}
@@ -40,4 +44,4 @@ export function SubmitButton({
       {iconOnly && pending ? spinner : children}
     </Button>
   );
-}
+});

@@ -19,6 +19,8 @@ import { NavLink } from "@/components/NavLink";
 import { LinkButton } from "@/components/LinkButton";
 import { RenameDishDialog } from "@/components/RenameDishDialog";
 import { EditIngredientDialog } from "@/components/EditIngredientDialog";
+import { RemoveIconButton } from "@/components/RemoveIconButton";
+import { SwipeableRow } from "@/components/SwipeableRow";
 import { SubmitButton } from "@/components/SubmitButton";
 import {
   addDish,
@@ -132,54 +134,67 @@ export default async function MenuPage({
                   </Typography>
                 )}
                 <Stack spacing={1.5} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
-                  {meal.dishes.map((dish) => (
+                  {meal.dishes.map((dish) => {
+                    const removeDishFormId = `remove-dish-${dish.id}`;
+                    return (
                     <Stack key={dish.id} component="li" spacing={0.5}>
-                      <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
+                      <SwipeableRow
+                        deleteFormId={removeDishFormId}
+                        actions={
+                          canEdit && (
+                            <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+                              <RenameDishDialog
+                                menuId={menu.id}
+                                dishId={dish.id}
+                                dishName={dish.name}
+                                renameAction={renameDish}
+                              />
+                              <RemoveIconButton
+                                formId={removeDishFormId}
+                                label={`Remove ${dish.name}`}
+                                action={removeDish}
+                                hiddenFields={{ menuId: menu.id, dishId: dish.id }}
+                              />
+                            </Stack>
+                          )
+                        }
+                      >
                         <Typography sx={{ fontWeight: 500 }}>{dish.name}</Typography>
-                        {canEdit && (
-                          <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-                            <RenameDishDialog
-                              menuId={menu.id}
-                              dishId={dish.id}
-                              dishName={dish.name}
-                              renameAction={renameDish}
-                            />
-                            <Box component="form" action={removeDish}>
-                              <input type="hidden" name="menuId" value={menu.id} />
-                              <input type="hidden" name="dishId" value={dish.id} />
-                              <SubmitButton variant="text" size="small" sx={{ color: "text.secondary" }}>
-                                Remove dish
-                              </SubmitButton>
-                            </Box>
-                          </Stack>
-                        )}
-                      </Stack>
+                      </SwipeableRow>
                       <Stack spacing={0.5} component="ul" sx={{ listStyle: "none", m: 0, ml: 2, p: 0 }}>
-                        {dish.ingredients.map((ing) => (
-                          <Stack key={ing.id} component="li" direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                            <Typography variant="body2" color="text.secondary">
-                              {ing.name} — {ing.quantity}
-                            </Typography>
-                            {canEdit && (
-                              <>
-                                <EditIngredientDialog
-                                  menuId={menu.id}
-                                  ingredientId={ing.id}
-                                  name={ing.name}
-                                  quantity={ing.quantity}
-                                  editAction={editIngredient}
-                                />
-                                <Box component="form" action={removeIngredient}>
-                                  <input type="hidden" name="menuId" value={menu.id} />
-                                  <input type="hidden" name="ingredientId" value={ing.id} />
-                                  <SubmitButton variant="text" size="small" sx={{ color: "text.secondary" }}>
-                                    Remove
-                                  </SubmitButton>
-                                </Box>
-                              </>
-                            )}
+                        {dish.ingredients.map((ing) => {
+                          const removeIngredientFormId = `remove-ingredient-${ing.id}`;
+                          return (
+                          <Stack key={ing.id} component="li">
+                            <SwipeableRow
+                              deleteFormId={removeIngredientFormId}
+                              actions={
+                                canEdit && (
+                                  <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+                                    <EditIngredientDialog
+                                      menuId={menu.id}
+                                      ingredientId={ing.id}
+                                      name={ing.name}
+                                      quantity={ing.quantity}
+                                      editAction={editIngredient}
+                                    />
+                                    <RemoveIconButton
+                                      formId={removeIngredientFormId}
+                                      label={`Remove ${ing.name}`}
+                                      action={removeIngredient}
+                                      hiddenFields={{ menuId: menu.id, ingredientId: ing.id }}
+                                    />
+                                  </Stack>
+                                )
+                              }
+                            >
+                              <Typography variant="body2" color="text.secondary">
+                                {ing.name} — {ing.quantity}
+                              </Typography>
+                            </SwipeableRow>
                           </Stack>
-                        ))}
+                          );
+                        })}
                       </Stack>
                       {canEdit && (
                         <Stack
@@ -198,7 +213,8 @@ export default async function MenuPage({
                         </Stack>
                       )}
                     </Stack>
-                  ))}
+                    );
+                  })}
                 </Stack>
                 {canEdit && (
                   <Stack component="form" action={addDish} direction="row" sx={{ alignItems: "flex-end", gap: 1 }}>

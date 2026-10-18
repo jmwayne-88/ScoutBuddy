@@ -1,6 +1,6 @@
 # Requirement 16 — Icon-Button Row Actions & Swipe-to-Delete
 
-Status: Not started
+Status: Implemented
 Depends on: [Requirement 15](15-consistent-destructive-action-pattern.md) (the undo-toast behavior this requirement's remove actions should trigger)
 
 ## Goal

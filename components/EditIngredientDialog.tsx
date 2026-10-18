@@ -2,12 +2,15 @@
 
 import { useState, useTransition } from "react";
 import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import EditIcon from "@mui/icons-material/Edit";
 import { SubmitButton } from "@/components/SubmitButton";
 
 export function EditIngredientDialog({
@@ -28,9 +31,11 @@ export function EditIngredientDialog({
 
   return (
     <>
-      <Button variant="text" size="small" onClick={() => setOpen(true)}>
-        Edit
-      </Button>
+      <Tooltip title={`Edit ${name}`}>
+        <IconButton size="small" aria-label={`Edit ${name}`} onClick={() => setOpen(true)} sx={{ width: 44, height: 44 }}>
+          <EditIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogTitle>Edit ingredient</DialogTitle>
         <DialogContent>
