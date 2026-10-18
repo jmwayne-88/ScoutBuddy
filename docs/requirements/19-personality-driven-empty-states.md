@@ -1,6 +1,6 @@
 # Requirement 19 — Personality-Driven Empty States
 
-Status: Not started
+Status: Done
 Depends on: [Requirement 5](05-workflow-hardening-and-polish.md)'s REQ-5.5 (the original guarantee that every empty state shows *something* rather than a blank/broken view — this requirement is about what that something says and looks like, not whether it exists)
 
 ## Goal
@@ -33,11 +33,11 @@ Each is accurate and functional (satisfying Requirement 5's original guardrail a
 
 ## Acceptance Criteria
 
-- [ ] Every empty state identified in the Problem section shows new, specific copy distinct from a generic "No X yet." sentence.
-- [ ] Every empty state shows a supporting icon.
-- [ ] The copy for a given empty state uses real troop terms, not genericized language.
-- [ ] No empty state's new copy references a feature that doesn't exist in the current build.
-- [ ] A Patrol Leader's and an ASPL's respective empty states for related situations (e.g. "your menu has no dishes" vs. "this campout has no patrols assigned") read distinctly, not as copy-pasted variants of each other.
+- [x] Every empty state identified in the Problem section shows new, specific copy distinct from a generic "No X yet." sentence.
+- [x] Every empty state shows a supporting icon.
+- [x] The copy for a given empty state uses real troop terms, not genericized language.
+- [x] No empty state's new copy references a feature that doesn't exist in the current build.
+- [x] A Patrol Leader's and an ASPL's respective empty states for related situations (e.g. "your menu has no dishes" vs. "this campout has no patrols assigned") read distinctly, not as copy-pasted variants of each other.
 
 ## Out of Scope for This Requirement
 

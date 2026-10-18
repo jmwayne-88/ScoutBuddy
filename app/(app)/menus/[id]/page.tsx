@@ -12,6 +12,8 @@ import { canEditMenu, canReview, canSubmitMenu } from "@/lib/permissions";
 import { MEAL_OCCASIONS } from "@/lib/constants";
 import { formatDueDate } from "@/lib/dates";
 import { menuMealProgress, menuStatusColor } from "@/lib/progress";
+import { EMPTY_STATES } from "@/lib/empty-states";
+import { EmptyState } from "@/components/EmptyState";
 import { PatrolBadge } from "@/components/PatrolBadge";
 import { RelativeDate } from "@/components/RelativeDate";
 import { MenuStatusChip } from "@/components/MenuStatusChip";
@@ -128,11 +130,11 @@ export default async function MenuPage({
                 <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                   {label}
                 </Typography>
-                {meal.dishes.length === 0 && (
-                  <Typography variant="body2" color="text.secondary">
-                    No dishes yet.
-                  </Typography>
-                )}
+                {meal.dishes.length === 0 &&
+                  (() => {
+                    const { Icon, message } = EMPTY_STATES.mealNoDishes(label, canEdit);
+                    return <EmptyState icon={Icon}>{message}</EmptyState>;
+                  })()}
                 <Stack spacing={1.5} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
                   {meal.dishes.map((dish) => {
                     const removeDishFormId = `remove-dish-${dish.id}`;

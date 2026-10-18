@@ -5,6 +5,7 @@ import Typography from "@mui/material/Typography";
 import { db } from "@/lib/db";
 import { MEAL_OCCASIONS, mealOccasionLabel } from "@/lib/constants";
 import { CATEGORY_ORDER, CATEGORY_LABELS } from "@/lib/ingredient-categorization";
+import { EMPTY_STATES } from "@/lib/empty-states";
 import { PatrolBadge } from "@/components/PatrolBadge";
 import { NavLink } from "@/components/NavLink";
 import { PrintButton } from "@/components/PrintButton";
@@ -126,7 +127,20 @@ export default async function MenuPrintPage({ params }: { params: Promise<{ id: 
             Shopping List — {menu.patrol.name}, {menu.campout.name}
           </Typography>
           {groupedShoppingRows.length === 0 ? (
-            <Typography variant="inherit" sx={{ fontSize: "1em", color: "text.secondary" }}>No ingredients listed yet.</Typography>
+            // REQ-19.6/ADR 0024's print precedent: the print page stays in its own
+            // em-scaled typography (for ShrinkToFitPage) rather than the shared
+            // EmptyState component's fixed sizing -- only the copy is shared.
+            (() => {
+              const { Icon, message } = EMPTY_STATES.noIngredientsInShoppingList();
+              return (
+                <Stack direction="row" spacing={0.5} sx={{ alignItems: "flex-start" }}>
+                  <Icon sx={{ fontSize: "1.1em", color: "text.secondary" }} />
+                  <Typography variant="inherit" sx={{ fontSize: "1em", color: "text.secondary" }}>
+                    {message}
+                  </Typography>
+                </Stack>
+              );
+            })()
           ) : (
             groupedShoppingRows.map(({ category, items }) => (
               <Box key={category}>

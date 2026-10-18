@@ -8,6 +8,8 @@ import { getActor } from "@/lib/session";
 import { getActivePatrols } from "@/lib/patrols";
 import { campoutProgress } from "@/lib/progress";
 import { formatEventDate } from "@/lib/dates";
+import { EMPTY_STATES } from "@/lib/empty-states";
+import { EmptyState } from "@/components/EmptyState";
 import { LinkButton } from "@/components/LinkButton";
 import { CampoutCard } from "@/components/CampoutCard";
 import { RoleMismatchNotice } from "@/components/RoleMismatchNotice";
@@ -44,9 +46,7 @@ export default async function CampoutsLayout({ children }: { children: ReactNode
             </LinkButton>
           </Stack>
           {campouts.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
-              No campouts yet — create the first one.
-            </Typography>
+            <EmptyState icon={EMPTY_STATES.noCampouts().Icon}>{EMPTY_STATES.noCampouts().message}</EmptyState>
           ) : (
             <Stack spacing={1} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
               {campouts.map((c) => {

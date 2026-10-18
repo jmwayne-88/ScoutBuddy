@@ -15,6 +15,8 @@ import { contrastText } from "@/lib/colors";
 import { getPatrolIcon } from "@/lib/patrolIcons";
 import { campoutProgress, menuDishCount } from "@/lib/progress";
 import { formatDueDate, formatEventDate } from "@/lib/dates";
+import { EMPTY_STATES } from "@/lib/empty-states";
+import { EmptyState } from "@/components/EmptyState";
 import { RelativeDate } from "@/components/RelativeDate";
 import { MenuStatusChip } from "@/components/MenuStatusChip";
 import { NavLink } from "@/components/NavLink";
@@ -131,6 +133,11 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
             assignAction={assignMenu}
           />
         </Stack>
+        {assignedPatrols.length === 0 && (
+          <EmptyState icon={EMPTY_STATES.noPatrolsAssignedToCampout().Icon}>
+            {EMPTY_STATES.noPatrolsAssignedToCampout().message}
+          </EmptyState>
+        )}
         <Grid container spacing={2}>
           {assignedPatrols.map((p) => {
             const menu = menuByPatrolId.get(p.id)!;

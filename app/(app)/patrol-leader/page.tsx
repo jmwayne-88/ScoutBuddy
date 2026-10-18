@@ -5,6 +5,8 @@ import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
 import { NavLink } from "@/components/NavLink";
 import { RoleMismatchNotice } from "@/components/RoleMismatchNotice";
+import { EMPTY_STATES } from "@/lib/empty-states";
+import { EmptyState } from "@/components/EmptyState";
 import { formatDueDate } from "@/lib/dates";
 import { RelativeDate } from "@/components/RelativeDate";
 
@@ -22,7 +24,8 @@ export default async function PatrolLeaderPage() {
   });
 
   if (menus.length === 0) {
-    return <Typography>No menu has been assigned to your patrol yet.</Typography>;
+    const { Icon, message } = EMPTY_STATES.noMenuAssigned();
+    return <EmptyState icon={Icon}>{message}</EmptyState>;
   }
 
   if (menus.length === 1) {
