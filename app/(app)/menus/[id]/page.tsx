@@ -74,7 +74,7 @@ export default async function MenuPage({
             <Typography variant="h5" component="h1">
               {menu.campout.name}
             </Typography>
-            <PatrolBadge name={menu.patrol.name} color={menu.patrol.color} />
+            <PatrolBadge name={menu.patrol.name} color={menu.patrol.color} icon={menu.patrol.icon} />
           </Stack>
           <LinkButton
             href={actor?.role === "PATROL_LEADER" ? "/patrol-leader" : `/campouts/${menu.campout.id}`}

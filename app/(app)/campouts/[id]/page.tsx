@@ -12,6 +12,7 @@ import { db } from "@/lib/db";
 import { getActivePatrols, getAllPatrols } from "@/lib/patrols";
 import { MEAL_OCCASIONS, mealOccasionLabel } from "@/lib/constants";
 import { contrastText } from "@/lib/colors";
+import { getPatrolIcon } from "@/lib/patrolIcons";
 import { campoutProgress, menuDishCount } from "@/lib/progress";
 import { formatDueDate, formatEventDate } from "@/lib/dates";
 import { RelativeDate } from "@/components/RelativeDate";
@@ -133,6 +134,7 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
         <Grid container spacing={2}>
           {assignedPatrols.map((p) => {
             const menu = menuByPatrolId.get(p.id)!;
+            const iconDef = getPatrolIcon(p.icon);
             return (
               <Grid key={p.id} size={{ xs: 12, sm: 6 }}>
                 <Paper variant="outlined" sx={{ overflow: "hidden" }}>
@@ -147,9 +149,12 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
                       color: contrastText(p.color),
                     }}
                   >
-                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                      {p.name}
-                    </Typography>
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                      {iconDef && <iconDef.Icon fontSize="small" sx={{ color: "inherit" }} />}
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                        {p.name}
+                      </Typography>
+                    </Stack>
                     <MenuStatusChip status={menu.status} />
                   </Stack>
                   <Stack spacing={1.5} sx={{ p: 2 }}>

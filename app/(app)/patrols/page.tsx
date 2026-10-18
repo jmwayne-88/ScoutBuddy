@@ -8,6 +8,8 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { getActor } from "@/lib/session";
 import { getAllPatrols } from "@/lib/patrols";
+import { getPatrolIcon } from "@/lib/patrolIcons";
+import { contrastText } from "@/lib/colors";
 import { db } from "@/lib/db";
 import { LinkButton } from "@/components/LinkButton";
 import { NavLink } from "@/components/NavLink";
@@ -36,7 +38,9 @@ export default async function PatrolsPage() {
       </Stack>
 
       <Stack spacing={1.5} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
-        {patrols.map((p, index) => (
+        {patrols.map((p, index) => {
+          const iconDef = getPatrolIcon(p.icon);
+          return (
           <Paper key={p.id} component="li" variant="outlined" sx={{ p: 2 }}>
             <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
               <Stack spacing={0.5}>
@@ -61,7 +65,21 @@ export default async function PatrolsPage() {
                 </Box>
               </Stack>
 
-              <Box sx={{ width: 32, height: 32, borderRadius: 1, bgcolor: p.color, flexShrink: 0 }} aria-hidden="true" />
+              <Box
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 1,
+                  bgcolor: p.color,
+                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                aria-hidden="true"
+              >
+                {iconDef && <iconDef.Icon fontSize="small" htmlColor={contrastText(p.color)} />}
+              </Box>
 
               <Stack sx={{ flex: 1, minWidth: 0 }}>
                 <Typography sx={{ fontWeight: 600 }}>{p.name}</Typography>
@@ -84,7 +102,8 @@ export default async function PatrolsPage() {
               </Box>
             </Stack>
           </Paper>
-        ))}
+          );
+        })}
       </Stack>
     </Stack>
   );

@@ -27,3 +27,4 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0021 - Claude API ingredient categorization, cached per name](0021-claude-api-ingredient-categorization.md)
 - [0022 - Shrink-to-fit via real DOM measurement, replacing the row-count heuristic](0022-shrink-to-fit-via-real-dom-measurement.md)
 - [0023 - Toast feedback delivered via a post-redirect query param](0023-redirect-based-toast-notifications.md)
+- [0024 - Patrol icons: a fixed, hand-drawn glyph set plus name-based suggestion](0024-patrol-icon-identity.md)

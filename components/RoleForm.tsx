@@ -27,7 +27,7 @@ export function RoleForm({
 }: {
   action: (formData: FormData) => void | Promise<void>;
   defaultValue: string;
-  patrols: { id: string; name: string; color: string }[];
+  patrols: { id: string; name: string; color: string; icon: string | null }[];
 }) {
   return (
     <Grid container spacing={2}>
@@ -42,6 +42,7 @@ export function RoleForm({
             label="the Patrol Leader for"
             patrolName={p.name}
             patrolColor={p.color}
+            patrolIcon={p.icon}
             selected={defaultValue === `PATROL_LEADER:${p.id}`}
           />
         </Grid>
@@ -56,6 +57,7 @@ function RoleCard({
   label,
   patrolName,
   patrolColor,
+  patrolIcon,
   selected,
 }: {
   action: (formData: FormData) => void | Promise<void>;
@@ -63,6 +65,7 @@ function RoleCard({
   label: string;
   patrolName?: string;
   patrolColor?: string;
+  patrolIcon?: string | null;
   selected: boolean;
 }) {
   return (
@@ -91,7 +94,7 @@ function RoleCard({
           <Typography sx={{ fontWeight: 600 }}>{label}</Typography>
           {selected && <CheckCircleIcon color="primary" fontSize="small" />}
         </Stack>
-        {patrolName && patrolColor && <PatrolBadge name={patrolName} color={patrolColor} />}
+        {patrolName && patrolColor && <PatrolBadge name={patrolName} color={patrolColor} icon={patrolIcon} />}
       </SubmitButton>
     </form>
   );

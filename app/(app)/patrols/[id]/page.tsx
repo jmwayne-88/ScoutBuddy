@@ -6,6 +6,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
 import { db } from "@/lib/db";
 import { PatrolColorField } from "@/components/PatrolColorField";
+import { PatrolIdentityFields } from "@/components/PatrolIdentityFields";
 import { SubmitButton } from "@/components/SubmitButton";
 import { DeletePatrolDialog } from "@/components/DeletePatrolDialog";
 import { AssignFutureCampoutsPrompt } from "@/components/AssignFutureCampoutsPrompt";
@@ -44,7 +45,7 @@ export default async function EditPatrolPage({
 
       <Stack component="form" action={updatePatrol} spacing={2}>
         <input type="hidden" name="patrolId" value={patrol.id} />
-        <TextField name="name" label="Patrol name" defaultValue={patrol.name} required fullWidth />
+        <PatrolIdentityFields defaultName={patrol.name} defaultIcon={patrol.icon} />
         <PatrolColorField name="color" defaultValue={patrol.color} previewLabel={patrol.name} />
         <TextField name="type" label="Type" select defaultValue={patrol.type} fullWidth>
           <MenuItem value="YOUTH">Youth</MenuItem>

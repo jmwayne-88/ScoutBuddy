@@ -1,0 +1,51 @@
+# 0024. Patrol icons: a fixed, hand-drawn glyph set plus name-based suggestion
+
+Date: 2026-10-18
+Status: Accepted
+
+## Context
+
+[Requirement 18](../requirements/18-patrol-icon-identity.md) asks for every patrol to optionally carry a small icon alongside its existing color identity (`components/PatrolBadge.tsx`, the campout patrol card's header band, the `/patrols` list swatch, the home role picker), while staying strictly inside CLAUDE.md's rule against recreating any Scouting America logo, the fleur-de-lis, or another organization's protected mark. Because patrols are admin-managed rows an ASPL can name anything (ADR 0018), the icon set has to be considerably broader than the five current default patrols' own namesakes (Eagle/Puma/Raven/Silver Fox/Joe), and Requirement 18 was expanded to also ask for a best-effort icon suggestion based on the patrol name as the ASPL types it.
+
+Two real constraints shaped the implementation:
+
+- `@mui/icons-material` (the icon source used everywhere else in the app) is a general-purpose UI icon set. It has solid coverage for outdoors/nature/camping/weather concepts (`Forest`, `Terrain`, `Cabin`, `Hiking`, `Explore`, …) but essentially no species-specific animal glyphs — no fox, wolf, eagle, owl, raven, deer, and so on.
+- Patrol icons render in a single color (`currentColor`, driven by `contrastText(patrol.color)` per REQ-18.4) against an arbitrary, admin-chosen background color. Any icon that needs an internal "cutout" detail (an owl's eyes, a bee's stripes) can't use a guessed fixed accent color — a white highlight would look wrong against a light patrol color — so those few icons use a real SVG `<mask>` to punch through to the actual background, not a second color.
+
+## Decision
+
+**`Patrol.icon` is a nullable `String` column** (`prisma/migrations/20261018230129_add_patrol_icon`), storing the id of one entry in a fixed, bundled icon set — never free text or an uploaded file. This mirrors how `Patrol.color` already works: a plain column, not a database enum, validated at the Server Action layer (`app/(app)/patrols/actions.ts`'s new `readIcon`) against the actual fixed set rather than enforced by the schema. `NULL` means "no icon," which is also every existing patrol's value immediately after this migration — REQ-18.3's required no-op fallback for free.
+
+**The fixed set (`lib/patrolIcons.ts`) mixes two sources**, chosen per icon based on what each is actually good at:
+- `@mui/icons-material` icons for everything it covers well: outdoors & nature (tree, mountain, sun, moon, lightning, cloud, water drop, river, leaf, campfire, grass, trail), camping & Scoutcraft gear (tent, backpack, compass, map, canoe, sailboat, anchor, lantern, first aid, cooking pot, water bottle, grill), and troop-neutral fallback shapes (star, shield, banner, arrow, badge) for a name with no better match.
+- A small original set of hand-drawn animal silhouettes (`components/icons/PatrolAnimalIcons.tsx`) for the 18 species MUI's icon set doesn't have: fox, wolf, bear, deer, rabbit, squirrel, raccoon, otter, beaver, turtle, eagle, owl, raven, duck, fish, bee, butterfly, snake. Each is built from basic geometric primitives (circles, ellipses, straight-edged paths) — most mammals share one base head-circle with 1-2 extra elements layered on (ears, antlers, a tail) to tell species apart, the way a real icon family would be constructed — and none is traced or adapted from a real animal photo, another icon set, an emoji, or any Scouting America/BSA emblem (REQ-18.7). Both icon's cutout details (`OwlIcon`'s eyes, `BeeIcon`'s stripes) use an SVG `<mask>` with a `useId()`-generated id, so the "hole" always reveals the icon's true background rather than a guessed color, and stays unique when the same icon renders many times on one page.
+
+47 icons ship in total (18 animal + 12 outdoors/nature + 12 camping gear + 5 neutral) — considerably more than the five default patrols' own namesakes, and the table is deliberately a floor, not a ceiling: adding another icon later is a one-line addition to `PATROL_ICONS`, nothing else needs to change.
+
+**Name-based suggestion (REQ-18.9) is a plain local keyword lookup**, not fuzzy or AI matching. Every `PatrolIconDefinition` carries a `keywords: string[]` list; `suggestPatrolIconId(name)` lowercases the patrol name and returns the first icon whose keyword list is a substring match, or `null`. `components/PatrolIconField.tsx` (the picker grid) and `components/PatrolIdentityFields.tsx` (the client wrapper that lifts the name field's state so the picker can see it live, on every keystroke) apply the suggestion only while the ASPL hasn't explicitly touched the icon picker themselves — clicking any icon, or the "No icon" option, makes that choice sticky for the rest of the session, and a patrol that was already saved with an explicit icon starts "touched" so a later name edit never silently overwrites it.
+
+**`components/PatrolBadge.tsx` gained `"use client"`** as part of this change. It now takes `icon` as a plain id string (never a JSX element) and looks the actual icon component up itself, building the `<Icon />` element inside its own render for Chip's `icon` prop — the same pattern `components/MenuStatusChip.tsx` already established for its `STATUS_ICONS` table. This is required by CLAUDE.md's MUI + Server Components gotcha: `Chip`'s `icon` prop is cloned by MUI, so an icon element built in one place and handed in as a prop from a different, already-"use client" boundary doesn't survive serialization. Passing a plain id string across that same boundary is always safe, which is why every call site (`app/(app)/menus/[id]/page.tsx`, `components/RoleForm.tsx`) just forwards `patrol.icon` directly. The campout patrol card's header band and the `/patrols` list swatch are both plain Server Components that construct their `<iconDef.Icon />` element directly in their own JSX (never pass it across a boundary as a prop), so they didn't need the same treatment.
+
+**The print view (`app/(print)/menus/[id]/print/page.tsx`) is untouched** — REQ-18.6's call, since it already deliberately avoids decorative color/branding risk for a black-and-white-friendly printed reference, and nothing here validates how these specific icons render at print DPI.
+
+## Alternatives Considered
+
+- **A third-party icon package (e.g. Lucide) for the animal glyphs**: rejected for this pass. General-purpose icon packs like Lucide have the same gap `@mui/icons-material` does — good UI icons, but not dozens of distinct wildlife species — so it would have added a second icon-library dependency without actually solving the coverage problem it was meant to solve.
+- **Literal Unicode emoji (🦊🐺🦅…) for the animal icons**: would give effectively unlimited species coverage for free and needs no new code, but emoji are inherently multi-color and can't be recolored via CSS `color`/`currentColor` — directly incompatible with REQ-18.4's requirement that `contrastText(patrol.color)` drive the icon's foreground color the same way it drives the badge text. Rendering also varies by OS/browser emoji font, which the rest of this app's carefully-themed, consistent visual language doesn't do anywhere else.
+- **A Prisma enum for `Patrol.icon` instead of a validated `String`**: would make an invalid icon id impossible at the database layer, but would also mean every future icon addition needs its own schema migration — directly against REQ-18.2's "floor, not a ceiling" intent, and inconsistent with how `Patrol.color` (also unconstrained, free-form data validated at the action layer) already works.
+- **Auto-saving the suggested icon rather than just pre-highlighting it**: rejected per REQ-18.9's explicit requirement — a suggestion is a convenience default the ASPL must still actively confirm (or override) through the normal picker-and-save flow, never a silent write.
+
+## Consequences
+
+- `lib/patrolIcons.ts` is the single source of truth for "what icons exist and what they're called" (REQ-18.8) — both the picker UI and the suggestion function read the same `PATROL_ICONS` table, so they can't drift out of sync with each other.
+- Adding a new icon later only touches `lib/patrolIcons.ts` (and `components/icons/PatrolAnimalIcons.tsx` if it's a new hand-drawn animal) — no migration, no changes to any of the four render sites.
+- `components/PatrolBadge.tsx` being a Client Component now (previously it had no directive) is a one-time, low-cost change — it was already rendered from both Server and Client Component callers before this requirement, which Next supports natively; only *passing an icon element into it as a prop* would have been unsafe, not calling it.
+- The animal icon set is intentionally a curated 18, not a literal glyph for every species keyword in Requirement 18's original wish list (e.g. moose, bison, badger, bobcat/puma, skunk, porcupine, armadillo, ram, goat, horse, hawk, falcon, osprey, heron, cardinal, woodpecker, turkey, frog, snake, lizard, spider, dragonfly, ant all alias to a close relative's icon or a neutral fallback via keywords, rather than getting a pixel-distinct glyph of their own) — a deliberate quality-over-literal-count tradeoff; broadening it further is a future, additive change, not a redesign.
+
+## Related
+
+- [Requirement 18 - Patrol Icon/Avatar Identity](../requirements/18-patrol-icon-identity.md)
+- [ADR 0015 - Brand-aligned visual design, no trademarks](0015-brand-aligned-visual-design.md) — the trademark-safety constraint REQ-18.7 carries forward, and this ADR's "no traced/adapted art" decision satisfies directly.
+- [ADR 0018 - Patrols as database rows](0018-patrols-as-database-rows.md) — why the icon set can't be hardcoded to five known patrol names, and why `Patrol.icon` follows `Patrol.color`'s "validated plain column, not an enum" shape.
+- [ADR 0017 - Adopt MUI design system](0017-adopt-mui-design-system.md) — the MUI + Server Components gotcha `PatrolBadge.tsx`'s `"use client"` change follows, and `SvgIcon` as the wrapper that makes the hand-drawn icons interchangeable with `@mui/icons-material` ones.
+- [Requirement 17 - Avatar/Card Home Role Picker](../requirements/17-avatar-card-role-picker.md) — `components/RoleForm.tsx` was already built to consume a patrol icon once this requirement landed; this ADR is what actually supplies one.

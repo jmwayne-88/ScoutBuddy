@@ -4,6 +4,7 @@ import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
 import { PatrolColorField } from "@/components/PatrolColorField";
+import { PatrolIdentityFields } from "@/components/PatrolIdentityFields";
 import { SubmitButton } from "@/components/SubmitButton";
 import { createPatrol } from "../actions";
 
@@ -19,7 +20,7 @@ export default async function NewPatrolPage({
       <Typography variant="h5">Create a patrol</Typography>
       {error && <Alert severity="error">{error}</Alert>}
       <Stack component="form" action={createPatrol} spacing={2}>
-        <TextField name="name" label="Patrol name" defaultValue={name ?? ""} required fullWidth />
+        <PatrolIdentityFields defaultName={name ?? ""} defaultIcon={null} />
         <PatrolColorField name="color" defaultValue="#1d4ed8" previewLabel={name ?? "Preview"} />
         <TextField name="type" label="Type" select defaultValue={type ?? "YOUTH"} fullWidth>
           <MenuItem value="YOUTH">Youth</MenuItem>

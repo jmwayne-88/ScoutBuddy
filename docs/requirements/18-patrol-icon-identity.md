@@ -1,6 +1,6 @@
 # Requirement 18 — Patrol Icon/Avatar Identity
 
-Status: Not started
+Status: Done
 Depends on: none tied to a single ROADMAP iteration; extends the existing patrol color system ([Requirement 2](02-four-patrols-and-visual-identity.md), [ADR 0018](../adr/0018-patrols-as-database-rows.md))
 
 ## Goal
@@ -44,16 +44,16 @@ Every place a patrol appears today — `components/PatrolBadge.tsx`, the patrol-
 
 ## Acceptance Criteria
 
-- [ ] An ASPL can assign one icon from the fixed set to a patrol, or leave it unset.
-- [ ] A patrol with an icon shows it (plus its existing color) in the badge, the campout patrol card, and the `/patrols` list.
-- [ ] A patrol with no icon set renders exactly as it does today — no broken image, no placeholder gap.
-- [ ] No icon in the shipped set is a reproduction of, or recognizably derived from, a Scouting America logo, the fleur-de-lis, or any other organization's protected mark.
-- [ ] The print view is visually unchanged by this requirement.
-- [ ] A new ADR documents the data-model and icon-sourcing decisions made while implementing this requirement.
-- [ ] The bundled icon set spans considerably more than the five current default patrols' own namesakes (see REQ-18.2's categorized list), so a newly created patrol with an arbitrary name has a reasonable chance of a relevant match.
-- [ ] Typing a patrol name with an obvious keyword match (e.g. "Wolf Patrol") pre-selects/highlights a matching icon in the picker before the ASPL saves.
-- [ ] The ASPL can override a suggested icon with any other icon from the full set, or clear it back to unset, before saving.
-- [ ] A patrol name with no keyword match (e.g. "Joe Patrol") leaves the picker with nothing pre-selected — same unset default as REQ-18.3, not a random guess.
+- [x] An ASPL can assign one icon from the fixed set to a patrol, or leave it unset.
+- [x] A patrol with an icon shows it (plus its existing color) in the badge, the campout patrol card, and the `/patrols` list.
+- [x] A patrol with no icon set renders exactly as it does today — no broken image, no placeholder gap.
+- [x] No icon in the shipped set is a reproduction of, or recognizably derived from, a Scouting America logo, the fleur-de-lis, or any other organization's protected mark.
+- [x] The print view is visually unchanged by this requirement.
+- [x] A new ADR documents the data-model and icon-sourcing decisions made while implementing this requirement.
+- [x] The bundled icon set spans considerably more than the five current default patrols' own namesakes (see REQ-18.2's categorized list), so a newly created patrol with an arbitrary name has a reasonable chance of a relevant match.
+- [x] Typing a patrol name with an obvious keyword match (e.g. "Wolf Patrol") pre-selects/highlights a matching icon in the picker before the ASPL saves.
+- [x] The ASPL can override a suggested icon with any other icon from the full set, or clear it back to unset, before saving.
+- [x] A patrol name with no keyword match (e.g. "Joe Patrol") leaves the picker with nothing pre-selected — same unset default as REQ-18.3, not a random guess.
 
 ## Out of Scope for This Requirement
 

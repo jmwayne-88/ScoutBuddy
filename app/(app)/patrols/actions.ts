@@ -8,6 +8,7 @@ import { getActor } from "@/lib/session";
 import { canManagePatrols } from "@/lib/permissions";
 import { requireString } from "@/lib/form-data";
 import { meetsContrast } from "@/lib/theme/contrast";
+import { isValidPatrolIconId } from "@/lib/patrolIcons";
 import { firstMondayOfMonthBefore } from "@/lib/dates";
 import { MEAL_OCCASIONS } from "@/lib/constants";
 import { withToast } from "@/lib/toast";
@@ -15,6 +16,23 @@ import { withToast } from "@/lib/toast";
 function normalizeHex(value: string): string {
   const v = value.trim();
   return v.startsWith("#") ? v : `#${v}`;
+}
+
+// REQ-18.1/18.2: the icon field submits a plain id string naming one of
+// the fixed, bundled icons from lib/patrolIcons.ts (or an empty string for
+// "no icon"), never free text -- validated here the same defense-in-depth
+// way `validateColor` guards `color`, since a Server Action is a public
+// POST endpoint reachable by anyone, not just through this form (see
+// Next's Server Actions security guide: "treat every action as an
+// untrusted entry point").
+function readIcon(formData: FormData): string | null {
+  const raw = formData.get("icon");
+  const value = typeof raw === "string" ? raw.trim() : "";
+  if (value === "") return null;
+  if (!isValidPatrolIconId(value)) {
+    throw new Error("That icon isn't one of the available options.");
+  }
+  return value;
 }
 
 // REQ-8.17 / Open Decision 6 (confirmed: block, don't just warn): a color
@@ -54,6 +72,7 @@ export async function createPatrol(formData: FormData) {
 
   const name = requireString(formData, "name");
   const color = normalizeHex(requireString(formData, "color"));
+  const icon = readIcon(formData);
   const type = requireString(formData, "type") as PatrolType;
   const orderRaw = formData.get("order");
   const orderInput = typeof orderRaw === "string" ? orderRaw.trim() : "";
@@ -67,7 +86,7 @@ export async function createPatrol(formData: FormData) {
   const maxOrder = await db.patrol.aggregate({ _max: { order: true } });
   const order = orderInput !== "" ? Number(orderInput) : (maxOrder._max.order ?? -1) + 1;
 
-  const patrol = await db.patrol.create({ data: { name, color, type, order } });
+  const patrol = await db.patrol.create({ data: { name, color, icon, type, order } });
 
   revalidatePath("/patrols");
   revalidatePath("/");
@@ -83,6 +102,7 @@ export async function updatePatrol(formData: FormData) {
   const patrolId = requireString(formData, "patrolId");
   const name = requireString(formData, "name");
   const color = normalizeHex(requireString(formData, "color"));
+  const icon = readIcon(formData);
   const type = requireString(formData, "type") as PatrolType;
   const order = Number(requireString(formData, "order"));
 
@@ -91,7 +111,7 @@ export async function updatePatrol(formData: FormData) {
     redirect(`/patrols/${patrolId}?error=${encodeURIComponent(colorError)}`);
   }
 
-  await db.patrol.update({ where: { id: patrolId }, data: { name, color, type, order } });
+  await db.patrol.update({ where: { id: patrolId }, data: { name, color, icon, type, order } });
 
   revalidatePath("/patrols");
   revalidatePath("/");
