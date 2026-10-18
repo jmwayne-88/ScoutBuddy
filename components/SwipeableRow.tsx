@@ -49,7 +49,26 @@ export function SwipeableRow({
 
   if (!isTouchSized) {
     return (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.5,
+          px: 1,
+          py: 0.5,
+          borderRadius: 1,
+          // On a wide row, the dish/ingredient text and its icons can sit
+          // far enough apart that it's not obvious the icons belong to
+          // *this* row rather than a neighboring one. Highlighting the
+          // whole row together (text through icons) on hover/focus ties
+          // them together visually the moment you interact with either.
+          // `focus-within` (not just `:hover`) covers keyboard users
+          // tabbing to the icon buttons without first hovering the text.
+          "&:hover, &:focus-within": {
+            bgcolor: "action.hover",
+          },
+        }}
+      >
         <Box sx={{ flex: 1, minWidth: 0 }}>{children}</Box>
         {actions}
       </Box>

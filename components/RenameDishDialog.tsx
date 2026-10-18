@@ -29,7 +29,12 @@ export function RenameDishDialog({
   return (
     <>
       <Tooltip title={`Rename ${dishName}`}>
-        <IconButton size="small" aria-label={`Rename ${dishName}`} onClick={() => setOpen(true)} sx={{ width: 44, height: 44 }}>
+        <IconButton
+          size="small"
+          aria-label={`Rename ${dishName}`}
+          onClick={() => setOpen(true)}
+          sx={{ width: 44, height: 44, color: "text.primary" }}
+        >
           <EditIcon fontSize="small" />
         </IconButton>
       </Tooltip>

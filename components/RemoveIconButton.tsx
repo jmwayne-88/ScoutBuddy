@@ -21,25 +21,39 @@ import { SubmitButton } from "@/components/SubmitButton";
 // `formId`, when given, lets components/SwipeableRow.tsx trigger this same
 // removal via `document.getElementById(formId)?.requestSubmit()` on a
 // large swipe (REQ-16.6), instead of requiring a precise tap.
+//
+// `tone="subtle"` is a smaller, muted icon for an ingredient-level remove,
+// mirroring how an ingredient's own text is already smaller/secondary-
+// colored than its dish's -- so icon weight alone signals which level a
+// given icon acts on, not just its shape. `tone="default"` (dish-level)
+// keeps the original full-weight treatment.
 export function RemoveIconButton({
   label,
   action,
   hiddenFields,
   formId,
+  tone = "default",
 }: {
   label: string;
   action: (formData: FormData) => void | Promise<void>;
   hiddenFields: Record<string, string>;
   formId?: string;
+  tone?: "default" | "subtle";
 }) {
+  const isSubtle = tone === "subtle";
+
   return (
     <Box component="form" id={formId} action={action} sx={{ display: "inline-flex" }}>
       {Object.entries(hiddenFields).map(([key, value]) => (
         <input key={key} type="hidden" name={key} value={value} />
       ))}
       <Tooltip title={label}>
-        <SubmitButton iconOnly aria-label={label} sx={{ minWidth: 44, minHeight: 44 }}>
-          <DeleteIcon fontSize="small" />
+        <SubmitButton
+          iconOnly
+          aria-label={label}
+          sx={{ minWidth: 44, minHeight: 44, color: isSubtle ? "text.secondary" : "text.primary" }}
+        >
+          <DeleteIcon sx={{ fontSize: isSubtle ? 16 : 20 }} />
         </SubmitButton>
       </Tooltip>
     </Box>

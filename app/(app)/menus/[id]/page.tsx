@@ -183,6 +183,7 @@ export default async function MenuPage({
                                       label={`Remove ${ing.name}`}
                                       action={removeIngredient}
                                       hiddenFields={{ menuId: menu.id, ingredientId: ing.id }}
+                                      tone="subtle"
                                     />
                                   </Stack>
                                 )

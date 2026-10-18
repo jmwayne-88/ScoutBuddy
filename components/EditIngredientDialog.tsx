@@ -31,9 +31,18 @@ export function EditIngredientDialog({
 
   return (
     <>
+      {/* Smaller, muted relative to RenameDishDialog's icon -- mirrors how
+          this ingredient's own text is already smaller/secondary-colored
+          than its dish's, so icon weight alone signals which level this
+          action acts on. */}
       <Tooltip title={`Edit ${name}`}>
-        <IconButton size="small" aria-label={`Edit ${name}`} onClick={() => setOpen(true)} sx={{ width: 44, height: 44 }}>
-          <EditIcon fontSize="small" />
+        <IconButton
+          size="small"
+          aria-label={`Edit ${name}`}
+          onClick={() => setOpen(true)}
+          sx={{ width: 44, height: 44, color: "text.secondary" }}
+        >
+          <EditIcon sx={{ fontSize: 16 }} />
         </IconButton>
       </Tooltip>
       <Dialog open={open} onClose={() => setOpen(false)}>
