@@ -1,6 +1,6 @@
 # Requirement 15 — Consistent Destructive-Action Pattern
 
-Status: Not started
+Status: Implemented
 Depends on: [Requirement 13](13-ux-quick-win-polish.md)'s toast mechanism (`lib/toast.ts`, `components/ToastListener.tsx`)
 
 ## Goal

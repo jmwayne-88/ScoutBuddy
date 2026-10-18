@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { MenuStatus } from "@prisma/client";
+import type { IngredientCategory, MenuStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
@@ -95,15 +95,68 @@ export async function removeDish(formData: FormData) {
 
   const menu = await requireEditableMenu(menuId);
 
-  const dish = await db.dish.findFirst({ where: { id: dishId, meal: { menuId } } });
+  const dish = await db.dish.findFirst({
+    where: { id: dishId, meal: { menuId } },
+    include: { ingredients: true },
+  });
   if (!dish) throw new Error("That dish doesn't belong to this menu.");
+
+  // REQ-15.1-15.3: removing a dish is a Tier 2 destructive action -- it
+  // executes immediately (no confirm dialog) but captures a full snapshot
+  // of what's being destroyed (the dish and all its ingredients) so the
+  // toast's Undo button can re-create it exactly, not just an empty dish.
+  const snapshot = {
+    menuId,
+    mealId: dish.mealId,
+    name: dish.name,
+    ingredients: dish.ingredients.map((i) => ({ name: i.name, quantity: i.quantity, category: i.category ?? "" })),
+  };
 
   await db.ingredient.deleteMany({ where: { dishId } });
   await db.dish.delete({ where: { id: dishId } });
   await bumpNotStarted(menuId, menu.status);
 
   revalidatePath(`/menus/${menuId}`);
-  redirect(withToast(`/menus/${menuId}`, "Dish removed"));
+  redirect(withToast(`/menus/${menuId}`, "Dish removed", { undo: { action: "removeDish", payload: snapshot } }));
+}
+
+// REQ-15.3: reverses removeDish -- a real, server-verified re-insertion
+// (re-checks edit permission; fails gracefully if the meal occasion itself
+// is gone by the time Undo is pressed), not a client-only illusion.
+export async function undoRemoveDish(formData: FormData) {
+  const menuId = requireString(formData, "menuId");
+  const mealId = requireString(formData, "mealId");
+  const name = requireString(formData, "name");
+  const ingredients = JSON.parse(requireString(formData, "ingredients")) as {
+    name: string;
+    quantity: string;
+    category: string;
+  }[];
+
+  const menu = await requireEditableMenu(menuId);
+
+  const meal = await db.meal.findFirst({ where: { id: mealId, menuId } });
+  if (!meal) {
+    redirect(withToast(`/menus/${menuId}`, "Couldn't undo — that meal occasion no longer exists."));
+  }
+
+  await db.dish.create({
+    data: {
+      mealId,
+      name,
+      ingredients: {
+        create: ingredients.map((i) => ({
+          name: i.name,
+          quantity: i.quantity,
+          category: (i.category || null) as IngredientCategory | null,
+        })),
+      },
+    },
+  });
+  await bumpNotStarted(menuId, menu.status);
+
+  revalidatePath(`/menus/${menuId}`);
+  redirect(withToast(`/menus/${menuId}`, "Dish restored"));
 }
 
 export async function addIngredient(formData: FormData) {
@@ -164,11 +217,48 @@ export async function removeIngredient(formData: FormData) {
   });
   if (!ingredient) throw new Error("That ingredient doesn't belong to this menu.");
 
+  // REQ-15.1-15.3: Tier 2 -- executes immediately, but snapshots what's
+  // removed so Undo can restore it exactly.
+  const snapshot = {
+    menuId,
+    dishId: ingredient.dishId,
+    name: ingredient.name,
+    quantity: ingredient.quantity,
+    category: ingredient.category ?? "",
+  };
+
   await db.ingredient.delete({ where: { id: ingredientId } });
   await bumpNotStarted(menuId, menu.status);
 
   revalidatePath(`/menus/${menuId}`);
-  redirect(withToast(`/menus/${menuId}`, "Ingredient removed"));
+  redirect(
+    withToast(`/menus/${menuId}`, "Ingredient removed", { undo: { action: "removeIngredient", payload: snapshot } })
+  );
+}
+
+// REQ-15.3: reverses removeIngredient -- re-verifies edit permission and
+// that the parent dish still exists before re-inserting, rather than
+// trusting the client-supplied snapshot blindly.
+export async function undoRemoveIngredient(formData: FormData) {
+  const menuId = requireString(formData, "menuId");
+  const dishId = requireString(formData, "dishId");
+  const name = requireString(formData, "name");
+  const quantity = requireString(formData, "quantity");
+  const categoryRaw = String(formData.get("category") ?? "");
+  const category = (categoryRaw || null) as IngredientCategory | null;
+
+  const menu = await requireEditableMenu(menuId);
+
+  const dish = await db.dish.findFirst({ where: { id: dishId, meal: { menuId } } });
+  if (!dish) {
+    redirect(withToast(`/menus/${menuId}`, "Couldn't undo — that dish no longer exists."));
+  }
+
+  await db.ingredient.create({ data: { dishId, name, quantity, category } });
+  await bumpNotStarted(menuId, menu.status);
+
+  revalidatePath(`/menus/${menuId}`);
+  redirect(withToast(`/menus/${menuId}`, "Ingredient restored"));
 }
 
 export async function submitMenu(formData: FormData) {

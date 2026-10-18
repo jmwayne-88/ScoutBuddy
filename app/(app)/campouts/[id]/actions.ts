@@ -93,7 +93,7 @@ export async function removeOccasion(formData: FormData) {
   const patrolId = scope === "ALL" ? null : scope;
 
   await db.mealFrameworkException.deleteMany({ where: { campoutId, occasion, patrolId } });
-  await db.mealFrameworkException.create({ data: { campoutId, occasion, patrolId } });
+  const exception = await db.mealFrameworkException.create({ data: { campoutId, occasion, patrolId } });
 
   const affectedMenus = await db.menu.findMany({
     where: { campoutId, ...(patrolId ? { patrolId } : {}) },
@@ -112,7 +112,15 @@ export async function removeOccasion(formData: FormData) {
   }
 
   revalidatePath(`/campouts/${campoutId}`);
-  redirect(withToast(`/campouts/${campoutId}`, "Meal occasion removed"));
+  // REQ-15.1/15.2: Tier 2 -- executes immediately, and the toast's Undo
+  // button reuses the existing restoreOccasion action below (not a new
+  // one) via the exception row's own id, exactly what the persistent
+  // "Restore" link already does for this same exception.
+  redirect(
+    withToast(`/campouts/${campoutId}`, "Meal occasion removed", {
+      undo: { action: "removeOccasion", payload: { exceptionId: exception.id } },
+    })
+  );
 }
 
 export async function restoreOccasion(formData: FormData) {
