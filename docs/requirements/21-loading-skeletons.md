@@ -1,6 +1,6 @@
 # Requirement 21 — Loading Skeletons for Server-Rendered Pages
 
-Status: Not started
+Status: Done
 Depends on: none tied to a single ROADMAP iteration; complements [Requirement 14](14-async-action-pending-states.md) (pending states for actions) by covering the separate case of a page's first load
 
 ## Goal
@@ -26,10 +26,10 @@ Every page in this app is an `async` Server Component that queries `db` directly
 
 ## Acceptance Criteria
 
-- [ ] Navigating to a campout detail page, a menu page, `/patrols`, or `/patrol-leader` on a throttled/slow connection shows a shaped skeleton matching that page's layout before the real content appears, not a blank screen or a frozen previous page.
-- [ ] No skeleton is a single generic spinner reused identically across unrelated pages.
-- [ ] Skeletons render correctly in both light and dark mode.
-- [ ] The print view shows no skeleton.
+- [x] Navigating to a campout detail page, a menu page, `/patrols`, or `/patrol-leader` on a throttled/slow connection shows a shaped skeleton matching that page's layout before the real content appears, not a blank screen or a frozen previous page.
+- [x] No skeleton is a single generic spinner reused identically across unrelated pages.
+- [x] Skeletons render correctly in both light and dark mode.
+- [x] The print view shows no skeleton.
 
 ## Out of Scope for This Requirement
 

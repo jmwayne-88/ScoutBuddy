@@ -64,7 +64,18 @@ function validateColor(color: string): string | null {
   return null;
 }
 
-export async function createPatrol(formData: FormData) {
+// REQ-20.4: createPatrol/updatePatrol's color-contrast validation now
+// reports back to their still-mounted forms via useActionState instead of
+// redirecting with the error (and, for createPatrol, the rest of the form)
+// encoded into the URL -- see ADR 0025 and components/CreatePatrolForm.tsx
+// / components/EditPatrolForm.tsx, the client wrappers that call these with
+// this signature.
+export type PatrolFormState = { error: string | null };
+
+export async function createPatrol(
+  _prevState: PatrolFormState,
+  formData: FormData
+): Promise<PatrolFormState> {
   const actor = await getActor();
   if (!canManagePatrols(actor)) {
     throw new Error("Only the ASPL of Camping can manage patrols.");
@@ -79,8 +90,7 @@ export async function createPatrol(formData: FormData) {
 
   const colorError = validateColor(color);
   if (colorError) {
-    const params = new URLSearchParams({ error: colorError, name, type, order: orderInput });
-    redirect(`/patrols/new?${params.toString()}`);
+    return { error: colorError };
   }
 
   const maxOrder = await db.patrol.aggregate({ _max: { order: true } });
@@ -93,7 +103,10 @@ export async function createPatrol(formData: FormData) {
   redirect(withToast(`/patrols/${patrol.id}?prompt=assign`, "Patrol created"));
 }
 
-export async function updatePatrol(formData: FormData) {
+export async function updatePatrol(
+  _prevState: PatrolFormState,
+  formData: FormData
+): Promise<PatrolFormState> {
   const actor = await getActor();
   if (!canManagePatrols(actor)) {
     throw new Error("Only the ASPL of Camping can manage patrols.");
@@ -108,7 +121,7 @@ export async function updatePatrol(formData: FormData) {
 
   const colorError = validateColor(color);
   if (colorError) {
-    redirect(`/patrols/${patrolId}?error=${encodeURIComponent(colorError)}`);
+    return { error: colorError };
   }
 
   await db.patrol.update({ where: { id: patrolId }, data: { name, color, icon, type, order } });

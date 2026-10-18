@@ -1,27 +1,22 @@
 import { notFound } from "next/navigation";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
-import MenuItem from "@mui/material/MenuItem";
-import Alert from "@mui/material/Alert";
 import { db } from "@/lib/db";
-import { PatrolColorField } from "@/components/PatrolColorField";
-import { PatrolIdentityFields } from "@/components/PatrolIdentityFields";
-import { SubmitButton } from "@/components/SubmitButton";
+import { EditPatrolForm } from "@/components/EditPatrolForm";
 import { DeletePatrolDialog } from "@/components/DeletePatrolDialog";
 import { AssignFutureCampoutsPrompt } from "@/components/AssignFutureCampoutsPrompt";
 import { ReactivateCampoutsDialog } from "@/components/ReactivateCampoutsDialog";
-import { assignPatrolToCampouts, assignToFutureCampouts, deletePatrol, updatePatrol } from "../actions";
+import { assignPatrolToCampouts, assignToFutureCampouts, deletePatrol } from "../actions";
 
 export default async function EditPatrolPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; prompt?: string }>;
+  searchParams: Promise<{ prompt?: string }>;
 }) {
   const { id } = await params;
-  const { error, prompt } = await searchParams;
+  const { prompt } = await searchParams;
 
   const patrol = await db.patrol.findUnique({ where: { id } });
   if (!patrol) notFound();
@@ -41,21 +36,7 @@ export default async function EditPatrolPage({
     <Stack spacing={4} sx={{ maxWidth: 500 }}>
       <Typography variant="h5">Edit patrol</Typography>
 
-      {error && <Alert severity="error">{error}</Alert>}
-
-      <Stack component="form" action={updatePatrol} spacing={2}>
-        <input type="hidden" name="patrolId" value={patrol.id} />
-        <PatrolIdentityFields defaultName={patrol.name} defaultIcon={patrol.icon} />
-        <PatrolColorField name="color" defaultValue={patrol.color} previewLabel={patrol.name} />
-        <TextField name="type" label="Type" select defaultValue={patrol.type} fullWidth>
-          <MenuItem value="YOUTH">Youth</MenuItem>
-          <MenuItem value="ADULT">Adult</MenuItem>
-        </TextField>
-        <TextField name="order" label="Order" type="number" defaultValue={patrol.order} required fullWidth />
-        <SubmitButton variant="contained" sx={{ alignSelf: "flex-start" }}>
-          Save changes
-        </SubmitButton>
-      </Stack>
+      <EditPatrolForm patrol={patrol} />
 
       <Stack spacing={1.5} sx={{ borderTop: 1, borderColor: "divider", pt: 3 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>

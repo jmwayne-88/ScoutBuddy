@@ -1,6 +1,6 @@
 # Requirement 20 — Inline Validation Errors (Replacing `?error=` Query Strings)
 
-Status: Not started
+Status: Done
 Depends on: [Requirement 13](13-ux-quick-win-polish.md) (ADR 0023's redirect-based feedback mechanism, which this requirement partially supersedes for validation specifically)
 
 ## Goal
@@ -32,11 +32,11 @@ None of these is field-level — each surfaces as one generic alert at the top o
 
 ## Acceptance Criteria
 
-- [ ] Attempting to submit a menu with an empty active occasion shows the problem without a full page navigation and without a generic top-of-page alert disconnected from the specific occasion.
-- [ ] Entering an invalid patrol color on either the new-patrol or edit-patrol form shows the error directly on the color field, with the rest of the form's typed values still present (because no navigation occurred).
-- [ ] The URL never carries an `?error=` or re-encoded form-state query string after this requirement ships.
-- [ ] A new ADR documents the `useActionState` adoption for the two patrol forms.
-- [ ] Requirement 13's success-toast behavior (`?toast=`/`?celebrate=`) is unchanged by this work.
+- [x] Attempting to submit a menu with an empty active occasion shows the problem without a full page navigation and without a generic top-of-page alert disconnected from the specific occasion.
+- [x] Entering an invalid patrol color on either the new-patrol or edit-patrol form shows the error directly on the color field, with the rest of the form's typed values still present (because no navigation occurred).
+- [x] The URL never carries an `?error=` or re-encoded form-state query string after this requirement ships.
+- [x] A new ADR documents the `useActionState` adoption for the two patrol forms.
+- [x] Requirement 13's success-toast behavior (`?toast=`/`?celebrate=`) is unchanged by this work.
 
 ## Out of Scope for This Requirement
 

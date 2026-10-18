@@ -273,8 +273,14 @@ export async function submitMenu(formData: FormData) {
     throw new Error("You don't have permission to submit this menu.");
   }
 
+  // REQ-20.1: the menu page itself shows an inline note on each empty
+  // occasion's card and disables the Submit button from that same data --
+  // no round trip needed to discover this. This is the server-side
+  // backstop for a request that bypasses the disabled button; it no-ops
+  // back to the same page rather than redirecting through a `?error=`
+  // query string.
   if (menuHasEmptyOccasion(menu.meals)) {
-    redirect(`/menus/${menuId}?error=empty-occasions`);
+    redirect(`/menus/${menuId}`);
   }
 
   await db.menu.update({ where: { id: menuId }, data: { status: "SUBMITTED" } });

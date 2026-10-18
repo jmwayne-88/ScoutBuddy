@@ -1,42 +1,12 @@
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
-import MenuItem from "@mui/material/MenuItem";
-import Alert from "@mui/material/Alert";
-import { PatrolColorField } from "@/components/PatrolColorField";
-import { PatrolIdentityFields } from "@/components/PatrolIdentityFields";
-import { SubmitButton } from "@/components/SubmitButton";
-import { createPatrol } from "../actions";
+import { CreatePatrolForm } from "@/components/CreatePatrolForm";
 
-export default async function NewPatrolPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string; name?: string; type?: string; order?: string }>;
-}) {
-  const { error, name, type, order } = await searchParams;
-
+export default function NewPatrolPage() {
   return (
     <Stack spacing={3} sx={{ maxWidth: 500 }}>
       <Typography variant="h5">Create a patrol</Typography>
-      {error && <Alert severity="error">{error}</Alert>}
-      <Stack component="form" action={createPatrol} spacing={2}>
-        <PatrolIdentityFields defaultName={name ?? ""} defaultIcon={null} />
-        <PatrolColorField name="color" defaultValue="#1d4ed8" previewLabel={name ?? "Preview"} />
-        <TextField name="type" label="Type" select defaultValue={type ?? "YOUTH"} fullWidth>
-          <MenuItem value="YOUTH">Youth</MenuItem>
-          <MenuItem value="ADULT">Adult</MenuItem>
-        </TextField>
-        <TextField
-          name="order"
-          label="Order (optional — defaults to last)"
-          type="number"
-          defaultValue={order ?? ""}
-          fullWidth
-        />
-        <SubmitButton variant="contained" sx={{ alignSelf: "flex-start" }}>
-          Create patrol
-        </SubmitButton>
-      </Stack>
+      <CreatePatrolForm />
     </Stack>
   );
 }

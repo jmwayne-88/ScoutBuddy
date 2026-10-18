@@ -28,3 +28,4 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0022 - Shrink-to-fit via real DOM measurement, replacing the row-count heuristic](0022-shrink-to-fit-via-real-dom-measurement.md)
 - [0023 - Toast feedback delivered via a post-redirect query param](0023-redirect-based-toast-notifications.md)
 - [0024 - Patrol icons: a fixed, hand-drawn glyph set plus name-based suggestion](0024-patrol-icon-identity.md)
+- [0025 - `useActionState` adopted for the two patrol color-validation forms](0025-useactionstate-for-patrol-color-validation.md)

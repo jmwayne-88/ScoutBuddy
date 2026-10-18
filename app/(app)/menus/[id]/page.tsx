@@ -3,12 +3,12 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
-import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
 import { canEditMenu, canReview, canSubmitMenu } from "@/lib/permissions";
+import { menuHasEmptyOccasion } from "@/lib/validation";
 import { MEAL_OCCASIONS } from "@/lib/constants";
 import { formatDueDate } from "@/lib/dates";
 import { menuMealProgress, menuStatusColor } from "@/lib/progress";
@@ -39,13 +39,10 @@ import {
 
 export default async function MenuPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
 }) {
   const { id } = await params;
-  const { error } = await searchParams;
   const actor = await getActor();
 
   const menu = await db.menu.findUnique({
@@ -67,6 +64,7 @@ export default async function MenuPage({
   const mealsByOccasion = new Map(menu.meals.map((m) => [m.occasion, m]));
   const mealProgress = menuMealProgress(menu.meals);
   const statusColor = menuStatusColor(menu.status);
+  const hasEmptyOccasion = menuHasEmptyOccasion(menu.meals);
 
   return (
     <Stack spacing={4} sx={{ maxWidth: 900 }}>
@@ -135,6 +133,11 @@ export default async function MenuPage({
                     const { Icon, message } = EMPTY_STATES.mealNoDishes(label, canEdit);
                     return <EmptyState icon={Icon}>{message}</EmptyState>;
                   })()}
+                {meal.dishes.length === 0 && canSubmit && (
+                  <Typography variant="body2" color="error">
+                    This occasion needs at least one dish before you can submit.
+                  </Typography>
+                )}
                 <Stack spacing={1.5} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
                   {meal.dishes.map((dish) => {
                     const removeDishFormId = `remove-dish-${dish.id}`;
@@ -276,14 +279,9 @@ export default async function MenuPage({
 
       {canSubmit && (
         <Stack spacing={1.5} sx={{ alignItems: "flex-start" }}>
-          {error === "empty-occasions" && (
-            <Alert severity="error" sx={{ width: "100%" }}>
-              This menu can&apos;t be submitted yet — every meal occasion needs at least one dish.
-            </Alert>
-          )}
           <Box component="form" action={submitMenu}>
             <input type="hidden" name="menuId" value={menu.id} />
-            <SubmitButton variant="contained" color="primary">
+            <SubmitButton variant="contained" color="primary" disabled={hasEmptyOccasion}>
               Submit menu
             </SubmitButton>
           </Box>
