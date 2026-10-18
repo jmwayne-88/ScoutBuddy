@@ -18,9 +18,10 @@ import { SubmitButton } from "@/components/SubmitButton";
 // per-campout pick, so it isn't limited to future-only campouts.
 //
 // The Checkbox/FormControlLabel tree is built here, inside this Client
-// Component, rather than passed in as a prop — see RoleForm.tsx for why
-// that distinction matters (a Server Component constructing this same JSX
-// and passing it in as a prop would crash; building it here is safe).
+// Component, rather than passed in as a prop — see CLAUDE.md's MUI +
+// Server Components gotcha for why that distinction matters (a Server
+// Component constructing this same JSX and passing it in as a prop would
+// crash; building it here is safe).
 export function ReactivateCampoutsDialog({
   open,
   patrolId,

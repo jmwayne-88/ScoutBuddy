@@ -13,8 +13,9 @@ import { menuStatusColor } from "@/lib/progress";
 // REQ-13.12/13.13: one icon per status, defined once (as a module-level
 // table of already-built elements, not components picked by variable name
 // at render time -- the latter trips the static-components lint rule and,
-// per components/RoleForm.tsx's note, doesn't survive construction in a
-// Server Component) and reused everywhere a status chip is rendered.
+// per components/ReactivateCampoutsDialog.tsx's note, doesn't survive
+// construction in a Server Component) and reused everywhere a status chip
+// is rendered.
 const STATUS_ICONS: Record<MenuStatus, ReactElement> = {
   NOT_STARTED: <HourglassEmptyIcon fontSize="small" />,
   IN_PROGRESS: <EditNoteIcon fontSize="small" />,

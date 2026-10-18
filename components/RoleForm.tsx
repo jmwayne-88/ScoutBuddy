@@ -1,23 +1,25 @@
 "use client";
 
+import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
-import FormControl from "@mui/material/FormControl";
-import FormLabel from "@mui/material/FormLabel";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Radio from "@mui/material/Radio";
+import Typography from "@mui/material/Typography";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { PatrolBadge } from "@/components/PatrolBadge";
 import { SubmitButton } from "@/components/SubmitButton";
 
-// MUI's FormControlLabel reads `control.props.*` synchronously to derive
-// `disabled`/`required`/`checked`/etc. When `control={<Radio />}` is
-// constructed in a Server Component and crosses into this Client Component
-// as a prop, React serializes it as a not-yet-resolved reference rather than
-// a plain element, so `control.props` is `undefined` and every one of those
-// reads throws "Cannot read properties of undefined" (confirmed by running
-// the app — see ADR 0017). Building the whole Radio/FormControlLabel tree
-// inside a client component, with `action` passed in as a Server Action
-// reference (which *is* safely serializable across the boundary), avoids it.
+// REQ-17.2/17.5: one card per role, the whole card itself the tap target and
+// submit control -- no separate Continue button, no intermediate
+// "selected but not confirmed" state. Each card is its own single-button
+// <form>, so clicking it submits `action` (the existing chooseRole Server
+// Action) immediately with that card's role value.
+//
+// This card grid doesn't build a Radio/FormControlLabel tree the way this
+// file used to, so that specific MUI gotcha doesn't apply here. It's still
+// built entirely in this "use client" module per CLAUDE.md's general
+// Server->Client element-passing rule: `action` is a Server Action
+// reference (safely serializable), and every other prop crossing in from
+// the Server Component caller (`patrols`, `defaultValue`) is plain data,
+// never a JSX element.
 export function RoleForm({
   action,
   defaultValue,
@@ -28,31 +30,69 @@ export function RoleForm({
   patrols: { id: string; name: string; color: string }[];
 }) {
   return (
+    <Grid container spacing={2}>
+      <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+        <RoleCard action={action} value="ASPL" label="the ASPL of Camping" selected={defaultValue === "ASPL"} />
+      </Grid>
+      {patrols.map((p) => (
+        <Grid key={p.id} size={{ xs: 12, sm: 6, md: 4 }}>
+          <RoleCard
+            action={action}
+            value={`PATROL_LEADER:${p.id}`}
+            label="the Patrol Leader for"
+            patrolName={p.name}
+            patrolColor={p.color}
+            selected={defaultValue === `PATROL_LEADER:${p.id}`}
+          />
+        </Grid>
+      ))}
+    </Grid>
+  );
+}
+
+function RoleCard({
+  action,
+  value,
+  label,
+  patrolName,
+  patrolColor,
+  selected,
+}: {
+  action: (formData: FormData) => void | Promise<void>;
+  value: string;
+  label: string;
+  patrolName?: string;
+  patrolColor?: string;
+  selected: boolean;
+}) {
+  return (
     <form action={action}>
-      <Stack spacing={3}>
-        <FormControl>
-          <FormLabel id="role-label">I am...</FormLabel>
-          <RadioGroup aria-labelledby="role-label" name="role" defaultValue={defaultValue}>
-            <FormControlLabel value="ASPL" control={<Radio />} label="the ASPL of Camping" />
-            {patrols.map((p) => (
-              <FormControlLabel
-                key={p.id}
-                value={`PATROL_LEADER:${p.id}`}
-                control={<Radio />}
-                label={
-                  <Stack direction="row" spacing={1} component="span" sx={{ alignItems: "center" }}>
-                    <span>the Patrol Leader for</span>
-                    <PatrolBadge name={p.name} color={p.color} />
-                  </Stack>
-                }
-              />
-            ))}
-          </RadioGroup>
-        </FormControl>
-        <SubmitButton variant="contained" color="primary" sx={{ alignSelf: "flex-start" }}>
-          Continue
-        </SubmitButton>
-      </Stack>
+      <input type="hidden" name="role" value={value} />
+      <SubmitButton
+        variant="outlined"
+        fullWidth
+        aria-pressed={selected}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          justifyContent: "flex-start",
+          gap: 1,
+          p: 2,
+          minHeight: 96,
+          textAlign: "left",
+          borderWidth: selected ? 2 : 1,
+          borderColor: selected ? "primary.main" : "divider",
+          bgcolor: selected ? "action.selected" : "background.paper",
+          "&:hover": { borderColor: "primary.main" },
+        }}
+      >
+        <Stack direction="row" spacing={1} sx={{ width: "100%", alignItems: "center", justifyContent: "space-between" }}>
+          <Typography sx={{ fontWeight: 600 }}>{label}</Typography>
+          {selected && <CheckCircleIcon color="primary" fontSize="small" />}
+        </Stack>
+        {patrolName && patrolColor && <PatrolBadge name={patrolName} color={patrolColor} />}
+      </SubmitButton>
     </form>
   );
 }

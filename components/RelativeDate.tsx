@@ -9,8 +9,8 @@ import type { RelativeDateValue } from "@/lib/dates";
 // precision is never lost, and an error-token color when overdue.
 //
 // "use client" (not just plain JSX in the calling Server Component) for the
-// same reason components/RoleForm.tsx builds its Radio/FormControlLabel
-// tree client-side: confirmed by running the app, Tooltip clones its single
+// same reason components/ReactivateCampoutsDialog.tsx builds its
+// Checkbox/FormControlLabel tree client-side: confirmed by running the app, Tooltip clones its single
 // child to attach hover/touch handlers, and that clone doesn't survive the
 // Server->Client boundary cleanly when the child element was constructed in
 // a Server Component -- it throws a hydration mismatch, not a hard crash,

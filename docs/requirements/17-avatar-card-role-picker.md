@@ -1,6 +1,6 @@
 # Requirement 17 — Avatar/Card Home Role Picker
 
-Status: Not started
+Status: Done
 Depends on: none tied to a single ROADMAP iteration; builds on the existing role-selection flow (`app/(app)/role-actions.ts`, `components/RoleForm.tsx`, `components/RoleSwitcher.tsx`)
 
 ## Goal
@@ -27,11 +27,11 @@ Recommendation #8 from the UX/style audit referenced by [Requirement 13](13-ux-q
 
 ## Acceptance Criteria
 
-- [ ] `/` shows one tappable card per role (ASPL + each active Patrol Leader), not a radio list with a separate submit button.
-- [ ] Tapping a card immediately sets that role and navigates onward (to `/campouts` for ASPL, `/patrol-leader` for a Patrol Leader), with no extra confirmation step.
-- [ ] The currently active role's card is visually distinguished from the rest.
-- [ ] Every card is comfortably tappable at 360px width.
-- [ ] A deactivated patrol never produces a card (same active-only filtering `getActivePatrols()` already provides today).
+- [x] `/` shows one tappable card per role (ASPL + each active Patrol Leader), not a radio list with a separate submit button.
+- [x] Tapping a card immediately sets that role and navigates onward (to `/campouts` for ASPL, `/patrol-leader` for a Patrol Leader), with no extra confirmation step.
+- [x] The currently active role's card is visually distinguished from the rest.
+- [x] Every card is comfortably tappable at 360px width.
+- [x] A deactivated patrol never produces a card (same active-only filtering `getActivePatrols()` already provides today).
 
 ## Out of Scope for This Requirement
 

@@ -9,12 +9,12 @@ import { SubmitButton } from "@/components/SubmitButton";
 // dish, an ingredient), so they share the same icon, sizing, and Tooltip
 // treatment rather than each page re-implementing its own.
 //
-// "use client" for the same reason components/RoleForm.tsx builds its
-// Radio/FormControlLabel tree client-side: confirmed by running the app,
-// Tooltip clones its child to attach hover/touch handlers, which doesn't
-// survive the Server->Client boundary cleanly when that child is
-// constructed in a Server Component -- see CLAUDE.md's MUI + Server
-// Components gotcha. The menu page (a Server Component) only passes in
+// "use client" for the same reason components/ReactivateCampoutsDialog.tsx
+// builds its Checkbox/FormControlLabel tree client-side: confirmed by
+// running the app, Tooltip clones its child to attach hover/touch handlers,
+// which doesn't survive the Server->Client boundary cleanly when that
+// child is constructed in a Server Component -- see CLAUDE.md's MUI +
+// Server Components gotcha. The menu page (a Server Component) only passes in
 // plain data (`label`, `hiddenFields`) and a Server Action reference
 // (`action`, safely serializable), never JSX.
 //
