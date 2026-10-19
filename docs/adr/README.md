@@ -35,3 +35,4 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0029 - Meal comments anchor on occasion, not a `Meal` foreign key](0029-meal-comment-occasion-anchor.md)
 - [0030 - `Campout.endDate` and lightweight import-provenance columns](0030-campout-end-date-and-import-provenance.md)
 - [0031 - Campout-import parsing, extraction, and merge architecture](0031-campout-import-parsing-extraction-and-merge.md)
+- [0032 - Direct-to-Blob upload transport for the campout-import file](0032-campout-import-blob-upload-transport.md)

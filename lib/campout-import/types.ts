@@ -55,3 +55,18 @@ export type ImportCandidate = {
   previousValues: Partial<Record<ImportFieldKey, string | null>>;
   discarded: boolean;
 };
+
+// ADR 0032: what the review screen actually submits on confirm -- the
+// ASPL's edits to the small text fields plus which image (by index) and
+// whether to discard, deliberately *not* the `images` data-URL array
+// itself. The server already holds the real candidates (with their
+// images) on the CampoutImportBatch row from upload time and looks them
+// up by tempId, both because re-sending potentially several images'
+// worth of base64 on every confirm needlessly risks Vercel Functions'
+// hard request-body limit, and because trusting client-supplied image
+// bytes for what becomes Campout.imageUrl has no reason to be allowed in
+// the first place.
+export type ImportCandidateEdit = Pick<
+  ImportCandidate,
+  "tempId" | "name" | "date" | "endDate" | "location" | "description" | "selectedImageIndex" | "discarded"
+>;

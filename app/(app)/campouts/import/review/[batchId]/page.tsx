@@ -34,7 +34,7 @@ export default async function CampoutImportReviewPage({ params }: { params: Prom
           thumbnail, or discard a campout you don&apos;t want.
         </Typography>
       </Stack>
-      <ImportReviewForm batchId={batch.id} sourceFileName={batch.sourceFileName} initialCandidates={candidates} />
+      <ImportReviewForm batchId={batch.id} initialCandidates={candidates} />
     </Stack>
   );
 }

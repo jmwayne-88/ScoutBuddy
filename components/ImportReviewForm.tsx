@@ -12,7 +12,7 @@ import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import { SubmitButton } from "@/components/SubmitButton";
 import { confirmCampoutImport, type ImportConfirmFormState } from "@/app/(app)/campouts/import/actions";
-import type { ImportCandidate, ImportFieldKey } from "@/lib/campout-import/types";
+import type { ImportCandidate, ImportCandidateEdit, ImportFieldKey } from "@/lib/campout-import/types";
 
 const initialState: ImportConfirmFormState = { error: null };
 
@@ -157,13 +157,18 @@ function CandidateCard({
 // memory -- nothing round-trips to the server per edit. Navigating away
 // without submitting simply discards this state; the immutable staging
 // row (CampoutImportBatch) just sits inert until it's swept by age.
+//
+// ADR 0032: only a lightweight ImportCandidateEdit per candidate is
+// actually submitted on confirm (text fields, selected image index,
+// discarded flag) -- never the `images` data-URL array itself, which the
+// server already holds from upload time and re-attaches by tempId. Local
+// state here still keeps the full ImportCandidate (images included) for
+// rendering the thumbnail picker.
 export function ImportReviewForm({
   batchId,
-  sourceFileName,
   initialCandidates,
 }: {
   batchId: string;
-  sourceFileName: string;
   initialCandidates: ImportCandidate[];
 }) {
   const [candidates, setCandidates] = useState(initialCandidates);
@@ -175,13 +180,24 @@ export function ImportReviewForm({
 
   const activeCount = candidates.filter((c) => !c.discarded).length;
   const incompleteCount = candidates.filter((c) => !c.discarded && isIncomplete(c)).length;
-  const candidatesJson = useMemo(() => JSON.stringify(candidates), [candidates]);
+  const editsJson = useMemo(() => {
+    const edits: ImportCandidateEdit[] = candidates.map((c) => ({
+      tempId: c.tempId,
+      name: c.name,
+      date: c.date,
+      endDate: c.endDate,
+      location: c.location,
+      description: c.description,
+      selectedImageIndex: c.selectedImageIndex,
+      discarded: c.discarded,
+    }));
+    return JSON.stringify(edits);
+  }, [candidates]);
 
   return (
     <Stack component="form" action={formAction} spacing={2}>
       <input type="hidden" name="batchId" value={batchId} />
-      <input type="hidden" name="sourceFileName" value={sourceFileName} />
-      <input type="hidden" name="candidates" value={candidatesJson} />
+      <input type="hidden" name="edits" value={editsJson} />
 
       {state.error && <Alert severity="error">{state.error}</Alert>}
 
