@@ -17,8 +17,8 @@ import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import type { Actor } from "@/lib/session";
-import { unresolvedThreadCount } from "@/lib/comments";
-import { CommentThread, type CommentRecord, type CommentTarget } from "@/components/CommentThread";
+import { targetSummary, unresolvedThreadCount, type CommentGroup } from "@/lib/comments";
+import { CommentThread, type CommentBase, type CommentRecord, type CommentTarget } from "@/components/CommentThread";
 import { CommentComposer } from "@/components/CommentComposer";
 import { ResolvedThreadsToggle } from "@/components/ResolvedThreadsToggle";
 import { addComment } from "@/app/(app)/menus/[id]/comment-actions";
@@ -55,6 +55,7 @@ export function CommentPane({
   title,
   subtitle,
   comments,
+  otherComments,
   actor,
   variant = "icon",
 }: {
@@ -65,6 +66,12 @@ export function CommentPane({
   title: string;
   subtitle: string;
   comments: CommentRecord[];
+  // Only passed for the whole-menu pane (variant="button"): every other
+  // thread on the menu -- every meal, dish, and ingredient comment -- read
+  // through below this pane's own menu-level composer/thread list, so a
+  // reader doesn't have to open each one separately. See
+  // lib/comments.ts's groupNonMenuComments.
+  otherComments?: CommentGroup<CommentBase>[];
   actor: Actor | null;
   variant?: "icon" | "button";
 }) {
@@ -77,6 +84,19 @@ export function CommentPane({
   const resolvedThreads = comments.filter((c) => c.status === "RESOLVED");
   const unresolved = unresolvedThreadCount(comments);
   const hasAny = comments.length > 0;
+
+  // Each group split into its own open/resolved roots, so "Elsewhere on
+  // this menu" shows what needs attention by default and tucks resolved
+  // threads behind one shared toggle, same as this pane's own section
+  // above -- a group with nothing open is simply skipped from the open
+  // list rather than shown empty.
+  const otherOpenGroups = (otherComments ?? [])
+    .map((g) => ({ ...g, comments: g.comments.filter((c) => c.status === "OPEN") }))
+    .filter((g) => g.comments.length > 0);
+  const otherResolvedGroups = (otherComments ?? [])
+    .map((g) => ({ ...g, comments: g.comments.filter((c) => c.status === "RESOLVED") }))
+    .filter((g) => g.comments.length > 0);
+  const otherResolvedCount = otherResolvedGroups.reduce((sum, g) => sum + g.comments.length, 0);
 
   const hiddenTargetFields: Record<string, string> = { menuId, target: target.type };
   if (target.type === "DISH") hiddenTargetFields.dishId = target.dishId;
@@ -235,6 +255,69 @@ export function CommentPane({
                     ))}
                   </Stack>
                 </ResolvedThreadsToggle>
+              </Box>
+            )}
+
+            {otherComments && otherComments.length > 0 && (
+              <Box sx={{ mt: 3, pt: 2, borderTop: 1, borderColor: "divider" }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>
+                  Elsewhere on this menu
+                </Typography>
+                {otherOpenGroups.length === 0 ? (
+                  <Typography variant="body2" color="text.secondary">
+                    Nothing open elsewhere on this menu.
+                  </Typography>
+                ) : (
+                  <Stack spacing={2.5}>
+                    {otherOpenGroups.map((group) => (
+                      <Stack key={group.key} spacing={1}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                          {targetSummary(group.targetType, group.targetLabel)}
+                        </Typography>
+                        <Stack spacing={1.5} divider={<Divider flexItem />}>
+                          {group.comments.map((root) => (
+                            <CommentThread
+                              key={root.id}
+                              menuId={menuId}
+                              patrolColor={patrolColor}
+                              patrolName={patrolName}
+                              root={root}
+                              actor={actor}
+                            />
+                          ))}
+                        </Stack>
+                      </Stack>
+                    ))}
+                  </Stack>
+                )}
+
+                {otherResolvedCount > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <ResolvedThreadsToggle count={otherResolvedCount}>
+                      <Stack spacing={2.5}>
+                        {otherResolvedGroups.map((group) => (
+                          <Stack key={group.key} spacing={1}>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                              {targetSummary(group.targetType, group.targetLabel)}
+                            </Typography>
+                            <Stack spacing={1.5} divider={<Divider flexItem />}>
+                              {group.comments.map((root) => (
+                                <CommentThread
+                                  key={root.id}
+                                  menuId={menuId}
+                                  patrolColor={patrolColor}
+                                  patrolName={patrolName}
+                                  root={root}
+                                  actor={actor}
+                                />
+                              ))}
+                            </Stack>
+                          </Stack>
+                        ))}
+                      </Stack>
+                    </ResolvedThreadsToggle>
+                  </Box>
+                )}
               </Box>
             )}
           </Box>

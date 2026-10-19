@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { actorLabel, activityLine, nestReplies, targetSummary, unresolvedCountsByMenu, unresolvedThreadCount } from "./comments";
+import {
+  actorLabel,
+  activityLine,
+  groupNonMenuComments,
+  nestReplies,
+  targetSummary,
+  unresolvedCountsByMenu,
+  unresolvedThreadCount,
+} from "./comments";
 
 describe("actorLabel", () => {
   it("labels the ASPL and a patrol's Leader", () => {
@@ -88,6 +96,69 @@ describe("unresolvedThreadCount", () => {
       ])
     ).toBe(2);
     expect(unresolvedThreadCount([])).toBe(0);
+  });
+});
+
+describe("groupNonMenuComments", () => {
+  const content = {
+    body: "body",
+    authorRole: "ASPL" as const,
+    authorPatrolId: null as string | null,
+    status: "OPEN" as const,
+    assigneeRole: null as "ASPL" | "PATROL_LEADER" | null,
+  };
+
+  it("excludes MENU-targeted comments -- those stay in the pane's own composer/thread list", () => {
+    const comments = [
+      {
+        id: "m1",
+        parentId: null,
+        createdAt: new Date("2026-01-01"),
+        targetType: "MENU" as const,
+        dishId: null,
+        ingredientId: null,
+        occasion: null,
+        targetLabel: null,
+        ...content,
+      },
+    ];
+    expect(groupNonMenuComments(comments)).toEqual([]);
+  });
+
+  it("groups a dish's root and reply together, separately from another dish", () => {
+    const comments = [
+      { id: "d1-root", parentId: null, createdAt: new Date("2026-01-01"), targetType: "DISH" as const, dishId: "dish-1", ingredientId: null, occasion: null, targetLabel: "Trail Stew", ...content },
+      { id: "d1-reply", parentId: "d1-root", createdAt: new Date("2026-01-02"), targetType: "DISH" as const, dishId: "dish-1", ingredientId: null, occasion: null, targetLabel: "Trail Stew", ...content },
+      { id: "d2-root", parentId: null, createdAt: new Date("2026-01-03"), targetType: "DISH" as const, dishId: "dish-2", ingredientId: null, occasion: null, targetLabel: "Campfire Chili", ...content },
+    ];
+    const groups = groupNonMenuComments(comments);
+    expect(groups).toHaveLength(2);
+    const dish1 = groups.find((g) => g.targetLabel === "Trail Stew")!;
+    expect(dish1.comments).toHaveLength(1);
+    expect(dish1.comments[0].replies.map((r) => r.id)).toEqual(["d1-reply"]);
+  });
+
+  it("keeps a meal, a dish, and an ingredient of the same name in separate groups", () => {
+    const comments = [
+      { id: "meal-1", parentId: null, createdAt: new Date("2026-01-01"), targetType: "MEAL" as const, dishId: null, ingredientId: null, occasion: "SATURDAY_DINNER", targetLabel: "Saturday Dinner", ...content },
+      { id: "dish-1", parentId: null, createdAt: new Date("2026-01-01"), targetType: "DISH" as const, dishId: "d1", ingredientId: null, occasion: null, targetLabel: "Trail Stew", ...content },
+      { id: "ing-1", parentId: null, createdAt: new Date("2026-01-01"), targetType: "INGREDIENT" as const, dishId: null, ingredientId: "i1", occasion: null, targetLabel: "eggs", ...content },
+    ];
+    expect(groupNonMenuComments(comments)).toHaveLength(3);
+  });
+
+  it("orders groups by most recent activity (root or reply), newest first", () => {
+    const comments = [
+      { id: "old-root", parentId: null, createdAt: new Date("2026-01-01"), targetType: "DISH" as const, dishId: "old", ingredientId: null, occasion: null, targetLabel: "Old Dish", ...content },
+      { id: "new-root", parentId: null, createdAt: new Date("2026-01-02"), targetType: "DISH" as const, dishId: "new", ingredientId: null, occasion: null, targetLabel: "New Dish", ...content },
+      { id: "old-reply", parentId: "old-root", createdAt: new Date("2026-01-10"), targetType: "DISH" as const, dishId: "old", ingredientId: null, occasion: null, targetLabel: "Old Dish", ...content },
+    ];
+    // "Old Dish" was created first, but its reply is the most recent activity overall.
+    expect(groupNonMenuComments(comments).map((g) => g.targetLabel)).toEqual(["Old Dish", "New Dish"]);
+  });
+
+  it("is empty for an empty list", () => {
+    expect(groupNonMenuComments([])).toEqual([]);
   });
 });
 

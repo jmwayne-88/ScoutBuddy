@@ -37,7 +37,7 @@ import {
 // level deep, matching lib/comments.ts's `nestReplies` output shape
 // (`CommentNode<T> = T & { replies: T[] }`), so a reply never carries its
 // own further-nested `replies` field.
-type CommentBase = {
+export type CommentBase = {
   id: string;
   parentId: string | null;
   body: string;

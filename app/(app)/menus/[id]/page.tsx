@@ -12,7 +12,7 @@ import { menuHasEmptyOccasion } from "@/lib/validation";
 import { MEAL_OCCASIONS } from "@/lib/constants";
 import { formatDueDate } from "@/lib/dates";
 import { menuMealProgress, menuStatusColor } from "@/lib/progress";
-import { nestReplies } from "@/lib/comments";
+import { groupNonMenuComments, nestReplies } from "@/lib/comments";
 import { EMPTY_STATES } from "@/lib/empty-states";
 import { EmptyState } from "@/components/EmptyState";
 import { PatrolBadge } from "@/components/PatrolBadge";
@@ -107,6 +107,7 @@ export default async function MenuPage({
       dishId: true,
       ingredientId: true,
       occasion: true,
+      targetLabel: true,
       body: true,
       authorRole: true,
       authorPatrolId: true,
@@ -125,6 +126,12 @@ export default async function MenuPage({
     });
   }
 
+  // The whole-menu pane's "Elsewhere on this menu" read-through -- every
+  // meal/dish/ingredient thread on the menu, grouped by its own target.
+  // Computed once here (not per call site) since only the MENU target
+  // below actually uses it.
+  const otherCommentGroups = groupNonMenuComments(allComments);
+
   // REQ-28.1: every comment entry point on the page shares these props --
   // only the target and its display labels differ per call site.
   const { id: menuId, patrol } = menu;
@@ -139,6 +146,7 @@ export default async function MenuPage({
         title={title}
         subtitle={subtitle}
         comments={nestReplies(commentsForTarget(target))}
+        otherComments={target.type === "MENU" ? otherCommentGroups : undefined}
         actor={actor}
         variant={variant}
       />

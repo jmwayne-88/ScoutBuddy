@@ -1,4 +1,4 @@
-import type { CommentActivityAction, CommentActorRole, CommentTargetType } from "@prisma/client";
+import type { CommentActivityAction, CommentActorRole, CommentStatus, CommentTargetType } from "@prisma/client";
 
 // REQ-26.7: "ASPL" / "Eagle Patrol Leader" -- the same two parties
 // `lib/permissions.ts`'s canCommentOnMenu scopes to. `patrolName` is the
@@ -86,6 +86,76 @@ export function nestReplies<T extends { id: string; parentId: string | null; cre
 // longer needs anyone's attention.
 export function unresolvedThreadCount(comments: { parentId: string | null; status: "OPEN" | "RESOLVED" }[]): number {
   return comments.filter((c) => !c.parentId && c.status === "OPEN").length;
+}
+
+type TargetKeyed = {
+  targetType: CommentTargetType;
+  dishId: string | null;
+  ingredientId: string | null;
+  occasion: string | null;
+  targetLabel: string | null;
+};
+
+// Structurally identical to components/CommentThread.tsx's CommentBase --
+// duplicated here, not imported, so lib/ never depends on components/
+// (the reverse of the app's usual import direction). Needed so a group's
+// `.comments` come back typed richly enough for CommentPane to pass
+// straight into <CommentThread root={...} />.
+type CommentContent = {
+  body: string;
+  authorRole: CommentActorRole;
+  authorPatrolId: string | null;
+  status: CommentStatus;
+  assigneeRole: CommentActorRole | null;
+};
+
+export type CommentGroup<T extends { id: string; parentId: string | null; createdAt: Date }> = {
+  key: string;
+  targetType: CommentTargetType;
+  targetLabel: string | null;
+  comments: CommentNode<T>[];
+};
+
+// The whole-menu "Menu comments" pane (components/CommentPane.tsx,
+// variant="button") keeps its own composer/thread list for MENU-targeted
+// comments, but also shows a read-through of every other thread on the
+// menu -- every meal, dish, and ingredient comment -- so a reader doesn't
+// have to open each one separately to see what's being discussed. Grouped
+// by exact target (not just target type), since a reply inherits its
+// root's target fields (comment-actions.ts's replyToComment) and needs to
+// land in the same bucket as its root even though every target's comments
+// arrive here as one flat, already-fetched list. A dish/ingredient/meal
+// that's since been removed still has its comments grouped and shown here
+// (same "still counts" rule unresolvedCountsByMenu follows) -- this is a
+// read-through of the data, not a live join to the current menu layout.
+export function groupNonMenuComments<
+  T extends TargetKeyed & CommentContent & { id: string; parentId: string | null; createdAt: Date },
+>(comments: T[]): CommentGroup<T>[] {
+  const byKey = new Map<string, T[]>();
+  for (const c of comments) {
+    if (c.targetType === "MENU") continue;
+    const key = `${c.targetType}:${c.dishId ?? c.ingredientId ?? c.occasion ?? ""}`;
+    const bucket = byKey.get(key);
+    if (bucket) bucket.push(c);
+    else byKey.set(key, [c]);
+  }
+
+  const groups = Array.from(byKey.entries()).map(([key, items]) => ({
+    key,
+    targetType: items[0].targetType,
+    targetLabel: items[0].targetLabel,
+    comments: nestReplies(items),
+  }));
+
+  // Most recently active thread first, so what's being talked about right
+  // now surfaces above an old, quiet one.
+  groups.sort((a, b) => {
+    const latest = (g: typeof a) =>
+      Math.max(0, ...g.comments.flatMap((c) => [c.createdAt.getTime(), ...c.replies.map((r) => r.createdAt.getTime())]));
+    return latest(b) - latest(a);
+  });
+
+  return groups;
 }
 
 // REQ-29.9-29.11: the same "open root thread" definition as
