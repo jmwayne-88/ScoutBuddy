@@ -11,12 +11,12 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import { SubmitButton } from "@/components/SubmitButton";
-import { confirmCampoutImport, type ImportConfirmFormState } from "@/app/(app)/campouts/import/actions";
-import type { ImportCandidate, ImportCandidateEdit, ImportFieldKey } from "@/lib/campout-import/types";
+import { confirmCampoutUpload, type ConfirmUploadFormState } from "@/app/(app)/campouts/upload/actions";
+import type { UploadCandidate, UploadCandidateEdit, UploadFieldKey } from "@/lib/campout-upload/types";
 
-const initialState: ImportConfirmFormState = { error: null };
+const initialState: ConfirmUploadFormState = { error: null };
 
-const FIELD_LABELS: Record<ImportFieldKey, string> = {
+const FIELD_LABELS: Record<UploadFieldKey, string> = {
   name: "Name",
   date: "Start date",
   endDate: "End date",
@@ -24,7 +24,7 @@ const FIELD_LABELS: Record<ImportFieldKey, string> = {
   description: "Description",
 };
 
-function isIncomplete(candidate: ImportCandidate): boolean {
+function isIncomplete(candidate: UploadCandidate): boolean {
   return !candidate.name?.trim() || !candidate.date;
 }
 
@@ -32,8 +32,8 @@ function CandidateCard({
   candidate,
   onChange,
 }: {
-  candidate: ImportCandidate;
-  onChange: (next: ImportCandidate) => void;
+  candidate: UploadCandidate;
+  onChange: (next: UploadCandidate) => void;
 }) {
   const incomplete = !candidate.discarded && isIncomplete(candidate);
 
@@ -44,7 +44,7 @@ function CandidateCard({
     };
   }
 
-  function previousHint(key: ImportFieldKey) {
+  function previousHint(key: UploadFieldKey) {
     if (!candidate.changedFields.includes(key)) return null;
     const prev = candidate.previousValues[key];
     return (
@@ -70,7 +70,7 @@ function CandidateCard({
 
         {!candidate.discarded && (
           <>
-            {incomplete && <Alert severity="warning">Needs a name and a start date before it can be imported.</Alert>}
+            {incomplete && <Alert severity="warning">Needs a name and a start date before it can be uploaded.</Alert>}
 
             <Stack spacing={0.5}>
               <TextField label={FIELD_LABELS.name} {...field("name")} error={!candidate.name?.trim()} fullWidth size="small" />
@@ -156,32 +156,32 @@ function CandidateCard({
 // REQ-30.18-30.21: owns the in-progress edit state for every candidate in
 // memory -- nothing round-trips to the server per edit. Navigating away
 // without submitting simply discards this state; the immutable staging
-// row (CampoutImportBatch) just sits inert until it's swept by age.
+// row (CampoutUploadBatch) just sits inert until it's swept by age.
 //
-// ADR 0032: only a lightweight ImportCandidateEdit per candidate is
+// ADR 0032: only a lightweight UploadCandidateEdit per candidate is
 // actually submitted on confirm (text fields, selected image index,
 // discarded flag) -- never the `images` data-URL array itself, which the
 // server already holds from upload time and re-attaches by tempId. Local
-// state here still keeps the full ImportCandidate (images included) for
+// state here still keeps the full UploadCandidate (images included) for
 // rendering the thumbnail picker.
-export function ImportReviewForm({
+export function UploadReviewForm({
   batchId,
   initialCandidates,
 }: {
   batchId: string;
-  initialCandidates: ImportCandidate[];
+  initialCandidates: UploadCandidate[];
 }) {
   const [candidates, setCandidates] = useState(initialCandidates);
-  const [state, formAction] = useActionState(confirmCampoutImport, initialState);
+  const [state, formAction] = useActionState(confirmCampoutUpload, initialState);
 
-  function updateCandidate(tempId: string, next: ImportCandidate) {
+  function updateCandidate(tempId: string, next: UploadCandidate) {
     setCandidates((prev) => prev.map((c) => (c.tempId === tempId ? next : c)));
   }
 
   const activeCount = candidates.filter((c) => !c.discarded).length;
   const incompleteCount = candidates.filter((c) => !c.discarded && isIncomplete(c)).length;
   const editsJson = useMemo(() => {
-    const edits: ImportCandidateEdit[] = candidates.map((c) => ({
+    const edits: UploadCandidateEdit[] = candidates.map((c) => ({
       tempId: c.tempId,
       name: c.name,
       date: c.date,
@@ -213,7 +213,7 @@ export function ImportReviewForm({
 
       <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
         <SubmitButton variant="contained" color="primary" disabled={activeCount === 0 || incompleteCount > 0}>
-          Import {activeCount} campout{activeCount === 1 ? "" : "s"}
+          Upload {activeCount} campout{activeCount === 1 ? "" : "s"}
         </SubmitButton>
         {incompleteCount > 0 && (
           <Typography variant="body2" color="warning.main">

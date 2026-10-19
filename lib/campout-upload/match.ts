@@ -1,5 +1,5 @@
 import type { Campout } from "@prisma/client";
-import type { ImportCandidate, ImportFieldKey, RawExtractedCampout } from "./types";
+import type { UploadCandidate, UploadFieldKey, RawExtractedCampout } from "./types";
 
 // REQ-30.15: a small tolerance window, to absorb minor date-parsing
 // ambiguity for what's really the same event (e.g. the flyer says "the
@@ -49,7 +49,7 @@ function toIsoDateOrNull(date: Date | null): string | null {
 export function buildMergePreview(
   raw: RawExtractedCampout,
   matched: Campout | null
-): Pick<ImportCandidate, "name" | "date" | "endDate" | "location" | "description" | "changedFields" | "previousValues"> {
+): Pick<UploadCandidate, "name" | "date" | "endDate" | "location" | "description" | "changedFields" | "previousValues"> {
   if (!matched) {
     return {
       name: raw.name,
@@ -62,7 +62,7 @@ export function buildMergePreview(
     };
   }
 
-  const previous: Record<ImportFieldKey, string | null> = {
+  const previous: Record<UploadFieldKey, string | null> = {
     name: matched.name,
     date: toIsoDateOrNull(matched.date),
     endDate: toIsoDateOrNull(matched.endDate),
@@ -70,7 +70,7 @@ export function buildMergePreview(
     description: matched.description,
   };
 
-  const merged: Record<ImportFieldKey, string | null> = {
+  const merged: Record<UploadFieldKey, string | null> = {
     name: raw.name ?? previous.name,
     date: raw.date ?? previous.date,
     endDate: raw.endDate ?? previous.endDate,
@@ -78,7 +78,7 @@ export function buildMergePreview(
     description: raw.description ?? previous.description,
   };
 
-  const changedFields = (Object.keys(merged) as ImportFieldKey[]).filter((key) => merged[key] !== previous[key]);
+  const changedFields = (Object.keys(merged) as UploadFieldKey[]).filter((key) => merged[key] !== previous[key]);
 
   return { ...merged, changedFields, previousValues: previous };
 }

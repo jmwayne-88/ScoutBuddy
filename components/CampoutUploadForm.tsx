@@ -7,9 +7,9 @@ import Alert from "@mui/material/Alert";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { SubmitButton } from "@/components/SubmitButton";
-import { uploadCampoutFile, type ImportUploadFormState } from "@/app/(app)/campouts/import/actions";
+import { uploadCampoutFile, type UploadFormState } from "@/app/(app)/campouts/upload/actions";
 
-const initialState: ImportUploadFormState = { error: null };
+const initialState: UploadFormState = { error: null };
 
 // ADR 0032: the file goes straight from this browser to Vercel Blob
 // (bypassing the Server Action's own request body, which has a hard,
@@ -20,7 +20,7 @@ const initialState: ImportUploadFormState = { error: null };
 // handler; only once it resolves does this call the Server Action itself
 // (via useActionState's own action function, wrapped in a transition so
 // its pending/error state still works the normal way).
-export function CampoutImportUploadForm() {
+export function CampoutUploadForm() {
   const [state, formAction] = useActionState(uploadCampoutFile, initialState);
   const [isUploading, setIsUploading] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -41,7 +41,7 @@ export function CampoutImportUploadForm() {
     try {
       const blob = await upload(file.name, file, {
         access: "private",
-        handleUploadUrl: "/api/campout-import-upload",
+        handleUploadUrl: "/api/campout-upload",
       });
       const formData = new FormData();
       formData.set("blobUrl", blob.url);
@@ -63,10 +63,10 @@ export function CampoutImportUploadForm() {
     <Stack component="form" onSubmit={handleSubmit} spacing={2} sx={{ maxWidth: 480 }}>
       {error && <Alert severity="error">{error}</Alert>}
       <Box>
-        <Typography component="label" htmlFor="campout-import-file" variant="body2" sx={{ display: "block", mb: 1 }}>
+        <Typography component="label" htmlFor="campout-upload-file" variant="body2" sx={{ display: "block", mb: 1 }}>
           PDF or Excel file
         </Typography>
-        <input id="campout-import-file" name="file" type="file" accept=".pdf,.xlsx,.xls" ref={fileInputRef} required />
+        <input id="campout-upload-file" name="file" type="file" accept=".pdf,.xlsx,.xls" ref={fileInputRef} required />
       </Box>
       <SubmitButton type="submit" variant="contained" color="primary" pendingOverride={pending} sx={{ alignSelf: "flex-start" }}>
         {isUploading ? "Uploading…" : "Upload & extract"}

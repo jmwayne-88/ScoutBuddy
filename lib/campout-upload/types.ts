@@ -1,9 +1,9 @@
 // REQ-30: shared shapes for the upload -> review -> confirm flow. A
 // RawExtractedCampout is exactly what the Claude extraction step returns
-// (lib/campout-import/extract-with-claude.ts) -- nothing matched or merged
-// yet. An ImportCandidate is what gets stored on CampoutImportBatch and
+// (lib/campout-upload/extract-with-claude.ts) -- nothing matched or merged
+// yet. An UploadCandidate is what gets stored on CampoutUploadBatch and
 // rendered in the review screen: the raw extraction plus the proposed
-// merge result against any matching existing campout (lib/campout-import/
+// merge result against any matching existing campout (lib/campout-upload/
 // match.ts), ready to edit and confirm as-is.
 
 // A PDF page or an Excel worksheet -- the unit both parsers split a
@@ -28,9 +28,9 @@ export type RawExtractedCampout = {
   sourceSections: number[];
 };
 
-export type ImportFieldKey = "name" | "date" | "endDate" | "location" | "description";
+export type UploadFieldKey = "name" | "date" | "endDate" | "location" | "description";
 
-export type ImportCandidate = {
+export type UploadCandidate = {
   tempId: string;
   // The proposed final values -- for a new campout this is just the raw
   // extraction; for a campout matched to an existing one (REQ-30.15) this
@@ -51,8 +51,8 @@ export type ImportCandidate = {
   // current stored value, so the review screen can show a "was: ..." hint
   // without recomputing the diff itself (and so it still reads correctly
   // even after the ASPL edits a field away from the proposed value).
-  changedFields: ImportFieldKey[];
-  previousValues: Partial<Record<ImportFieldKey, string | null>>;
+  changedFields: UploadFieldKey[];
+  previousValues: Partial<Record<UploadFieldKey, string | null>>;
   discarded: boolean;
 };
 
@@ -60,13 +60,13 @@ export type ImportCandidate = {
 // ASPL's edits to the small text fields plus which image (by index) and
 // whether to discard, deliberately *not* the `images` data-URL array
 // itself. The server already holds the real candidates (with their
-// images) on the CampoutImportBatch row from upload time and looks them
+// images) on the CampoutUploadBatch row from upload time and looks them
 // up by tempId, both because re-sending potentially several images'
 // worth of base64 on every confirm needlessly risks Vercel Functions'
 // hard request-body limit, and because trusting client-supplied image
 // bytes for what becomes Campout.imageUrl has no reason to be allowed in
 // the first place.
-export type ImportCandidateEdit = Pick<
-  ImportCandidate,
+export type UploadCandidateEdit = Pick<
+  UploadCandidate,
   "tempId" | "name" | "date" | "endDate" | "location" | "description" | "selectedImageIndex" | "discarded"
 >;

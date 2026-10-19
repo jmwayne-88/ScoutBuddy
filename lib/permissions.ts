@@ -14,9 +14,9 @@ export function canCreateCampout(actor: Actor | null): boolean {
   return isASPL(actor);
 }
 
-// REQ-30.22: the bulk PDF/Excel import flow is gated the same way as every
+// REQ-30.22: the bulk PDF/Excel upload flow is gated the same way as every
 // other campout-authoring action -- ASPL only, never a Patrol Leader.
-export function canImportCampouts(actor: Actor | null): boolean {
+export function canUploadCampouts(actor: Actor | null): boolean {
   return isASPL(actor);
 }
 

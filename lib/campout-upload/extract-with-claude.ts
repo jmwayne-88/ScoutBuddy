@@ -19,7 +19,7 @@ export class ExtractionFailedError extends Error {}
 
 const MODEL = "claude-sonnet-5-5";
 
-const SYSTEM_PROMPT = `You are reading a document a Scout troop's ASPL of Camping uploaded to import campouts into a planning app. The document is split into numbered sections below (PDF pages or Excel worksheets).
+const SYSTEM_PROMPT = `You are reading a document a Scout troop's ASPL of Camping uploaded to add campouts to a planning app. The document is split into numbered sections below (PDF pages or Excel worksheets).
 
 Find every distinct campout described anywhere in the document. Do not assume one campout per section -- a single section can describe several campouts, and a single campout's description can span multiple sections. Infer the breakpoints between campouts from the content itself (headings, repeated date/name patterns, blank lines, table rows).
 

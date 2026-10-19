@@ -6,7 +6,7 @@ import AddIcon from "@mui/icons-material/Add";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
-import { canImportCampouts } from "@/lib/permissions";
+import { canUploadCampouts } from "@/lib/permissions";
 import { getActivePatrols } from "@/lib/patrols";
 import { campoutProgress } from "@/lib/progress";
 import { unresolvedCountsByMenu } from "@/lib/comments";
@@ -49,15 +49,15 @@ export default async function CampoutsLayout({ children }: { children: ReactNode
               Campouts
             </Typography>
             <Stack direction="row" spacing={1}>
-              {canImportCampouts(actor) && (
+              {canUploadCampouts(actor) && (
                 <LinkButton
-                  href="/campouts/import"
+                  href="/campouts/upload"
                   variant="outlined"
                   size="small"
                   startIcon={<UploadFileIcon />}
-                  aria-label="Import from file"
+                  aria-label="Upload from file"
                 >
-                  Import
+                  Upload
                 </LinkButton>
               )}
               <LinkButton

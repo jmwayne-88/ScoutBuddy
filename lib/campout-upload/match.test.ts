@@ -12,8 +12,8 @@ function campout(overrides: Partial<Campout> = {}): Campout {
     location: "Eagle Lake",
     description: "Annual fall trip",
     imageUrl: null,
-    lastImportedFrom: null,
-    lastImportedAt: null,
+    lastUploadedFrom: null,
+    lastUploadedAt: null,
     createdAt: new Date("2026-01-01"),
     ...overrides,
   };

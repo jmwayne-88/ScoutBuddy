@@ -5,10 +5,10 @@ import {
   canCreateCampout,
   canDeleteComment,
   canEditMenu,
-  canImportCampouts,
   canManageCampoutRoster,
   canReview,
   canSubmitMenu,
+  canUploadCampouts,
   isCommentAuthor,
   type CommentForPermissions,
   type MenuForPermissions,
@@ -34,11 +34,11 @@ describe("canCreateCampout / canAssignMenu", () => {
   });
 });
 
-describe("canImportCampouts", () => {
-  it("only the ASPL can import campouts from a file", () => {
-    expect(canImportCampouts(aspl)).toBe(true);
-    expect(canImportCampouts(eagleLeader)).toBe(false);
-    expect(canImportCampouts(null)).toBe(false);
+describe("canUploadCampouts", () => {
+  it("only the ASPL can upload campouts from a file", () => {
+    expect(canUploadCampouts(aspl)).toBe(true);
+    expect(canUploadCampouts(eagleLeader)).toBe(false);
+    expect(canUploadCampouts(null)).toBe(false);
   });
 });
 

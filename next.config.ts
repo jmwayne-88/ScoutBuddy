@@ -16,10 +16,10 @@ const nextConfig: NextConfig = {
   // file never made it into the deployed function's bundle ("Cannot find
   // module '/var/task/node_modules/pdfjs-dist/legacy/build/
   // pdf.worker.mjs'" in production). `contains: true` matching (Next's
-  // own glob-match behavior for this option) means the "campouts/import"
+  // own glob-match behavior for this option) means the "campouts/upload"
   // key matches both the upload route and its nested review route.
   outputFileTracingIncludes: {
-    "campouts/import": ["./node_modules/pdfjs-dist/legacy/build/*.mjs"],
+    "campouts/upload": ["./node_modules/pdfjs-dist/legacy/build/*.mjs"],
   },
 };
 

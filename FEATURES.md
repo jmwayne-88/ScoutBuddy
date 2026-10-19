@@ -50,7 +50,7 @@ Six fixed occasions, always in this order:
 ## Campout & Assignment (ASPL)
 
 - Create a campout: name, date.
-- Bulk-import campouts from an uploaded PDF or Excel file: finds every campout the file describes (not assuming one per page/row/sheet), extracts name/dates/location/description and a thumbnail where a usable photo is present, proposes a merge for anything matching an existing campout, and requires explicit review/confirmation before anything saves — never a duplicate, never a silent overwrite.
+- Bulk-upload campouts from a PDF or Excel file: finds every campout the file describes (not assuming one per page/row/sheet), extracts name/dates/location/description and a thumbnail where a usable photo is present, proposes a merge for anything matching an existing campout, and requires explicit review/confirmation before anything saves — never a duplicate, never a silent overwrite.
 - For a campout, assign a menu to a patrol: set a due date.
 - Remove meal occasions from the standard framework for that campout, either for one named patrol or for all patrols at once.
 - View the status of each patrol's menu for the campout.

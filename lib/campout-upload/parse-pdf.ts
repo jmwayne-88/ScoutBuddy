@@ -32,7 +32,7 @@ export async function parsePdf(bytes: Uint8Array, maxPages: number): Promise<Par
   }).promise;
 
   if (doc.numPages > maxPages) {
-    throw new Error(`This PDF has ${doc.numPages} pages; imports are limited to ${maxPages}.`);
+    throw new Error(`This PDF has ${doc.numPages} pages; uploads are limited to ${maxPages}.`);
   }
 
   const pages: ParsedSection[] = [];
@@ -95,7 +95,7 @@ async function extractPageImages(
       if (dataUrl) images.push(dataUrl);
     } catch {
       // REQ-30.11 is an enhancement, not the core value of this feature --
-      // one undecodable embedded image never fails the whole import.
+      // one undecodable embedded image never fails the whole upload.
       continue;
     }
   }

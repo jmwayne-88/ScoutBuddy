@@ -61,10 +61,10 @@ model Campout {
   description              String?
   imageUrl                 String?
   // REQ-30: provenance only, not an audit trail -- overwritten on every
-  // subsequent import, so it answers "was this last touched by an
-  // upload" rather than "show me its full import history." See ADR 0030.
-  lastImportedFrom         String?
-  lastImportedAt           DateTime?
+  // subsequent upload, so it answers "was this last touched by an
+  // upload" rather than "show its full upload history." See ADR 0030.
+  lastUploadedFrom         String?
+  lastUploadedAt           DateTime?
   createdAt                DateTime                  @default(now())
   menus                    Menu[]
   mealFrameworkExceptions  MealFrameworkException[]
@@ -77,7 +77,7 @@ model Campout {
 // multi-KB base64 thumbnail data per row. Deleted on confirm; swept
 // lazily (by age) on the next upload rather than via a cron job. See ADR
 // 0031.
-model CampoutImportBatch {
+model CampoutUploadBatch {
   id             String   @id @default(cuid())
   sourceFileName String
   createdAt      DateTime @default(now())
