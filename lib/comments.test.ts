@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { actorLabel, activityLine, nestReplies, targetSummary, unresolvedThreadCount } from "./comments";
+import { actorLabel, activityLine, nestReplies, targetSummary, unresolvedCountsByMenu, unresolvedThreadCount } from "./comments";
 
 describe("actorLabel", () => {
   it("labels the ASPL and a patrol's Leader", () => {
@@ -9,10 +9,11 @@ describe("actorLabel", () => {
 });
 
 describe("targetSummary", () => {
-  it("describes each of the three comment targets", () => {
+  it("describes each of the four comment targets", () => {
     expect(targetSummary("MENU", null)).toBe("the menu");
     expect(targetSummary("DISH", "Trail Stew")).toBe("Trail Stew (dish)");
     expect(targetSummary("INGREDIENT", "eggs")).toBe("eggs (ingredient)");
+    expect(targetSummary("MEAL", "Saturday Dinner")).toBe("Saturday Dinner (meal)");
   });
 });
 
@@ -87,5 +88,29 @@ describe("unresolvedThreadCount", () => {
       ])
     ).toBe(2);
     expect(unresolvedThreadCount([])).toBe(0);
+  });
+});
+
+describe("unresolvedCountsByMenu", () => {
+  it("groups the same open-root-thread count per menu", () => {
+    const counts = unresolvedCountsByMenu([
+      { menuId: "menu-1", parentId: null, status: "OPEN" },
+      { menuId: "menu-1", parentId: "c1", status: "OPEN" }, // reply -- doesn't count
+      { menuId: "menu-1", parentId: null, status: "RESOLVED" }, // resolved -- doesn't count
+      { menuId: "menu-2", parentId: null, status: "OPEN" },
+      { menuId: "menu-2", parentId: null, status: "OPEN" },
+    ]);
+    expect(counts.get("menu-1")).toBe(1);
+    expect(counts.get("menu-2")).toBe(2);
+  });
+
+  it("omits a menu with no unresolved threads rather than storing zero", () => {
+    const counts = unresolvedCountsByMenu([{ menuId: "menu-1", parentId: null, status: "RESOLVED" }]);
+    expect(counts.has("menu-1")).toBe(false);
+    expect(counts.get("menu-1") ?? 0).toBe(0);
+  });
+
+  it("is empty for an empty list", () => {
+    expect(unresolvedCountsByMenu([]).size).toBe(0);
   });
 });

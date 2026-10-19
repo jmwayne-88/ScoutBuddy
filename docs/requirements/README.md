@@ -32,3 +32,4 @@ One file per product iteration from [ROADMAP.md](../../ROADMAP.md) (01-05), each
 - [26 - Full Comment & Annotation System (Office Review-Mode Style)](26-full-comment-annotation-system.md)
 - [27 - Multi-Tenant Unit Isolation & Switching](27-multi-tenant-unit-isolation.md)
 - [28 - Comment Pane UX Revision](28-comment-pane-ux-revision.md)
+- [29 - Smaller Comment Icon, Meal-Level Comments & Campout-List Comment Counts](29-smaller-comment-icon-and-meal-comments.md)

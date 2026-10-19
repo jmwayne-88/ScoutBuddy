@@ -2,13 +2,24 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { CommentActivityAction, CommentActorRole, CommentTargetType } from "@prisma/client";
+import type { CommentActivityAction, CommentActorRole, CommentTargetType, MealOccasion } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getActor, type Actor } from "@/lib/session";
 import { canCommentOnMenu, canDeleteComment } from "@/lib/permissions";
 import { requireString } from "@/lib/form-data";
 import { actorLabel, targetSummary } from "@/lib/comments";
+import { mealOccasionLabel } from "@/lib/constants";
 import { withToast } from "@/lib/toast";
+
+// REQ-29.13: posting, resolving, reopening, or deleting a thread changes
+// an unresolved count shown outside the menu page itself -- the ASPL's
+// campout list (its layout, shared across every /campouts/[id]) and the
+// Patrol Leader's own menu list. Replying and assigning don't change any
+// count, so they don't call this.
+function revalidateCommentCountLists() {
+  revalidatePath("/campouts", "layout");
+  revalidatePath("/patrol-leader");
+}
 
 // REQ-26.1/26.10: available to the menu's owning Patrol Leader and the
 // ASPL regardless of Menu.status -- see canCommentOnMenu.
@@ -59,11 +70,13 @@ export async function addComment(formData: FormData) {
   const body = requireString(formData, "body");
   const dishId = String(formData.get("dishId") ?? "") || null;
   const ingredientId = String(formData.get("ingredientId") ?? "") || null;
+  const occasion = (String(formData.get("occasion") ?? "") || null) as MealOccasion | null;
 
   const { actor, menu } = await requireCommentableMenu(menuId);
 
   let resolvedDishId: string | null = null;
   let resolvedIngredientId: string | null = null;
+  let resolvedOccasion: MealOccasion | null = null;
   let label: string | null = null;
 
   if (target === "DISH") {
@@ -78,6 +91,16 @@ export async function addComment(formData: FormData) {
     if (!ingredient) throw new Error("That ingredient doesn't belong to this menu.");
     resolvedIngredientId = ingredient.id;
     label = ingredient.name;
+  } else if (target === "MEAL") {
+    // REQ-29.3: the trigger only ever renders beside a currently-active
+    // meal heading, so this requires the Meal row to exist right now --
+    // unlike a reply (which inherits its root's occasion regardless of
+    // whether the meal still exists, REQ-29.7).
+    if (!occasion) throw new Error("Missing meal occasion for this comment.");
+    const meal = await db.meal.findFirst({ where: { menuId, occasion } });
+    if (!meal) throw new Error("That meal occasion isn't currently part of this menu.");
+    resolvedOccasion = occasion;
+    label = mealOccasionLabel(occasion);
   }
 
   const { role, patrolId } = actorFields(actor);
@@ -88,6 +111,7 @@ export async function addComment(formData: FormData) {
       targetType: target,
       dishId: resolvedDishId,
       ingredientId: resolvedIngredientId,
+      occasion: resolvedOccasion,
       targetLabel: label,
       body,
       authorRole: role,
@@ -104,6 +128,7 @@ export async function addComment(formData: FormData) {
   });
 
   revalidatePath(`/menus/${menuId}`);
+  revalidateCommentCountLists();
   redirect(withToast(`/menus/${menuId}`, "Comment added"));
 }
 
@@ -127,6 +152,7 @@ export async function replyToComment(formData: FormData) {
       targetType: parent.targetType,
       dishId: parent.dishId,
       ingredientId: parent.ingredientId,
+      occasion: parent.occasion,
       targetLabel: parent.targetLabel,
       parentId: parent.id,
       body,
@@ -216,6 +242,7 @@ async function setCommentStatus(
   });
 
   revalidatePath(`/menus/${menuId}`);
+  revalidateCommentCountLists();
   redirect(withToast(`/menus/${menuId}`, toastMessage));
 }
 
@@ -260,5 +287,6 @@ export async function deleteComment(formData: FormData) {
   });
 
   revalidatePath(`/menus/${menuId}`);
+  revalidateCommentCountLists();
   redirect(withToast(`/menus/${menuId}`, "Comment deleted"));
 }

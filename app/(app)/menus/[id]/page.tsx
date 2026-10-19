@@ -106,6 +106,7 @@ export default async function MenuPage({
       targetType: true,
       dishId: true,
       ingredientId: true,
+      occasion: true,
       body: true,
       authorRole: true,
       authorPatrolId: true,
@@ -119,6 +120,7 @@ export default async function MenuPage({
     return allComments.filter((c) => {
       if (target.type === "MENU") return c.targetType === "MENU";
       if (target.type === "DISH") return c.targetType === "DISH" && c.dishId === target.dishId;
+      if (target.type === "MEAL") return c.targetType === "MEAL" && c.occasion === target.occasion;
       return c.targetType === "INGREDIENT" && c.ingredientId === target.ingredientId;
     });
   }
@@ -222,9 +224,12 @@ export default async function MenuPage({
           return (
             <Paper key={value} variant="outlined" sx={{ p: 2 }}>
               <Stack spacing={1.5}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  {label}
-                </Typography>
+                <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    {label}
+                  </Typography>
+                  {commentPane({ type: "MEAL", occasion: value }, label, "Meal")}
+                </Stack>
                 {meal.dishes.length === 0 &&
                   (() => {
                     const { Icon, message } = EMPTY_STATES.mealNoDishes(label, canEdit);

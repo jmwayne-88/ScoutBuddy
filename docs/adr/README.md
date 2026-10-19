@@ -32,3 +32,4 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0026 - Comment/annotation data model: a self-referencing table plus an append-only activity log](0026-comment-annotation-data-model.md)
 - [0027 - Mobile bottom navigation, breakpoint-scoped and header-only role switching](0027-mobile-bottom-navigation.md)
 - [0028 - `Menu.submittedAt`, set once, backs the on-time streak](0028-menu-submitted-at-for-streak-tracking.md)
+- [0029 - Meal comments anchor on occasion, not a `Meal` foreign key](0029-meal-comment-occasion-anchor.md)

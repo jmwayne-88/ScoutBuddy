@@ -9,12 +9,13 @@ export function actorLabel(role: CommentActorRole, patrolName: string | null): s
   return `${patrolName ?? "the patrol's"} Leader`;
 }
 
-// REQ-26.7: "the menu" / "Trail Stew (dish)" / "eggs (ingredient)" -- the
-// same phrasing used for a live comment's target and for a frozen
-// CommentActivity.targetSummary snapshot.
+// REQ-26.7/29.6: "the menu" / "Trail Stew (dish)" / "eggs (ingredient)" /
+// "Saturday Dinner (meal)" -- the same phrasing used for a live comment's
+// target and for a frozen CommentActivity.targetSummary snapshot.
 export function targetSummary(targetType: CommentTargetType, targetLabel: string | null): string {
   if (targetType === "MENU") return "the menu";
   if (targetType === "DISH") return `${targetLabel} (dish)`;
+  if (targetType === "MEAL") return `${targetLabel} (meal)`;
   return `${targetLabel} (ingredient)`;
 }
 
@@ -85,4 +86,22 @@ export function nestReplies<T extends { id: string; parentId: string | null; cre
 // longer needs anyone's attention.
 export function unresolvedThreadCount(comments: { parentId: string | null; status: "OPEN" | "RESOLVED" }[]): number {
   return comments.filter((c) => !c.parentId && c.status === "OPEN").length;
+}
+
+// REQ-29.9-29.11: the same "open root thread" definition as
+// unresolvedThreadCount, grouped per menu -- shared by the ASPL's campout
+// list (summed across a campout's menus, app/(app)/campouts/layout.tsx)
+// and the Patrol Leader's own menu list (one menu per row,
+// app/(app)/patrol-leader/page.tsx). A thread whose dish/ingredient/meal
+// has since been removed still counts here, same as unresolvedThreadCount
+// -- this only looks at menuId/parentId/status, never the target itself.
+export function unresolvedCountsByMenu(
+  comments: { menuId: string; parentId: string | null; status: "OPEN" | "RESOLVED" }[]
+): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const c of comments) {
+    if (c.parentId !== null || c.status !== "OPEN") continue;
+    counts.set(c.menuId, (counts.get(c.menuId) ?? 0) + 1);
+  }
+  return counts;
 }

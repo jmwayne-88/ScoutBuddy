@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import LinearProgress from "@mui/material/LinearProgress";
 import Tooltip from "@mui/material/Tooltip";
+import { CommentCountBadge } from "@/components/CommentCountBadge";
 
 // See components/LinkButton.tsx for why `Link` must be resolved inside a
 // client module rather than passed in as a `component` prop value from the
@@ -20,6 +21,7 @@ export function CampoutCard({
   dotColor,
   percent,
   label,
+  unresolvedComments = 0,
 }: {
   href: string;
   name: string;
@@ -29,6 +31,7 @@ export function CampoutCard({
   dotColor: string;
   percent: number;
   label: string;
+  unresolvedComments?: number;
 }) {
   return (
     <Paper
@@ -67,7 +70,10 @@ export function CampoutCard({
               </Typography>
             </Tooltip>
           </Box>
-          <Box aria-hidden sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: dotColor, flexShrink: 0 }} />
+          <Stack spacing={0.5} sx={{ alignItems: "flex-end", flexShrink: 0 }}>
+            <Box aria-hidden sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: dotColor }} />
+            <CommentCountBadge count={unresolvedComments} />
+          </Stack>
         </Stack>
         <Box>
           <LinearProgress

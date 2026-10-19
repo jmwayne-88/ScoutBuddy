@@ -15,7 +15,7 @@ import ReplyIcon from "@mui/icons-material/Reply";
 import CheckIcon from "@mui/icons-material/Check";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
-import type { CommentActorRole, CommentStatus } from "@prisma/client";
+import type { CommentActorRole, CommentStatus, MealOccasion } from "@prisma/client";
 import { formatEventDate } from "@/lib/dates";
 import { actorLabel } from "@/lib/comments";
 import { contrastText } from "@/lib/colors";
@@ -53,7 +53,8 @@ export type CommentRecord = CommentBase & { replies: CommentBase[] };
 export type CommentTarget =
   | { type: "MENU" }
   | { type: "DISH"; dishId: string }
-  | { type: "INGREDIENT"; ingredientId: string };
+  | { type: "INGREDIENT"; ingredientId: string }
+  | { type: "MEAL"; occasion: MealOccasion };
 
 // REQ-26.2-26.5/26.9, revised by REQ-28.3/28.4: one root comment and its
 // flat replies, rendered inside components/CommentPane.tsx. Reuses

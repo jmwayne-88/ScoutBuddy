@@ -81,6 +81,7 @@ export function CommentPane({
   const hiddenTargetFields: Record<string, string> = { menuId, target: target.type };
   if (target.type === "DISH") hiddenTargetFields.dishId = target.dishId;
   if (target.type === "INGREDIENT") hiddenTargetFields.ingredientId = target.ingredientId;
+  if (target.type === "MEAL") hiddenTargetFields.occasion = target.occasion;
 
   const triggerLabel =
     unresolved > 0
@@ -99,7 +100,12 @@ export function CommentPane({
     setComposing(false);
   }
 
-  const icon = unresolved > 0 || hasAny ? <ChatBubbleIcon fontSize="small" /> : <ChatBubbleOutlineIcon fontSize="small" />;
+  const hasUnresolvedOrAny = unresolved > 0 || hasAny;
+  // REQ-29.1: the button variant (the menu header's "Menu comments") keeps
+  // its original 20px icon; only the icon-variant trigger (dish,
+  // ingredient, meal) gets the smaller 16px glyph below.
+  const icon = hasUnresolvedOrAny ? <ChatBubbleIcon fontSize="small" /> : <ChatBubbleOutlineIcon fontSize="small" />;
+  const smallIcon = hasUnresolvedOrAny ? <ChatBubbleIcon sx={{ fontSize: 16 }} /> : <ChatBubbleOutlineIcon sx={{ fontSize: 16 }} />;
 
   const trigger =
     variant === "button" ? (
@@ -110,19 +116,25 @@ export function CommentPane({
       </Badge>
     ) : (
       <Tooltip title={triggerLabel}>
+        {/* REQ-29.1/29.2: shrunk from 36x36 to 28x28 -- still clears the
+            24x24 WCAG 2.2 target-size minimum (SC 2.5.8). */}
         <IconButton
           size="small"
           onClick={handleOpen}
           aria-label={triggerLabel}
           sx={{
-            width: 36,
-            height: 36,
+            width: 28,
+            height: 28,
             flexShrink: 0,
             color: unresolved > 0 ? "primary.main" : "text.secondary",
           }}
         >
-          <Badge badgeContent={unresolved} color="primary" sx={{ "& .MuiBadge-badge": { fontSize: 10, height: 16, minWidth: 16 } }}>
-            {icon}
+          <Badge
+            badgeContent={unresolved}
+            color="primary"
+            sx={{ "& .MuiBadge-badge": { fontSize: 9, height: 14, minWidth: 14, px: "3px" } }}
+          >
+            {smallIcon}
           </Badge>
         </IconButton>
       </Tooltip>

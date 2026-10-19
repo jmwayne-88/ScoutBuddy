@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
 import { getActivePatrols } from "@/lib/patrols";
 import { campoutProgress } from "@/lib/progress";
+import { unresolvedCountsByMenu } from "@/lib/comments";
 import { formatEventDate } from "@/lib/dates";
 import { EMPTY_STATES } from "@/lib/empty-states";
 import { EmptyState } from "@/components/EmptyState";
@@ -23,9 +24,19 @@ export default async function CampoutsLayout({ children }: { children: ReactNode
 
   const campouts = await db.campout.findMany({
     orderBy: { date: "asc" },
-    include: { menus: { select: { status: true } } },
+    include: { menus: { select: { id: true, status: true } } },
   });
   const activePatrols = await getActivePatrols();
+
+  // REQ-29.9/29.11: a campout's total is every unresolved top-level thread
+  // across every patrol's menu for it (menu, meal, dish, and ingredient
+  // targets alike) -- counted once here and summed per campout below,
+  // rather than a separate query per card.
+  const unresolvedComments = await db.comment.findMany({
+    where: { menuId: { in: campouts.flatMap((c) => c.menus.map((m) => m.id)) }, parentId: null, status: "OPEN", deletedAt: null },
+    select: { menuId: true, parentId: true, status: true },
+  });
+  const unresolvedCountsByMenuId = unresolvedCountsByMenu(unresolvedComments);
 
   return (
     <Stack direction={{ xs: "column", md: "row" }} spacing={3} sx={{ alignItems: "flex-start" }}>
@@ -52,6 +63,10 @@ export default async function CampoutsLayout({ children }: { children: ReactNode
               {campouts.map((c) => {
                 const progress = campoutProgress(c.menus.map((m) => m.status), activePatrols.length);
                 const eventDate = formatEventDate(c.date);
+                const unresolvedTotal = c.menus.reduce(
+                  (sum, m) => sum + (unresolvedCountsByMenuId.get(m.id) ?? 0),
+                  0
+                );
                 return (
                   <li key={c.id}>
                     <CampoutCard
@@ -63,6 +78,7 @@ export default async function CampoutsLayout({ children }: { children: ReactNode
                       dotColor={progress.dotColor}
                       percent={progress.percent}
                       label={progress.label}
+                      unresolvedComments={unresolvedTotal}
                     />
                   </li>
                 );

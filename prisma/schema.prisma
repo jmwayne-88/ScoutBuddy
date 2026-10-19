@@ -156,6 +156,7 @@ enum CommentTargetType {
   MENU
   DISH
   INGREDIENT
+  MEAL
 }
 
 enum CommentStatus {
@@ -195,6 +196,15 @@ model Comment {
   dish               Dish?              @relation(fields: [dishId], references: [id], onDelete: SetNull)
   ingredientId       String?
   ingredient         Ingredient?        @relation(fields: [ingredientId], references: [id], onDelete: SetNull)
+  // REQ-29.3/29.7: a MEAL comment anchors on menuId + occasion, not a
+  // `Meal` FK -- restoreOccasion (app/(app)/campouts/[id]/actions.ts)
+  // creates a brand-new Meal row with a new id on every restore, so an FK
+  // (even `onDelete: SetNull`, matching dishId/ingredientId) would leave a
+  // comment permanently detached after one remove/restore cycle. Since a
+  // menu has at most one Meal per occasion, the (menuId, occasion) pair
+  // already identifies "that meal" uniquely and keeps working across
+  // delete/recreate. See ADR 0029.
+  occasion           MealOccasion?
   targetLabel        String?
   parentId           String?
   parent             Comment?           @relation("CommentReplies", fields: [parentId], references: [id])
