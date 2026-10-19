@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
   canAssignMenu,
+  canCommentOnMenu,
   canCreateCampout,
+  canDeleteComment,
   canEditMenu,
   canManageCampoutRoster,
   canReview,
   canSubmitMenu,
+  isCommentAuthor,
+  type CommentForPermissions,
   type MenuForPermissions,
 } from "./permissions";
 import type { Actor } from "./session";
@@ -79,5 +83,40 @@ describe("canReview", () => {
   it("a Patrol Leader can never review their own or another patrol's menu", () => {
     expect(canReview(eagleLeader, menu({ patrolId: "eagle", status: "SUBMITTED" }))).toBe(false);
     expect(canReview(pumaLeader, menu({ patrolId: "eagle", status: "SUBMITTED" }))).toBe(false);
+  });
+});
+
+describe("canCommentOnMenu", () => {
+  it("allows the ASPL and the owning Patrol Leader regardless of status", () => {
+    for (const status of ["NOT_STARTED", "IN_PROGRESS", "SUBMITTED", "CHANGES_REQUESTED", "APPROVED"] as const) {
+      expect(canCommentOnMenu(aspl, menu({ status }))).toBe(true);
+      expect(canCommentOnMenu(eagleLeader, menu({ status, patrolId: "eagle" }))).toBe(true);
+    }
+  });
+
+  it("denies a Patrol Leader from a different patrol, and a signed-out viewer", () => {
+    expect(canCommentOnMenu(pumaLeader, menu({ patrolId: "eagle" }))).toBe(false);
+    expect(canCommentOnMenu(null, menu())).toBe(false);
+  });
+});
+
+describe("isCommentAuthor / canDeleteComment", () => {
+  const aspl_comment: CommentForPermissions = { authorRole: "ASPL", authorPatrolId: null };
+  const eagle_comment: CommentForPermissions = { authorRole: "PATROL_LEADER", authorPatrolId: "eagle" };
+
+  it("matches only the actor who actually authored the comment", () => {
+    expect(isCommentAuthor(aspl, aspl_comment)).toBe(true);
+    expect(isCommentAuthor(eagleLeader, aspl_comment)).toBe(false);
+    expect(isCommentAuthor(eagleLeader, eagle_comment)).toBe(true);
+    expect(isCommentAuthor(pumaLeader, eagle_comment)).toBe(false);
+    expect(isCommentAuthor(aspl, eagle_comment)).toBe(false);
+    expect(isCommentAuthor(null, eagle_comment)).toBe(false);
+  });
+
+  it("lets only the author delete, never the other party or the ASPL overriding", () => {
+    expect(canDeleteComment(eagleLeader, menu({ patrolId: "eagle" }), eagle_comment)).toBe(true);
+    expect(canDeleteComment(aspl, menu({ patrolId: "eagle" }), eagle_comment)).toBe(false);
+    expect(canDeleteComment(pumaLeader, menu({ patrolId: "eagle" }), eagle_comment)).toBe(false);
+    expect(canDeleteComment(eagleLeader, menu({ patrolId: "eagle" }), aspl_comment)).toBe(false);
   });
 });

@@ -62,19 +62,21 @@ model Campout {
 }
 
 model Menu {
-  id             String     @id @default(cuid())
-  campoutId      String
-  campout        Campout    @relation(fields: [campoutId], references: [id])
-  patrolId       String
-  patrol         Patrol     @relation(fields: [patrolId], references: [id])
-  dueDate        DateTime
-  status         MenuStatus @default(NOT_STARTED)
-  nutritionNote  String     @default("")
-  allergyNote    String     @default("")
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  meals          Meal[]
-  reviews        Review[]
+  id              String            @id @default(cuid())
+  campoutId       String
+  campout         Campout           @relation(fields: [campoutId], references: [id])
+  patrolId        String
+  patrol          Patrol            @relation(fields: [patrolId], references: [id])
+  dueDate         DateTime
+  status          MenuStatus        @default(NOT_STARTED)
+  nutritionNote   String            @default("")
+  allergyNote     String            @default("")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  meals           Meal[]
+  reviews         Review[]
+  comments        Comment[]
+  commentActivity CommentActivity[]
 
   @@unique([campoutId, patrolId])
 }
@@ -95,6 +97,7 @@ model Dish {
   meal        Meal         @relation(fields: [mealId], references: [id])
   name        String
   ingredients Ingredient[]
+  comments    Comment[]
 }
 
 // A patrol-leader-entered free-text item, never tagged by hand with a
@@ -110,6 +113,7 @@ model Ingredient {
   name     String
   quantity String
   category IngredientCategory?
+  comments Comment[]
 }
 
 enum IngredientCategory {
@@ -132,6 +136,96 @@ model Review {
   decision  ReviewDecision
   comment   String?
   createdAt DateTime       @default(now())
+}
+
+// REQ-26: the two parties who can ever author/assign/resolve/delete a
+// comment -- the same two roles `lib/session.ts`'s `Actor` type already
+// models. Not a general user-identity system; see ADR 0026.
+enum CommentActorRole {
+  ASPL
+  PATROL_LEADER
+}
+
+enum CommentTargetType {
+  MENU
+  DISH
+  INGREDIENT
+}
+
+enum CommentStatus {
+  OPEN
+  RESOLVED
+}
+
+enum CommentActivityAction {
+  CREATED
+  REPLIED
+  ASSIGNED
+  REASSIGNED
+  RESOLVED
+  REOPENED
+  DELETED
+}
+
+// REQ-26: a general-purpose, Office-review-mode-style annotation layer
+// alongside Review (ADR 0007) -- comments never drive Menu.status. A reply
+// is a Comment row with `parentId` set, flat (one level, no reply-to-
+// reply), inheriting its root's target.
+//
+// `targetType` is stored explicitly rather than inferred from
+// dishId/ingredientId nullability, because those two FKs are `onDelete:
+// SetNull` (removeDish/removeIngredient in actions.ts hard-delete the
+// underlying row) -- once that happens, nullability alone could no longer
+// distinguish a DISH comment whose dish is gone from a MENU comment.
+// `targetLabel` is a point-in-time name snapshot for the same reason: the
+// comment (and REQ-26.6's audit log) must keep reading sensibly forever,
+// even after its anchor is renamed or removed. See ADR 0026.
+model Comment {
+  id                 String             @id @default(cuid())
+  menuId             String
+  menu               Menu               @relation(fields: [menuId], references: [id])
+  targetType         CommentTargetType
+  dishId             String?
+  dish               Dish?              @relation(fields: [dishId], references: [id], onDelete: SetNull)
+  ingredientId       String?
+  ingredient         Ingredient?        @relation(fields: [ingredientId], references: [id], onDelete: SetNull)
+  targetLabel        String?
+  parentId           String?
+  parent             Comment?           @relation("CommentReplies", fields: [parentId], references: [id])
+  replies            Comment[]          @relation("CommentReplies")
+  body               String
+  authorRole         CommentActorRole
+  authorPatrolId     String?
+  status             CommentStatus      @default(OPEN)
+  assigneeRole       CommentActorRole?
+  assigneePatrolId   String?
+  resolvedAt         DateTime?
+  resolvedByRole     CommentActorRole?
+  resolvedByPatrolId String?
+  deletedAt          DateTime?
+  deletedByRole      CommentActorRole?
+  deletedByPatrolId  String?
+  createdAt          DateTime           @default(now())
+  activity           CommentActivity[]
+}
+
+// REQ-26.6: an append-only, immutable audit trail -- deleting a Comment is
+// always a soft delete (Comment.deletedAt), so a comment's activity rows
+// are never deleted either. `targetSummary`/`detail` are frozen display
+// text captured at write time, not derived live, so a past entry reads
+// correctly even after the comment/dish/ingredient it describes changes.
+model CommentActivity {
+  id            String                @id @default(cuid())
+  menuId        String
+  menu          Menu                  @relation(fields: [menuId], references: [id])
+  commentId     String
+  comment       Comment               @relation(fields: [commentId], references: [id])
+  action        CommentActivityAction
+  actorRole     CommentActorRole
+  actorPatrolId String?
+  targetSummary String
+  detail        String?
+  createdAt     DateTime              @default(now())
 }
 
 // A row means "this occasion is removed for this patrol (or every patrol,

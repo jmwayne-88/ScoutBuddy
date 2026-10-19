@@ -12,11 +12,15 @@ import { menuHasEmptyOccasion } from "@/lib/validation";
 import { MEAL_OCCASIONS } from "@/lib/constants";
 import { formatDueDate } from "@/lib/dates";
 import { menuMealProgress, menuStatusColor } from "@/lib/progress";
+import { nestReplies } from "@/lib/comments";
 import { EMPTY_STATES } from "@/lib/empty-states";
 import { EmptyState } from "@/components/EmptyState";
 import { PatrolBadge } from "@/components/PatrolBadge";
 import { RelativeDate } from "@/components/RelativeDate";
 import { ReviewThread } from "@/components/ReviewThread";
+import { CommentThread, type CommentTarget } from "@/components/CommentThread";
+import { CommentDisclosure } from "@/components/CommentDisclosure";
+import { CommentActivityLog } from "@/components/CommentActivityLog";
 import { MenuStatusChip } from "@/components/MenuStatusChip";
 import { NavLink } from "@/components/NavLink";
 import { LinkButton } from "@/components/LinkButton";
@@ -38,12 +42,18 @@ import {
   updateNotes,
 } from "./actions";
 
+const ACTIVITY_PAGE_SIZE = 20;
+const ACTIVITY_LIMIT_CAP = 500;
+
 export default async function MenuPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ activityLimit?: string }>;
 }) {
   const { id } = await params;
+  const { activityLimit: activityLimitParam } = await searchParams;
   const actor = await getActor();
 
   const menu = await db.menu.findUnique({
@@ -66,6 +76,57 @@ export default async function MenuPage({
   const mealProgress = menuMealProgress(menu.meals);
   const statusColor = menuStatusColor(menu.status);
   const hasEmptyOccasion = menuHasEmptyOccasion(menu.meals);
+
+  // REQ-26.1-26.5: every live (non-deleted) comment on this menu, fetched
+  // once and sliced per target below -- a reply already carries its
+  // root's target fields (see comment-actions.ts's replyToComment), so a
+  // plain filter per target is enough; lib/comments.ts's nestReplies does
+  // the root/reply grouping.
+  const allComments = await db.comment.findMany({
+    where: { menuId: id, deletedAt: null },
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      parentId: true,
+      targetType: true,
+      dishId: true,
+      ingredientId: true,
+      body: true,
+      authorRole: true,
+      authorPatrolId: true,
+      status: true,
+      assigneeRole: true,
+      createdAt: true,
+    },
+  });
+
+  function commentsForTarget(target: CommentTarget) {
+    return allComments.filter((c) => {
+      if (target.type === "MENU") return c.targetType === "MENU";
+      if (target.type === "DISH") return c.targetType === "DISH" && c.dishId === target.dishId;
+      return c.targetType === "INGREDIENT" && c.ingredientId === target.ingredientId;
+    });
+  }
+
+  function threadCount(target: CommentTarget) {
+    return commentsForTarget(target).filter((c) => !c.parentId).length;
+  }
+
+  // REQ-26.7: newest first, an initial page plus "Load more" via
+  // `?activityLimit=`, fetched as limit+1 so we know whether more exist
+  // without a separate count query.
+  const activityLimit = Math.min(
+    ACTIVITY_LIMIT_CAP,
+    Math.max(ACTIVITY_PAGE_SIZE, Number(activityLimitParam) || ACTIVITY_PAGE_SIZE)
+  );
+  const activityRows = await db.commentActivity.findMany({
+    where: { menuId: id },
+    orderBy: { createdAt: "desc" },
+    take: activityLimit + 1,
+    select: { id: true, action: true, actorRole: true, targetSummary: true, detail: true, createdAt: true },
+  });
+  const hasMoreActivity = activityRows.length > activityLimit;
+  const activityEntries = activityRows.slice(0, activityLimit);
 
   return (
     <Stack spacing={4} sx={{ maxWidth: 900 }}>
@@ -199,6 +260,16 @@ export default async function MenuPage({
                                 {ing.name} — {ing.quantity}
                               </Typography>
                             </SwipeableRow>
+                            <CommentDisclosure label="Comments" count={threadCount({ type: "INGREDIENT", ingredientId: ing.id })}>
+                              <CommentThread
+                                menuId={menu.id}
+                                patrolColor={menu.patrol.color}
+                                patrolName={menu.patrol.name}
+                                target={{ type: "INGREDIENT", ingredientId: ing.id }}
+                                comments={nestReplies(commentsForTarget({ type: "INGREDIENT", ingredientId: ing.id }))}
+                                actor={actor}
+                              />
+                            </CommentDisclosure>
                           </Stack>
                           );
                         })}
@@ -219,6 +290,16 @@ export default async function MenuPage({
                           </SubmitButton>
                         </Stack>
                       )}
+                      <CommentDisclosure label="Comments" count={threadCount({ type: "DISH", dishId: dish.id })}>
+                        <CommentThread
+                          menuId={menu.id}
+                          patrolColor={menu.patrol.color}
+                          patrolName={menu.patrol.name}
+                          target={{ type: "DISH", dishId: dish.id }}
+                          comments={nestReplies(commentsForTarget({ type: "DISH", dishId: dish.id }))}
+                          actor={actor}
+                        />
+                      </CommentDisclosure>
                     </Stack>
                     );
                   })}
@@ -328,6 +409,33 @@ export default async function MenuPage({
           <ReviewThread reviews={menu.reviews} patrolColor={menu.patrol.color} />
         </Stack>
       )}
+
+      <Stack spacing={1.5} sx={{ borderTop: 1, borderColor: "divider", pt: 2 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          Menu comments
+        </Typography>
+        <CommentThread
+          menuId={menu.id}
+          patrolColor={menu.patrol.color}
+          patrolName={menu.patrol.name}
+          target={{ type: "MENU" }}
+          comments={nestReplies(commentsForTarget({ type: "MENU" }))}
+          actor={actor}
+        />
+      </Stack>
+
+      <Stack spacing={1.5} id="comment-activity-log" sx={{ borderTop: 1, borderColor: "divider", pt: 2 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          Comment activity log
+        </Typography>
+        <CommentActivityLog
+          menuId={menu.id}
+          patrolName={menu.patrol.name}
+          entries={activityEntries}
+          hasMore={hasMoreActivity}
+          nextLimit={activityLimit + ACTIVITY_PAGE_SIZE}
+        />
+      </Stack>
     </Stack>
   );
 }
