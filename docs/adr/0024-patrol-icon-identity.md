@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-[Requirement 18](../requirements/18-patrol-icon-identity.md) asks for every patrol to optionally carry a small icon alongside its existing color identity (`components/PatrolBadge.tsx`, the campout patrol card's header band, the `/patrols` list swatch, the home role picker), while staying strictly inside CLAUDE.md's rule against recreating any Scouting America logo, the fleur-de-lis, or another organization's protected mark. Because patrols are admin-managed rows an ASPL can name anything (ADR 0018), the icon set has to be considerably broader than the five current default patrols' own namesakes (Eagle/Puma/Raven/Silver Fox/Joe), and Requirement 18 was expanded to also ask for a best-effort icon suggestion based on the patrol name as the ASPL types it.
+[Requirement 18](../requirements/design-system-visual-identity/18-patrol-icon-identity.md) asks for every patrol to optionally carry a small icon alongside its existing color identity (`components/PatrolBadge.tsx`, the campout patrol card's header band, the `/patrols` list swatch, the home role picker), while staying strictly inside CLAUDE.md's rule against recreating any Scouting America logo, the fleur-de-lis, or another organization's protected mark. Because patrols are admin-managed rows an ASPL can name anything (ADR 0018), the icon set has to be considerably broader than the five current default patrols' own namesakes (Eagle/Puma/Raven/Silver Fox/Joe), and Requirement 18 was expanded to also ask for a best-effort icon suggestion based on the patrol name as the ASPL types it.
 
 Two real constraints shaped the implementation:
 
@@ -44,8 +44,8 @@ Two real constraints shaped the implementation:
 
 ## Related
 
-- [Requirement 18 - Patrol Icon/Avatar Identity](../requirements/18-patrol-icon-identity.md)
+- [Requirement 18 - Patrol Icon/Avatar Identity](../requirements/design-system-visual-identity/18-patrol-icon-identity.md)
 - [ADR 0015 - Brand-aligned visual design, no trademarks](0015-brand-aligned-visual-design.md) — the trademark-safety constraint REQ-18.7 carries forward, and this ADR's "no traced/adapted art" decision satisfies directly.
 - [ADR 0018 - Patrols as database rows](0018-patrols-as-database-rows.md) — why the icon set can't be hardcoded to five known patrol names, and why `Patrol.icon` follows `Patrol.color`'s "validated plain column, not an enum" shape.
 - [ADR 0017 - Adopt MUI design system](0017-adopt-mui-design-system.md) — the MUI + Server Components gotcha `PatrolBadge.tsx`'s `"use client"` change follows, and `SvgIcon` as the wrapper that makes the hand-drawn icons interchangeable with `@mui/icons-material` ones.
-- [Requirement 17 - Avatar/Card Home Role Picker](../requirements/17-avatar-card-role-picker.md) — `components/RoleForm.tsx` was already built to consume a patrol icon once this requirement landed; this ADR is what actually supplies one.
+- [Requirement 17 - Avatar/Card Home Role Picker](../requirements/design-system-visual-identity/17-avatar-card-role-picker.md) — `components/RoleForm.tsx` was already built to consume a patrol icon once this requirement landed; this ADR is what actually supplies one.

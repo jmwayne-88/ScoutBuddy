@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-[FEATURES.md](../../FEATURES.md) explicitly left open whether a Patrol Leader editing a menu while it's `SUBMITTED` should silently revert its status to `IN_PROGRESS` (requiring an explicit re-submit), or leave it `SUBMITTED` while edited. [REQ-5.1](../requirements/05-workflow-hardening-and-polish.md) requires this be decided and written down before Iteration 5 is considered done.
+[FEATURES.md](../../FEATURES.md) explicitly left open whether a Patrol Leader editing a menu while it's `SUBMITTED` should silently revert its status to `IN_PROGRESS` (requiring an explicit re-submit), or leave it `SUBMITTED` while edited. [REQ-5.1](../requirements/roadmap-iterations/05-workflow-hardening-and-polish.md) requires this be decided and written down before Iteration 5 is considered done.
 
 Separately, the user directed earlier in this project that "the Patrol Leader can tweak it until it's been approved" — i.e. editing should remain possible in every pre-`APPROVED` status, without qualification.
 

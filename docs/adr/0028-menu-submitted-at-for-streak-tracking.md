@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-[Requirement 25](../requirements/25-lightweight-gamification.md) asks for a Patrol Leader's "on-time streak" — a count of consecutive menus submitted at or before their due date — computed, per REQ-25.1, "from existing data only... if the current schema doesn't already timestamp the Submitted transition itself, that one addition, and only that one, may be needed, and must get its own ADR if so."
+[Requirement 25](../requirements/ux-interaction-polish/25-lightweight-gamification.md) asks for a Patrol Leader's "on-time streak" — a count of consecutive menus submitted at or before their due date — computed, per REQ-25.1, "from existing data only... if the current schema doesn't already timestamp the Submitted transition itself, that one addition, and only that one, may be needed, and must get its own ADR if so."
 
 `Menu` had no such timestamp. `status` only records the current state, not when any particular transition happened; `Review.createdAt` exists but a `Review` row is only ever created by `approveMenu`/`rejectMenu` (the ASPL's decision), never by `submitMenu` itself — so there was no existing field anywhere that recorded when a menu first reached `Submitted`.
 
@@ -31,6 +31,6 @@ The streak itself is computed by a new pure function, `lib/streaks.ts`'s `onTime
 
 ## Related
 
-- [Requirement 25 - Lightweight Gamification (Streaks & Recognition)](../requirements/25-lightweight-gamification.md)
+- [Requirement 25 - Lightweight Gamification (Streaks & Recognition)](../requirements/ux-interaction-polish/25-lightweight-gamification.md)
 - [ADR 0013 - Editing a Submitted menu does not revert its status](0013-submitted-menu-edits-do-not-revert-status.md) — the unlimited-revision model REQ-25.3 relies on to justify never penalizing a Changes-Requested cycle.
 - [ADR 0014 - Separate Neon branch for development and testing](0014-separate-dev-test-database-branch.md) — this schema change follows that same develop-then-deploy migration path.

@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-[Requirement 29](../requirements/29-smaller-comment-icon-and-meal-comments.md) extends [ADR 0026](0026-comment-annotation-data-model.md)'s comment system with a fourth target: a whole meal (e.g. "Saturday Dinner"), not just the menu, a dish, or an ingredient. `Comment`'s existing targets (`dishId`/`ingredientId`) each carry a real foreign key to the row they're about, with `onDelete: SetNull` — the comment survives its target's deletion, just loses the live link, relying on its frozen `targetLabel` snapshot to keep reading sensibly (REQ-26's design).
+[Requirement 29](../requirements/review-comments/29-smaller-comment-icon-and-meal-comments.md) extends [ADR 0026](0026-comment-annotation-data-model.md)'s comment system with a fourth target: a whole meal (e.g. "Saturday Dinner"), not just the menu, a dish, or an ingredient. `Comment`'s existing targets (`dishId`/`ingredientId`) each carry a real foreign key to the row they're about, with `onDelete: SetNull` — the comment survives its target's deletion, just loses the live link, relying on its frozen `targetLabel` snapshot to keep reading sensibly (REQ-26's design).
 
 A `Meal` row doesn't behave like a `Dish` or `Ingredient` row here. `removeOccasion` (`app/(app)/campouts/[id]/actions.ts`) hard-deletes the `Meal` row for a removed occasion, and `restoreOccasion` — the normal Undo path for that removal (REQ-15.1/15.2) — doesn't resurrect it; it `create`s a **brand-new** `Meal` row with a new id. A `mealId` FK with `onDelete: SetNull`, mirroring `dishId`/`ingredientId` exactly, would correctly survive the delete (comment lives on, `mealId` goes null) but would stay null forever after a restore — the new `Meal` row has a different id, so nothing reattaches it. Since remove/restore is routine, expected behavior (not a rare edge case), that would mean losing the meal heading for most meal comments within their normal lifecycle, not just in an unusual one.
 
@@ -32,7 +32,7 @@ While an occasion is removed, its meal comments have no meal heading to render u
 
 ## Related
 
-- [Requirement 29 - Smaller Comment Icon, Meal-Level Comments & Campout-List Comment Counts](../requirements/29-smaller-comment-icon-and-meal-comments.md) — REQ-29.3/29.7, and the Open Question this ADR records the resolution of.
+- [Requirement 29 - Smaller Comment Icon, Meal-Level Comments & Campout-List Comment Counts](../requirements/review-comments/29-smaller-comment-icon-and-meal-comments.md) — REQ-29.3/29.7, and the Open Question this ADR records the resolution of.
 - [ADR 0026 - Comment/annotation data model](0026-comment-annotation-data-model.md) — the `Comment`/`CommentActivity` schema this extends with a fourth target.
 - [ADR 0012 - Meal-framework removal modeled as a campout-scoped exception table](0012-meal-framework-exceptions.md) — why `removeOccasion`/`restoreOccasion` hard-delete and recreate `Meal` rows the way they do.
-- [Requirement 15 - Consistent Destructive-Action Pattern](../requirements/15-consistent-destructive-action-pattern.md) — the Undo-via-restore flow that makes remove/restore a routine, not exceptional, event.
+- [Requirement 15 - Consistent Destructive-Action Pattern](../requirements/ux-interaction-polish/15-consistent-destructive-action-pattern.md) — the Undo-via-restore flow that makes remove/restore a routine, not exceptional, event.

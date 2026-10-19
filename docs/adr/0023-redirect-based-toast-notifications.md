@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-[Requirement 13](../requirements/13-ux-quick-win-polish.md) calls for every mutating Server Action to surface a brief confirmation (REQ-13.1/13.2) instead of relying on a silent `revalidatePath` re-render as the only feedback. Almost every mutation in the app is wired up as a plain `<form action={serverAction}>` built directly in a Server Component (`app/(app)/menus/[id]/page.tsx`, `app/(app)/campouts/[id]/page.tsx`, `app/(app)/patrols/page.tsx`, and the handful of dialog components) — there is no client-side state anywhere that could receive a return value from most of these actions, short of rewriting every form into a client-wrapped component the way `components/RenameDishDialog.tsx` already does for its own, narrower reason (closing itself after submit).
+[Requirement 13](../requirements/ux-interaction-polish/13-ux-quick-win-polish.md) calls for every mutating Server Action to surface a brief confirmation (REQ-13.1/13.2) instead of relying on a silent `revalidatePath` re-render as the only feedback. Almost every mutation in the app is wired up as a plain `<form action={serverAction}>` built directly in a Server Component (`app/(app)/menus/[id]/page.tsx`, `app/(app)/campouts/[id]/page.tsx`, `app/(app)/patrols/page.tsx`, and the handful of dialog components) — there is no client-side state anywhere that could receive a return value from most of these actions, short of rewriting every form into a client-wrapped component the way `components/RenameDishDialog.tsx` already does for its own, narrower reason (closing itself after submit).
 
 ## Decision
 
@@ -30,6 +30,6 @@ One consequence had to be handled directly: two dialogs (`RenameDishDialog`, `Ed
 
 ## Related
 
-- [Requirement 13 - UX Quick-Win Polish Pass](../requirements/13-ux-quick-win-polish.md) — REQ-13.1-13.5.
+- [Requirement 13 - UX Quick-Win Polish Pass](../requirements/ux-interaction-polish/13-ux-quick-win-polish.md) — REQ-13.1-13.5.
 - [ADR 0009 - Next.js Server Actions for writes, Server Components for reads](0009-server-actions-for-writes.md) — this ADR's redirect-based pattern operates within that same writes-via-Server-Actions architecture.
 - [ADR 0017 - Adopt MUI design system](0017-adopt-mui-design-system.md) — `ToastListener` is built on MUI's `Snackbar`/`Alert`, consistent with "MUI is the only component library."

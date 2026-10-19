@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-[Requirement 23](../requirements/23-mobile-bottom-navigation.md) asks for a persistent, always-one-tap navigation bar on mobile viewports — today, `components/AppNav.tsx` renders at most one destination ("Manage Patrols," ASPL-only) as either an inline header link (`md` and up) or a hamburger-triggered `Drawer` (below `md`); a Patrol Leader has no persistent navigation at all on a phone-width viewport, the primary device the app's actual users (youth leaders, on the go) are expected to use.
+[Requirement 23](../requirements/ux-interaction-polish/23-mobile-bottom-navigation.md) asks for a persistent, always-one-tap navigation bar on mobile viewports — today, `components/AppNav.tsx` renders at most one destination ("Manage Patrols," ASPL-only) as either an inline header link (`md` and up) or a hamburger-triggered `Drawer` (below `md`); a Patrol Leader has no persistent navigation at all on a phone-width viewport, the primary device the app's actual users (youth leaders, on the go) are expected to use.
 
 Two decisions had to be made that the requirement left open:
 
@@ -33,7 +33,7 @@ Two decisions had to be made that the requirement left open:
 
 ## Related
 
-- [Requirement 23 - Persistent Mobile Bottom Navigation](../requirements/23-mobile-bottom-navigation.md)
-- [Requirement 7 - Campout Dashboard Layout & Status Visualization](../requirements/07-campout-dashboard-layout.md) — REQ-7.4 moved the role switcher into the header in the first place.
+- [Requirement 23 - Persistent Mobile Bottom Navigation](../requirements/ux-interaction-polish/23-mobile-bottom-navigation.md)
+- [Requirement 7 - Campout Dashboard Layout & Status Visualization](../requirements/ux-interaction-polish/07-campout-dashboard-layout.md) — REQ-7.4 moved the role switcher into the header in the first place.
 - [ADR 0020 - Print view route group and padding-as-margin pagination](0020-print-view-route-group-and-pagination.md) — why the print route group never renders this bar (or any chrome) at all.
 - [ADR 0017 - Adopt MUI as the design system](0017-adopt-mui-design-system.md) — `BottomNav` is built on MUI's `BottomNavigation`/`BottomNavigationAction`, consistent with "MUI is the only component library."

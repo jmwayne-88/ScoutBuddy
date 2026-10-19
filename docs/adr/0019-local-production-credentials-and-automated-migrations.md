@@ -5,9 +5,9 @@ Status: Accepted
 
 ## Context
 
-On 2026-10-14/15, the live Vercel deployment started throwing a generic server error on every page. The cause: [ADR 0018](0018-patrols-as-database-rows.md)'s enum→table migration for patrols was applied to the `development` Neon branch — everything this project's tooling touches by default — and never applied to the `production` branch Vercel actually serves from. [ADR 0014](0014-separate-dev-test-database-branch.md) named this exact risk in its own Consequences section ("Skipping the second step means production silently falls behind the code that expects the new schema — worth catching before it ships") and [Requirement 6](../requirements/06-test-database-isolation.md) left verifying Vercel's Production configuration as an unchecked, manual acceptance criterion. Neither caught the actual gap, which was the migration itself never being applied to `production` — a manual step nobody remembered.
+On 2026-10-14/15, the live Vercel deployment started throwing a generic server error on every page. The cause: [ADR 0018](0018-patrols-as-database-rows.md)'s enum→table migration for patrols was applied to the `development` Neon branch — everything this project's tooling touches by default — and never applied to the `production` branch Vercel actually serves from. [ADR 0014](0014-separate-dev-test-database-branch.md) named this exact risk in its own Consequences section ("Skipping the second step means production silently falls behind the code that expects the new schema — worth catching before it ships") and [Requirement 6](../requirements/infrastructure-deployment/06-test-database-isolation.md) left verifying Vercel's Production configuration as an unchecked, manual acceptance criterion. Neither caught the actual gap, which was the migration itself never being applied to `production` — a manual step nobody remembered.
 
-[Requirement 11](../requirements/11-production-deployment-pipeline.md) asks for this to become structurally impossible to forget, not something to be more careful about next time.
+[Requirement 11](../requirements/infrastructure-deployment/11-production-deployment-pipeline.md) asks for this to become structurally impossible to forget, not something to be more careful about next time.
 
 ## Decision
 
@@ -38,7 +38,7 @@ No application data (`Campout`/`Menu`/`Meal`/`Dish`/`Ingredient`/`Review`/`MealF
 
 ## Related
 
-- [Requirement 11 - Production Deployment Pipeline & Environment Isolation](../requirements/11-production-deployment-pipeline.md)
+- [Requirement 11 - Production Deployment Pipeline & Environment Isolation](../requirements/infrastructure-deployment/11-production-deployment-pipeline.md)
 - [ADR 0005 - Secrets kept in gitignored env files](0005-env-based-secrets-management.md) — partially superseded; see that ADR's Status line.
 - [ADR 0014 - Separate Neon branch for development and testing](0014-separate-dev-test-database-branch.md) — partially superseded; see that ADR's Status line. This ADR's branch-isolation decision itself is unchanged.
 - [ADR 0004 - Vercel deployment via GitHub](0004-vercel-deployment-via-github.md) — the `buildCommand` change stays inside this ADR's "no separate CI/CD system" decision rather than replacing it.

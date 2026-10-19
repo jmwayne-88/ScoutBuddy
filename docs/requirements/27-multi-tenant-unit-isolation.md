@@ -114,4 +114,4 @@ CLAUDE.md requires reading the existing ADRs before proposing a stack or data-mo
 - [ADR 0014 - Separate dev/test database branch](../adr/0014-separate-dev-test-database-branch.md) — the existing isolation-testing precedent REQ-27.6's cross-tenant test suite follows.
 - [ADR 0005 - Env-based secrets management](../adr/0005-env-based-secrets-management.md) — the secrets approach any new invite-token/session-secret (REQ-27.17) must follow rather than reinvent.
 - [ADR 0026 - Comment/annotation data model](../adr/0026-comment-annotation-data-model.md) — `CommentActorRole`/actor-role modeling this requirement's `UnitMembership` role concept extends to be unit-scoped rather than global.
-- [Requirement 8 - Manage Patrols](08-manage-patrols.md) — the ASPL-managed patrol CRUD this requirement scopes per-unit without changing its behavior within one unit.
+- [Requirement 8 - Manage Patrols](patrol-management/08-manage-patrols.md) — the ASPL-managed patrol CRUD this requirement scopes per-unit without changing its behavior within one unit.

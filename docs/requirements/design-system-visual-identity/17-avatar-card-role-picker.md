@@ -9,7 +9,7 @@ Replace the home page's radio-button-list role picker with a one-tap grid of ava
 
 ## Source
 
-Recommendation #8 from the UX/style audit referenced by [Requirement 13](13-ux-quick-win-polish.md)'s Source section.
+Recommendation #8 from the UX/style audit referenced by [Requirement 13](../ux-interaction-polish/13-ux-quick-win-polish.md)'s Source section.
 
 ## Problem
 

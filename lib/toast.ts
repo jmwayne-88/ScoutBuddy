@@ -4,7 +4,7 @@
 // which reads and then strips these params on the client.
 //
 // REQ-15.4: a Tier 2 destructive action (see docs/requirements/
-// 15-consistent-destructive-action-pattern.md) can additionally pass `undo`
+// ../docs/requirements/ux-interaction-polish/15-consistent-destructive-action-pattern.md) can additionally pass `undo`
 // — a flat, JSON-serializable payload plus the string key of the Server
 // Action (registered in ToastListener's UNDO_ACTIONS) that reverses it.
 export type UndoSpec = { action: string; payload: Record<string, unknown> };

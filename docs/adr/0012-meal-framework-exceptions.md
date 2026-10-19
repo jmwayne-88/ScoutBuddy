@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-[Iteration 4](../requirements/04-meal-framework-variation.md) requires the ASPL to remove one or more of the six standard meal occasions from a campout, scoped either to one named patrol or to all patrols, and to be able to do this both before and after a patrol's menu is assigned. [ADR 0006](0006-structured-meal-framework-variation.md) already decided this is structured removal, not free text — this ADR is about how that removal is stored.
+[Iteration 4](../requirements/roadmap-iterations/04-meal-framework-variation.md) requires the ASPL to remove one or more of the six standard meal occasions from a campout, scoped either to one named patrol or to all patrols, and to be able to do this both before and after a patrol's menu is assigned. [ADR 0006](0006-structured-meal-framework-variation.md) already decided this is structured removal, not free text — this ADR is about how that removal is stored.
 
 Iteration 1's `assignMenu` eagerly creates all six `Meal` rows the moment a menu is assigned, and `app/menus/[id]/page.tsx` already only renders occasions that have a `Meal` row. A removal mechanism needs to (a) stop those rows from being created for a menu assigned after the removal, and (b) remove them from a menu that already has them, without losing the "occasions that are removed" fact once a matching menu doesn't exist yet.
 

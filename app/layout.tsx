@@ -33,7 +33,7 @@ export const viewport: Viewport = {
 
 // Deliberately minimal -- the AppBar/nav chrome lives in app/(app)/layout.tsx
 // instead, so routes outside that group (the print view, app/(print)/...)
-// never get it, on screen or in print. See docs/requirements/12-menu-print-preview.md.
+// never get it, on screen or in print. See docs/requirements/printing-exports/12-menu-print-preview.md.
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${montserrat.variable} ${inter.variable}`} suppressHydrationWarning>

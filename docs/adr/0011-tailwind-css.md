@@ -14,7 +14,7 @@ Use Tailwind CSS (v4, imported via `@import "tailwindcss";` in `app/globals.css`
 ## Alternatives Considered
 
 - **CSS Modules / plain CSS files**: more conventional separation of markup and style, but means naming and maintaining a stylesheet per component for a small number of screens that don't currently need that structure.
-- **A component library** (e.g. shadcn/ui, MUI): would speed up polish later, but is more than Iteration 1's plain forms and lists need; worth reconsidering once patrol color-coding ([Iteration 2](../requirements/02-four-patrols-and-visual-identity.md)) and general visual polish become the focus.
+- **A component library** (e.g. shadcn/ui, MUI): would speed up polish later, but is more than Iteration 1's plain forms and lists need; worth reconsidering once patrol color-coding ([Iteration 2](../requirements/roadmap-iterations/02-four-patrols-and-visual-identity.md)) and general visual polish become the focus.
 
 ## Consequences
 

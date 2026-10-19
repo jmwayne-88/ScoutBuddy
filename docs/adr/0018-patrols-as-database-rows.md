@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-[Requirement 8](../requirements/08-manage-patrols.md) asks the ASPL of Camping to be able to view, create, edit, delete, reorder, and activate/deactivate patrols at runtime. Since Iteration 1, patrols have been a fixed Prisma enum (`EAGLE | PUMA | RAVEN | SILVER_FOX | JOE`) — explicitly called out as "fixed reference data" in CLAUDE.md and FEATURES.md, and baked directly into `Menu.patrol`/`MealFrameworkException.patrol` columns, the Patrol Leader's session identity (`lib/session.ts`), every permission check (`lib/permissions.ts`), and a static `PATROLS` array (`lib/constants.ts`) that most of the UI iterated over. An enum value can't be created, renamed, reordered, or deleted without a schema migration and a deploy — the opposite of what admin-managed means.
+[Requirement 8](../requirements/patrol-management/08-manage-patrols.md) asks the ASPL of Camping to be able to view, create, edit, delete, reorder, and activate/deactivate patrols at runtime. Since Iteration 1, patrols have been a fixed Prisma enum (`EAGLE | PUMA | RAVEN | SILVER_FOX | JOE`) — explicitly called out as "fixed reference data" in CLAUDE.md and FEATURES.md, and baked directly into `Menu.patrol`/`MealFrameworkException.patrol` columns, the Patrol Leader's session identity (`lib/session.ts`), every permission check (`lib/permissions.ts`), and a static `PATROLS` array (`lib/constants.ts`) that most of the UI iterated over. An enum value can't be created, renamed, reordered, or deleted without a schema migration and a deploy — the opposite of what admin-managed means.
 
 ## Decision
 
@@ -34,6 +34,6 @@ Replace the `Patrol` enum with a real `Patrol` table (`id`, `name`, `color`, `or
 
 ## Related
 
-- [Requirement 8 - Manage Patrols](../requirements/08-manage-patrols.md)
+- [Requirement 8 - Manage Patrols](../requirements/patrol-management/08-manage-patrols.md)
 - [ADR 0012 - Meal-framework removal modeled as a campout-scoped exception table](0012-meal-framework-exceptions.md) — the manual-cascade delete style this ADR's patrol deletion follows.
 - [ADR 0017 - Adopt MUI as the design system](0017-adopt-mui-design-system.md) — `lib/theme/contrast.ts`'s `meetsContrast`, reused here to validate admin-entered patrol colors.

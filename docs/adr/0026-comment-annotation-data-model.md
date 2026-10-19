@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-[Requirement 26](../requirements/26-full-comment-annotation-system.md) asks for an Office-review-mode-style commenting system layered onto a menu: either party can start a thread on the menu, a dish, or an ingredient; reply; assign it to a party; resolve/reopen it; delete it; and see every one of those actions recorded forever in an audit log. Nothing like this existed before — `Review` ([ADR 0007](0007-menu-status-lifecycle-and-permissions.md)) is a single optional comment tied 1:1 to the ASPL's approve/reject decision, with no notion of a thread, a reply, an assignee, or a per-action history. This is a real data-model shape decision, which this project's working conventions (CLAUDE.md) require its own ADR for, written at build time rather than guessed at when the requirement was first drafted.
+[Requirement 26](../requirements/review-comments/26-full-comment-annotation-system.md) asks for an Office-review-mode-style commenting system layered onto a menu: either party can start a thread on the menu, a dish, or an ingredient; reply; assign it to a party; resolve/reopen it; delete it; and see every one of those actions recorded forever in an audit log. Nothing like this existed before — `Review` ([ADR 0007](0007-menu-status-lifecycle-and-permissions.md)) is a single optional comment tied 1:1 to the ASPL's approve/reject decision, with no notion of a thread, a reply, an assignee, or a per-action history. This is a real data-model shape decision, which this project's working conventions (CLAUDE.md) require its own ADR for, written at build time rather than guessed at when the requirement was first drafted.
 
 ## Decision
 
@@ -36,7 +36,7 @@ Both are a genuinely new, general-purpose layer — not a repurposing of `Review
 
 ## Related
 
-- [Requirement 26 - Full Comment & Annotation System](../requirements/26-full-comment-annotation-system.md) — the requirement this data model implements.
+- [Requirement 26 - Full Comment & Annotation System](../requirements/review-comments/26-full-comment-annotation-system.md) — the requirement this data model implements.
 - [ADR 0007 - Menu status lifecycle as a role-gated state machine](0007-menu-status-lifecycle-and-permissions.md) — `Review`/`ReviewDecision`, unchanged, and still the only thing driving `Menu.status`.
 - [ADR 0010 - Cookie-based role identity, no accounts or passwords](0010-cookie-based-role-identity.md) — why `Comment`'s author/assignee/resolver/deleter fields are role-shaped, not person-shaped.
 - [ADR 0019 - Local production credentials, automated migrations, and a startup environment guard](0019-local-production-credentials-and-automated-migrations.md) — `prisma migrate deploy`, the mechanism this ADR's migration also used.

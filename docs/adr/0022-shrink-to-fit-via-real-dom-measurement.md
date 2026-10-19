@@ -30,5 +30,5 @@ Status: Accepted. Supersedes the font-sizing portion of [ADR 0020](0020-print-vi
 
 ## Related
 
-- [Requirement 12 - Menu Print Preview & Shopping List](../requirements/12-menu-print-preview.md)
+- [Requirement 12 - Menu Print Preview & Shopping List](../requirements/printing-exports/12-menu-print-preview.md)
 - [ADR 0020 - Print view route group and pagination](0020-print-view-route-group-and-pagination.md) — route groups and padding-as-margin are unchanged; only the font-sizing mechanism described there is superseded.

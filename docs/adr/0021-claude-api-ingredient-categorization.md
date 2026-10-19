@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-[Requirement 12](../requirements/12-menu-print-preview.md)'s shopping list needs to group ingredients the way a grocery store would (Produce, Meat & Protein, Dairy & Eggs, ...) without the Patrol Leader ever tagging a category by hand. A hand-maintained keyword list was the original default proposal in the requirements doc, but after reviewing current model pricing, the user chose real AI classification instead — this is this app's first call to any external AI service, and its first secret that isn't a database credential.
+[Requirement 12](../requirements/printing-exports/12-menu-print-preview.md)'s shopping list needs to group ingredients the way a grocery store would (Produce, Meat & Protein, Dairy & Eggs, ...) without the Patrol Leader ever tagging a category by hand. A hand-maintained keyword list was the original default proposal in the requirements doc, but after reviewing current model pricing, the user chose real AI classification instead — this is this app's first call to any external AI service, and its first secret that isn't a database credential.
 
 ## Decision
 
@@ -33,6 +33,6 @@ Status: Accepted
 
 ## Related
 
-- [Requirement 12 - Menu Print Preview & Shopping List](../requirements/12-menu-print-preview.md)
+- [Requirement 12 - Menu Print Preview & Shopping List](../requirements/printing-exports/12-menu-print-preview.md)
 - [ADR 0005 - Secrets kept in gitignored env files](0005-env-based-secrets-management.md) — gains a second kind of secret.
 - [ADR 0020 - Print view route group and pagination](0020-print-view-route-group-and-pagination.md) — the other new piece of Requirement 12, built alongside this one.

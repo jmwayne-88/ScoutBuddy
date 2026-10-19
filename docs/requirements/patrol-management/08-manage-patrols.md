@@ -1,7 +1,7 @@
 # Requirement 8 — Manage Patrols
 
 Status: Not started — documentation only, per instruction
-Depends on: Requirements 1-7 (patrols are currently referenced everywhere via a fixed Prisma enum); this requirement replaces that foundation rather than building on top of it. Also affected by [Requirement 9](09-adopt-mui-design-system.md) — see "Impact from Requirement 9" below.
+Depends on: Requirements 1-7 (patrols are currently referenced everywhere via a fixed Prisma enum); this requirement replaces that foundation rather than building on top of it. Also affected by [Requirement 9](../design-system-visual-identity/09-adopt-mui-design-system.md) — see "Impact from Requirement 9" below.
 
 ## Goal
 
@@ -102,7 +102,7 @@ What that changes for this requirement, concretely:
 ## Related
 
 - This will need its own ADR when built — replacing the "patrols as a fixed enum" assumption that's held since Iteration 1 is exactly the kind of real architecture change CLAUDE.md's working conventions ask to be documented, not just coded.
-- [Requirement 2 - All Four Patrols + Visual Identity](02-four-patrols-and-visual-identity.md) — the original "fixed four" decision this requirement replaces (the Joe Patrol addition already showed the pattern of hand-editing the enum; this requirement is what makes that no longer necessary).
-- [Requirement 9 - Adopt MUI with the Scouting America Brand Palette](09-adopt-mui-design-system.md) — see "Impact from Requirement 9" above; this requirement's UI is built on whatever Requirement 9 actually leaves in place (MUI components, `lib/theme/`, dark mode, the still-missing AppBar nav).
+- [Requirement 2 - All Four Patrols + Visual Identity](../roadmap-iterations/02-four-patrols-and-visual-identity.md) — the original "fixed four" decision this requirement replaces (the Joe Patrol addition already showed the pattern of hand-editing the enum; this requirement is what makes that no longer necessary).
+- [Requirement 9 - Adopt MUI with the Scouting America Brand Palette](../design-system-visual-identity/09-adopt-mui-design-system.md) — see "Impact from Requirement 9" above; this requirement's UI is built on whatever Requirement 9 actually leaves in place (MUI components, `lib/theme/`, dark mode, the still-missing AppBar nav).
 - `lib/constants.ts`, `lib/colors.ts`, `lib/progress.ts`, `lib/session.ts`, `lib/permissions.ts` — every one of these has a static, compile-time assumption about patrols that this requirement removes.
 - `lib/theme/tokens.ts`, `lib/theme/contrast.ts` — the brand-token boundary this requirement respects (REQ-8.19) and the contrast utility it reuses (REQ-8.17).

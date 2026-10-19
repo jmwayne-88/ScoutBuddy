@@ -23,7 +23,7 @@ Destructive/low-emphasis actions (Remove dish, Remove ingredient) intentionally 
 
 Typography: Montserrat (bold, via `next/font/google` — self-hosted by Next.js at build time, not a runtime external request) for headings, applied globally via a plain `h1, h2, h3` CSS rule rather than a className on every heading; Arial/Helvetica for body text, matching the guidelines' "universal fonts" for broad compatibility.
 
-**Explicitly out of scope**: no fleur-de-lis, eagle/shield emblem, or any program trademark shape; no "Prepared. For Life.®" tagline text; no attempt to reproduce or approximate the official trademark artwork. Patrol identity colors (`lib/colors.ts`, `components/PatrolBadge.tsx` — Eagle blue, Puma gold, Raven dark purple, Silver Fox silver) are **not** touched by this decision; they're a pre-existing, separate concept (troop-specific patrol identity, not Scouting America's organizational brand) established back in [Iteration 2](../requirements/02-four-patrols-and-visual-identity.md) and are left exactly as they were.
+**Explicitly out of scope**: no fleur-de-lis, eagle/shield emblem, or any program trademark shape; no "Prepared. For Life.®" tagline text; no attempt to reproduce or approximate the official trademark artwork. Patrol identity colors (`lib/colors.ts`, `components/PatrolBadge.tsx` — Eagle blue, Puma gold, Raven dark purple, Silver Fox silver) are **not** touched by this decision; they're a pre-existing, separate concept (troop-specific patrol identity, not Scouting America's organizational brand) established back in [Iteration 2](../requirements/roadmap-iterations/02-four-patrols-and-visual-identity.md) and are left exactly as they were.
 
 ## Alternatives Considered
 

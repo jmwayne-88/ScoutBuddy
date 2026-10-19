@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-Enforcing "a Patrol Leader can never approve their own menu" ([REQ-1.15/1.16](../requirements/01-core-approval-loop.md)) server-side requires the app to know, on every request, who is acting. Neither the brief nor any earlier document specified how — there are exactly five youth leaders (one ASPL of Camping, one Patrol Leader per patrol), and this is a low-stakes internal troop tool, not something handling sensitive personal data.
+Enforcing "a Patrol Leader can never approve their own menu" ([REQ-1.15/1.16](../requirements/roadmap-iterations/01-core-approval-loop.md)) server-side requires the app to know, on every request, who is acting. Neither the brief nor any earlier document specified how — there are exactly five youth leaders (one ASPL of Camping, one Patrol Leader per patrol), and this is a low-stakes internal troop tool, not something handling sensitive personal data.
 
 ## Decision
 

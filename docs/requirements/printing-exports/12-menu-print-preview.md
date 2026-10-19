@@ -1,7 +1,7 @@
 # Requirement 12 — Menu Print Preview & Shopping List
 
 Status: Not started — documentation only
-Depends on: none directly, but reuses [Requirement 1 - Core Approval Loop](01-core-approval-loop.md)'s `Menu`/`Meal`/`Dish`/`Ingredient` data model as-is, and [Requirement 4 - Meal-Framework Variation](04-meal-framework-variation.md)'s occasion ordering (`MEAL_OCCASIONS`)
+Depends on: none directly, but reuses [Requirement 1 - Core Approval Loop](../roadmap-iterations/01-core-approval-loop.md)'s `Menu`/`Meal`/`Dish`/`Ingredient` data model as-is, and [Requirement 4 - Meal-Framework Variation](../roadmap-iterations/04-meal-framework-variation.md)'s occasion ordering (`MEAL_OCCASIONS`)
 
 ## Goal
 
@@ -59,7 +59,7 @@ Every field this needs already exists — `Campout.name`/`date`, `Patrol.name`, 
 
 ## Related
 
-- [Requirement 1 - Core Approval Loop](01-core-approval-loop.md) — the `Menu`/`Meal`/`Dish`/`Ingredient` model this prints, unchanged.
-- [Requirement 4 - Meal-Framework Variation](04-meal-framework-variation.md) — `MEAL_OCCASIONS`'s fixed ordering, reused for both pages.
+- [Requirement 1 - Core Approval Loop](../roadmap-iterations/01-core-approval-loop.md) — the `Menu`/`Meal`/`Dish`/`Ingredient` model this prints, unchanged.
+- [Requirement 4 - Meal-Framework Variation](../roadmap-iterations/04-meal-framework-variation.md) — `MEAL_OCCASIONS`'s fixed ordering, reused for both pages.
 - [ADR 0005 - Secrets kept in gitignored env files](../adr/0005-env-based-secrets-management.md) — gains a second kind of secret (`ANTHROPIC_API_KEY`) alongside the Neon connection strings it originally covered.
 - Expected to need its own ADR when built — and likely two, not one: the print-specific layout strategy (a chrome-free route group, `@page`/`@media print` rules, a deliberate on-screen-matches-print pagination approach) and, separately, this app's first external AI service dependency (the Claude API classification call, its caching, and its secret management). Both are real architectural decisions per CLAUDE.md's "every architecture decision gets its own ADR" rule, not a straightforward extension of an existing one.

@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-[Requirement 20](../requirements/20-inline-validation-errors.md) replaces the app's `?error=` query-string convention for validation failures with inline, field-level feedback. Two of its three cases — `createPatrol` and `updatePatrol`'s color-contrast validation (REQ-20.2/20.3) — report the problem directly on `components/PatrolColorField.tsx`'s own color input, which requires the Server Action's validation result to flow back into the still-mounted form without a full page navigation. `submitMenu`'s empty-occasion case (REQ-20.1) doesn't need this mechanism — see "Alternatives Considered."
+[Requirement 20](../requirements/ux-interaction-polish/20-inline-validation-errors.md) replaces the app's `?error=` query-string convention for validation failures with inline, field-level feedback. Two of its three cases — `createPatrol` and `updatePatrol`'s color-contrast validation (REQ-20.2/20.3) — report the problem directly on `components/PatrolColorField.tsx`'s own color input, which requires the Server Action's validation result to flow back into the still-mounted form without a full page navigation. `submitMenu`'s empty-occasion case (REQ-20.1) doesn't need this mechanism — see "Alternatives Considered."
 
 ADR 0023 considered `useActionState` for every mutating action in the app (for toast feedback) and rejected it as too invasive a conversion for too little benefit. This decision is narrower: only these two forms, only for their one validation path, and the benefit — avoiding a navigation and the query-string re-encoding of the entire form described in Requirement 20's Problem section — is specific to them.
 
@@ -31,6 +31,6 @@ Both forms move from a plain `<form action={serverAction}>` built directly in a 
 
 ## Related
 
-- [Requirement 20 - Inline Validation Errors](../requirements/20-inline-validation-errors.md) — REQ-20.2/20.3/20.4, the requirement this ADR exists to satisfy.
+- [Requirement 20 - Inline Validation Errors](../requirements/ux-interaction-polish/20-inline-validation-errors.md) — REQ-20.2/20.3/20.4, the requirement this ADR exists to satisfy.
 - [ADR 0023 - Toast feedback delivered via a post-redirect query param](0023-redirect-based-toast-notifications.md) — the success-path pattern this ADR's validation-path change sits alongside; 0023's rejection of `useActionState` as an app-wide mechanism still stands, this ADR only carves out these two specific forms.
 - CLAUDE.md's "MUI + Server Components gotcha" note — why the new wrapper components take plain data props from their Server Component pages rather than receiving JSX built server-side.

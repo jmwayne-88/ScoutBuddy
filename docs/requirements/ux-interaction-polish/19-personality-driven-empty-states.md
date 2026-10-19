@@ -1,7 +1,7 @@
 # Requirement 19 — Personality-Driven Empty States
 
 Status: Done
-Depends on: [Requirement 5](05-workflow-hardening-and-polish.md)'s REQ-5.5 (the original guarantee that every empty state shows *something* rather than a blank/broken view — this requirement is about what that something says and looks like, not whether it exists)
+Depends on: [Requirement 5](../roadmap-iterations/05-workflow-hardening-and-polish.md)'s REQ-5.5 (the original guarantee that every empty state shows *something* rather than a blank/broken view — this requirement is about what that something says and looks like, not whether it exists)
 
 ## Goal
 
@@ -47,5 +47,5 @@ Each is accurate and functional (satisfying Requirement 5's original guardrail a
 
 ## Related
 
-- [Requirement 5 - Workflow Hardening & Polish](05-workflow-hardening-and-polish.md) — REQ-5.5 is the guardrail this requirement's copy work sits on top of.
+- [Requirement 5 - Workflow Hardening & Polish](../roadmap-iterations/05-workflow-hardening-and-polish.md) — REQ-5.5 is the guardrail this requirement's copy work sits on top of.
 - CLAUDE.md's domain-language rule — every rewritten message must use real troop terms.

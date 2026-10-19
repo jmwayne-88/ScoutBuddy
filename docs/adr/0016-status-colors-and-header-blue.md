@@ -5,7 +5,7 @@ Status: Accepted — this ADR's own Consequences note that "ADR 0015['s]... butt
 
 ## Context
 
-[Requirement 7](../requirements/07-campout-dashboard-layout.md) — a dashboard-style layout based on a reference screenshot — needs a consistent color per menu status (Not Started, In Progress, Submitted, Changes Requested, Approved) used everywhere a status appears, plus a campout-level progress summary. The reference screenshot also uses a blue header, not the dark gray [ADR 0015](0015-brand-aligned-visual-design.md) chose.
+[Requirement 7](../requirements/ux-interaction-polish/07-campout-dashboard-layout.md) — a dashboard-style layout based on a reference screenshot — needs a consistent color per menu status (Not Started, In Progress, Submitted, Changes Requested, Approved) used everywhere a status appears, plus a campout-level progress summary. The reference screenshot also uses a blue header, not the dark gray [ADR 0015](0015-brand-aligned-visual-design.md) chose.
 
 ## Decision
 

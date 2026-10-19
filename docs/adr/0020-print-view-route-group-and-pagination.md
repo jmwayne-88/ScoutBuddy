@@ -5,7 +5,7 @@ Status: Accepted; the font-sizing decision (the row-count heuristic) is supersed
 
 ## Context
 
-[Requirement 12](../requirements/12-menu-print-preview.md) asks for a dedicated, print-optimized view of one patrol's menu that a Patrol Leader can preview on screen exactly as it will print, then actually print, with no app chrome anywhere. Every route in this app has always rendered inside a single root `app/layout.tsx` that unconditionally wraps `{children}` in the AppBar/nav/role-switcher — there was no way to opt a single route out of that chrome before this requirement, because Next.js App Router layouts nest top-down from one root.
+[Requirement 12](../requirements/printing-exports/12-menu-print-preview.md) asks for a dedicated, print-optimized view of one patrol's menu that a Patrol Leader can preview on screen exactly as it will print, then actually print, with no app chrome anywhere. Every route in this app has always rendered inside a single root `app/layout.tsx` that unconditionally wraps `{children}` in the AppBar/nav/role-switcher — there was no way to opt a single route out of that chrome before this requirement, because Next.js App Router layouts nest top-down from one root.
 
 ## Decision
 
@@ -31,6 +31,6 @@ Status: Accepted; the font-sizing decision (the row-count heuristic) is supersed
 
 ## Related
 
-- [Requirement 12 - Menu Print Preview & Shopping List](../requirements/12-menu-print-preview.md)
+- [Requirement 12 - Menu Print Preview & Shopping List](../requirements/printing-exports/12-menu-print-preview.md)
 - [ADR 0017 - Adopt MUI as the design system](0017-adopt-mui-design-system.md) — the "MUI only" rule this ADR takes one narrow, explicit exception to.
 - [ADR 0021 - Claude API ingredient categorization](0021-claude-api-ingredient-categorization.md) — the other new piece of Requirement 12, built alongside this one.

@@ -58,7 +58,7 @@ This requirement does not replace `Review`/`ReviewDecision` or the Approved/Chan
 
 - Editing the text of an already-posted comment or reply (Office supports this; this pass does not — only reply, assign, resolve, and delete, per the user's explicit list).
 - Real-time/live updates to threads or the audit log — matches Requirement 22's existing precedent; requires a refresh, same as the rest of the app today.
-- Notifications/alerts on assignment, reply, or resolution — a natural fit for [Requirement 24 - Due-Date & Review Notifications](24-due-date-and-review-notifications.md) if ever extended there, not built here.
+- Notifications/alerts on assignment, reply, or resolution — a natural fit for [Requirement 24 - Due-Date & Review Notifications](../24-due-date-and-review-notifications.md) if ever extended there, not built here.
 - Replacing or restructuring `Review`/`ReviewDecision` or the Approved/Changes-Requested decision flow — unchanged; see "Relationship to the Existing Review Model" above.
 - Comments from any party other than the menu's own Patrol Leader and the ASPL (e.g. other patrols, adult leaders) — no such viewer exists in the current permission model.
 - The underlying data-model shape (new `Comment`/audit-log tables, a target discriminator for menu/dish/ingredient, etc.) is not designed in this document — it's a real data-model decision and gets its own ADR at build time per this project's working conventions, not invented here.
@@ -76,5 +76,5 @@ This requirement does not replace `Review`/`ReviewDecision` or the Approved/Chan
 - [Requirement 22 - Chat-Thread Review History](22-chat-thread-review-history.md) — the bubble/thread visual language this requirement extends to a new, general-purpose comment target; `Review`'s chat-thread restyle itself is unchanged by this requirement.
 - [ADR 0007 - Menu status lifecycle as a role-gated state machine](../adr/0007-menu-status-lifecycle-and-permissions.md) — the approve/reject/status rules this requirement's comment layer sits alongside but never alters (REQ-26.10).
 - [ADR 0026 - Comment/annotation data model](../adr/0026-comment-annotation-data-model.md) — the `Comment`/`CommentActivity` schema this requirement is implemented with, including why deletion is a soft delete and why assignment is role-level.
-- [Requirement 5 - Workflow Hardening & Polish](05-workflow-hardening-and-polish.md) — REQ-5.3/5.4's existing guarantee that review comments stay visible and timestamped across revisions; this requirement's audit log extends that same spirit to the new, more granular comment system.
-- [Requirement 24 - Due-Date & Review Notifications](24-due-date-and-review-notifications.md) — the natural home for comment-assignment/reply notifications if ever built; explicitly out of scope here.
+- [Requirement 5 - Workflow Hardening & Polish](../roadmap-iterations/05-workflow-hardening-and-polish.md) — REQ-5.3/5.4's existing guarantee that review comments stay visible and timestamped across revisions; this requirement's audit log extends that same spirit to the new, more granular comment system.
+- [Requirement 24 - Due-Date & Review Notifications](../24-due-date-and-review-notifications.md) — the natural home for comment-assignment/reply notifications if ever built; explicitly out of scope here.

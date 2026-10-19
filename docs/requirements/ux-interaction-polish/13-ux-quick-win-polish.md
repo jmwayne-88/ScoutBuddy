@@ -72,7 +72,7 @@ Any change to the underlying approval workflow, permissions, or status lifecycle
 
 ## Related
 
-- [Requirement 5 - Workflow Hardening & Polish](05-workflow-hardening-and-polish.md) — REQ-5.5's empty-state guardrail is the direct ancestor of REQ-13.6/13.7.
+- [Requirement 5 - Workflow Hardening & Polish](../roadmap-iterations/05-workflow-hardening-and-polish.md) — REQ-5.5's empty-state guardrail is the direct ancestor of REQ-13.6/13.7.
 - [Requirement 7 - Campout Dashboard Layout & Status Visualization](07-campout-dashboard-layout.md) — REQ-13.12's status icons and REQ-13.14's progress indicator extend the status-color and progress conventions established there.
 - [ADR 0016 - Semantic status colors, and a Scouting Blue header](../adr/0016-status-colors-and-header-blue.md) — status icons (REQ-13.12) must not disturb the semantic color pairing this ADR established.
 - [ADR 0017 - Adopt MUI design system](../adr/0017-adopt-mui-design-system.md) — a new toast mechanism (REQ-13.1/13.2) should be built on MUI's `Snackbar`/`Alert`, consistent with "MUI is the only component library."

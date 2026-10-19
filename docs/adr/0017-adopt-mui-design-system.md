@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-[Requirement 9](../requirements/09-adopt-mui-design-system.md) asked to adopt MUI (Material UI), themed with the Scouting America brand palette, as ScoutBuddy's design system — centralizing color/typography/spacing/shape decisions in one theme, meeting WCAG 2.2 AA, and working at both phone and desktop widths.
+[Requirement 9](../requirements/design-system-visual-identity/09-adopt-mui-design-system.md) asked to adopt MUI (Material UI), themed with the Scouting America brand palette, as ScoutBuddy's design system — centralizing color/typography/spacing/shape decisions in one theme, meeting WCAG 2.2 AA, and working at both phone and desktop widths.
 
 Two existing decisions were directly in scope for a conflict, and the user resolved both explicitly before implementation:
 
@@ -52,7 +52,7 @@ A living style guide at `/style-guide` (excluded from production navigation) ren
 
 ## Related
 
-- [Requirement 9 - Adopt MUI with the Scouting America Brand Palette](../requirements/09-adopt-mui-design-system.md)
+- [Requirement 9 - Adopt MUI with the Scouting America Brand Palette](../requirements/design-system-visual-identity/09-adopt-mui-design-system.md)
 - [ADR 0011 - Tailwind CSS for styling](0011-tailwind-css.md) — superseded by this ADR.
 - [ADR 0015 - Brand-aligned visual design](0015-brand-aligned-visual-design.md) — button/background color roles superseded; palette values and trademark guardrails carried forward.
 - [ADR 0016 - Semantic status colors, and a Scouting Blue header](0016-status-colors-and-header-blue.md) — header-blue choice carried forward unchanged; its "buttons unchanged" consequence note is superseded.

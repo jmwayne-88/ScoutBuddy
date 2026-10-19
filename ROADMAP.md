@@ -13,7 +13,7 @@ This breaks [FEATURES.md](FEATURES.md) into small, sequenced iterations, each on
 
 **Goal:** prove the entire workflow end-to-end for one patrol on one campout.
 
-Full requirements and acceptance criteria: [docs/requirements/01-core-approval-loop.md](docs/requirements/01-core-approval-loop.md)
+Full requirements and acceptance criteria: [docs/requirements/roadmap-iterations/01-core-approval-loop.md](docs/requirements/roadmap-iterations/01-core-approval-loop.md)
 
 **Value delivered:** a real menu can go through the entire approval cycle in the app instead of over text and paper.
 
@@ -21,7 +21,7 @@ Full requirements and acceptance criteria: [docs/requirements/01-core-approval-l
 
 **Goal:** scale the core loop to how a campout actually works.
 
-Full requirements and acceptance criteria: [docs/requirements/02-four-patrols-and-visual-identity.md](docs/requirements/02-four-patrols-and-visual-identity.md)
+Full requirements and acceptance criteria: [docs/requirements/roadmap-iterations/02-four-patrols-and-visual-identity.md](docs/requirements/roadmap-iterations/02-four-patrols-and-visual-identity.md)
 
 **Value delivered:** an ASPL can run a whole campout's menu assignment and review, not just a single-patrol demo.
 
@@ -29,7 +29,7 @@ Full requirements and acceptance criteria: [docs/requirements/02-four-patrols-an
 
 **Goal:** support planning across a term, not just one campout at a time.
 
-Full requirements and acceptance criteria: [docs/requirements/03-multiple-campouts.md](docs/requirements/03-multiple-campouts.md)
+Full requirements and acceptance criteria: [docs/requirements/roadmap-iterations/03-multiple-campouts.md](docs/requirements/roadmap-iterations/03-multiple-campouts.md)
 
 **Value delivered:** the tool becomes usable term-over-term instead of single-use.
 
@@ -37,7 +37,7 @@ Full requirements and acceptance criteria: [docs/requirements/03-multiple-campou
 
 **Goal:** give the ASPL the flexibility real campouts need (e.g., no Friday Cracker Barrel on a campout with a late Friday arrival).
 
-Full requirements and acceptance criteria: [docs/requirements/04-meal-framework-variation.md](docs/requirements/04-meal-framework-variation.md) (see also [ADR 0006](docs/adr/0006-structured-meal-framework-variation.md))
+Full requirements and acceptance criteria: [docs/requirements/roadmap-iterations/04-meal-framework-variation.md](docs/requirements/roadmap-iterations/04-meal-framework-variation.md) (see also [ADR 0006](docs/adr/0006-structured-meal-framework-variation.md))
 
 **Value delivered:** menus reflect real campout logistics instead of forcing every campout through an identical framework.
 
@@ -45,7 +45,7 @@ Full requirements and acceptance criteria: [docs/requirements/04-meal-framework-
 
 **Goal:** close the gaps that only show up once the loop gets used for real.
 
-Full requirements and acceptance criteria: [docs/requirements/05-workflow-hardening-and-polish.md](docs/requirements/05-workflow-hardening-and-polish.md)
+Full requirements and acceptance criteria: [docs/requirements/roadmap-iterations/05-workflow-hardening-and-polish.md](docs/requirements/roadmap-iterations/05-workflow-hardening-and-polish.md)
 
 **Value delivered:** the workflow is trustworthy enough to hand fully to youth leaders without an adult double-checking it.
 

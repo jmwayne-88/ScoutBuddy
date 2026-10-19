@@ -15,7 +15,7 @@ import { restoreOccasion } from "@/app/(app)/campouts/[id]/actions";
 // can trigger, keyed by the string name that action passes to lib/toast.ts's
 // withToast(..., { undo: { action: "<key>", payload } }). "removeOccasion"
 // reuses the existing restoreOccasion action rather than a new one -- see
-// docs/requirements/15-consistent-destructive-action-pattern.md.
+// docs/requirements/ux-interaction-polish/15-consistent-destructive-action-pattern.md.
 const UNDO_ACTIONS: Record<string, (formData: FormData) => void | Promise<void>> = {
   removeDish: undoRemoveDish,
   removeIngredient: undoRemoveIngredient,

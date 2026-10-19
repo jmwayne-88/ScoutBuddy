@@ -2,7 +2,7 @@
  * The one deliberate exception to "MUI only" (CLAUDE.md) in this app --
  * @page/break-before/print media queries have no MUI equivalent. Every
  * actual component on this page still uses MUI; only the page geometry and
- * pagination mechanics live here. See docs/requirements/12-menu-print-preview.md.
+ * pagination mechanics live here. See docs/requirements/printing-exports/12-menu-print-preview.md.
  *
  * `@page { margin: 0 }` plus each .printPage's own 0.5in padding means the
  * padding *is* the margin, identically on screen and on paper -- this

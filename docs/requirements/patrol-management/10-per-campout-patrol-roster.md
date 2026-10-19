@@ -1,7 +1,7 @@
 # Requirement 10 — Per-Campout Patrol Roster (Add/Remove)
 
 Status: Not started — documentation only
-Depends on: [Requirement 1 - Core Approval Loop](01-core-approval-loop.md) (the `assignMenu` action this reuses), [Requirement 7 - Campout Dashboard Layout](07-campout-dashboard-layout.md) and [Requirement 8 - Manage Patrols](08-manage-patrols.md) (this requirement revises the "every active patrol gets a row" display model those introduced, now that the patrol roster is unbounded, and reuses Requirement 8's confirm-before-destroying pattern)
+Depends on: [Requirement 1 - Core Approval Loop](../roadmap-iterations/01-core-approval-loop.md) (the `assignMenu` action this reuses), [Requirement 7 - Campout Dashboard Layout](../ux-interaction-polish/07-campout-dashboard-layout.md) and [Requirement 8 - Manage Patrols](08-manage-patrols.md) (this requirement revises the "every active patrol gets a row" display model those introduced, now that the patrol roster is unbounded, and reuses Requirement 8's confirm-before-destroying pattern)
 
 ## Goal
 
@@ -52,7 +52,7 @@ Removal is allowed at **any** menu status, including Approved — consistent wit
 
 ## Related
 
-- [Requirement 1 - Core Approval Loop](01-core-approval-loop.md) — the existing `assignMenu` action the "Add patrol" picker calls underneath.
-- [Requirement 4 - Meal-Framework Variation](04-meal-framework-variation.md) — meal-framework exceptions are campout+patrol scoped and explicitly preserved across a remove/re-add cycle (REQ-10.2/10.7).
-- [Requirement 7 - Campout Dashboard Layout](07-campout-dashboard-layout.md) (REQ-7.12) and [Requirement 8 - Manage Patrols](08-manage-patrols.md) — this requirement revises the campout detail page's patrol display from "a row for every active patrol" to "a row for every patrol that's actually on this campout, plus a disable-able Add control" (a direct consequence of Requirement 8 making the patrol roster unbounded), and reuses Requirement 8's cascading-delete-behind-a-confirmation-dialog pattern at a smaller (single-menu) scope — `components/DeletePatrolDialog.tsx` is the direct precedent for whatever confirmation UI this builds.
+- [Requirement 1 - Core Approval Loop](../roadmap-iterations/01-core-approval-loop.md) — the existing `assignMenu` action the "Add patrol" picker calls underneath.
+- [Requirement 4 - Meal-Framework Variation](../roadmap-iterations/04-meal-framework-variation.md) — meal-framework exceptions are campout+patrol scoped and explicitly preserved across a remove/re-add cycle (REQ-10.2/10.7).
+- [Requirement 7 - Campout Dashboard Layout](../ux-interaction-polish/07-campout-dashboard-layout.md) (REQ-7.12) and [Requirement 8 - Manage Patrols](08-manage-patrols.md) — this requirement revises the campout detail page's patrol display from "a row for every active patrol" to "a row for every patrol that's actually on this campout, plus a disable-able Add control" (a direct consequence of Requirement 8 making the patrol roster unbounded), and reuses Requirement 8's cascading-delete-behind-a-confirmation-dialog pattern at a smaller (single-menu) scope — `components/DeletePatrolDialog.tsx` is the direct precedent for whatever confirmation UI this builds.
 - This is a straightforward feature extension of already-established patterns (manual cascade delete per ADR 0012/0018, confirm-before-destroy per Requirement 8) — it isn't expected to need its own ADR when built, unlike Requirement 8.

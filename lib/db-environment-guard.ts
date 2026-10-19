@@ -16,7 +16,7 @@
 // for the same branch have different hostnames (a "-pooler" suffix).
 export const NEON_DEVELOPMENT_HOST = "ep-fragrant-haze-b4zn25pb-pooler.c-6.us-east-2.aws.neon.tech";
 
-// Production's pooled DATABASE_URL host (see docs/requirements/11-production-deployment-pipeline.md).
+// Production's pooled DATABASE_URL host (see docs/requirements/infrastructure-deployment/11-production-deployment-pipeline.md).
 // Before this was filled in, the constant held a literal placeholder
 // ("REPLACE_WITH_PRODUCTION_NEON_HOST") and the guard below treated an
 // unfilled placeholder as "not yet configured" (warn, not throw) so that

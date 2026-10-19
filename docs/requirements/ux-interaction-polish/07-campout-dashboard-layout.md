@@ -60,5 +60,5 @@ A reference screenshot supplied by the user: a "Scout Buddy" dashboard with a le
 ## Related
 
 - [ADR 0015 - Brand-aligned visual design](../adr/0015-brand-aligned-visual-design.md) — this requirement refines its header-color and status-color choices (status pills use semantic colors, not strictly the Scouts BSA palette); implementing this should produce a follow-up ADR documenting what changed and why, per CLAUDE.md's per-decision convention.
-- [Requirement 2 - Patrol Visual Identity](02-four-patrols-and-visual-identity.md) — patrol colors are reused as-is on the new cards.
-- [Requirement 3 - Multiple Campouts](03-multiple-campouts.md) — this is a new presentation layer over the same campout list.
+- [Requirement 2 - Patrol Visual Identity](../roadmap-iterations/02-four-patrols-and-visual-identity.md) — patrol colors are reused as-is on the new cards.
+- [Requirement 3 - Multiple Campouts](../roadmap-iterations/03-multiple-campouts.md) — this is a new presentation layer over the same campout list.

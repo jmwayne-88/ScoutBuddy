@@ -51,6 +51,7 @@ Not Started → In Progress → Submitted → Changes Requested → Approved
 ## Working conventions
 
 - **Every architecture decision gets its own ADR.** Any time a real architectural choice is made or changed (stack, hosting, data model shape, a new external service, a significant convention like the status state machine) — not just at project kickoff — write a new numbered file in [docs/adr/](docs/adr/README.md) following the existing Context / Decision / Alternatives Considered / Consequences format, link it from `docs/adr/README.md`'s index, and cross-link related ADRs. If a decision supersedes an earlier one, write a new ADR and update the old one's Status line rather than editing its original content away.
+- **File a built requirement into its category folder as part of landing it.** Once a requirement in [docs/requirements/](docs/requirements/README.md) has been built, committed, and pushed, move it from the flat root into the subfolder matching its functionality (`git mv`), fixing any cross-links the move affects — see `docs/requirements/README.md`'s Organization section for the category list and process. This runs every time a requirement ships, not as an occasional cleanup pass.
 - (To be filled in further as the codebase takes shape — testing approach, folder structure, naming conventions.)
 
 <!-- BEGIN:nextjs-agent-rules -->

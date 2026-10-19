@@ -1,7 +1,7 @@
 # Requirement 18 — Patrol Icon/Avatar Identity
 
 Status: Done
-Depends on: none tied to a single ROADMAP iteration; extends the existing patrol color system ([Requirement 2](02-four-patrols-and-visual-identity.md), [ADR 0018](../adr/0018-patrols-as-database-rows.md))
+Depends on: none tied to a single ROADMAP iteration; extends the existing patrol color system ([Requirement 2](../roadmap-iterations/02-four-patrols-and-visual-identity.md), [ADR 0018](../adr/0018-patrols-as-database-rows.md))
 
 ## Goal
 
@@ -9,7 +9,7 @@ Give each patrol a small original icon or avatar shape alongside its existing co
 
 ## Source
 
-Recommendation #9 from the UX/style audit referenced by [Requirement 13](13-ux-quick-win-polish.md)'s Source section.
+Recommendation #9 from the UX/style audit referenced by [Requirement 13](../ux-interaction-polish/13-ux-quick-win-polish.md)'s Source section.
 
 ## Problem
 
@@ -65,7 +65,7 @@ Every place a patrol appears today — `components/PatrolBadge.tsx`, the patrol-
 
 ## Related
 
-- [Requirement 2 - Four Patrols + Visual Identity](02-four-patrols-and-visual-identity.md) — the original color-only identity system this requirement extends.
+- [Requirement 2 - Four Patrols + Visual Identity](../roadmap-iterations/02-four-patrols-and-visual-identity.md) — the original color-only identity system this requirement extends.
 - [ADR 0015 - Brand-aligned visual design, no trademarks](../adr/0015-brand-aligned-visual-design.md) — the trademark-safety constraint REQ-18.7 carries forward.
 - [ADR 0018 - Patrols as database rows](../adr/0018-patrols-as-database-rows.md) — patrols are admin-managed data now, which is why this requirement's icon set must be ASPL-selectable per patrol rather than hardcoded to the original five names.
 - [Requirement 17 - Avatar/Card Home Role Picker](17-avatar-card-role-picker.md) — the clearest consumer of this requirement's icons once both exist.

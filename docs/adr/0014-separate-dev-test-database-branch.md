@@ -5,7 +5,7 @@ Status: Accepted; partially superseded by [ADR 0019](0019-local-production-crede
 
 ## Context
 
-[ADR 0003](0003-postgres-database-via-neon.md) set up a single Neon database, used for local development, for the manual/automated verification done while building Iterations 1-5, and eventually for the live application. That was fine while ScoutBuddy was purely a work-in-progress, but it means real troop data and disposable test data would end up in the exact same tables once the app is actually in use — a stray test campout, a schema experiment, or a bad migration run locally could land on top of live data with no isolation at all. [Requirement 6](../requirements/06-test-database-isolation.md) requires this to stop being possible before real use starts.
+[ADR 0003](0003-postgres-database-via-neon.md) set up a single Neon database, used for local development, for the manual/automated verification done while building Iterations 1-5, and eventually for the live application. That was fine while ScoutBuddy was purely a work-in-progress, but it means real troop data and disposable test data would end up in the exact same tables once the app is actually in use — a stray test campout, a schema experiment, or a bad migration run locally could land on top of live data with no isolation at all. [Requirement 6](../requirements/infrastructure-deployment/06-test-database-isolation.md) requires this to stop being possible before real use starts.
 
 ## Decision
 

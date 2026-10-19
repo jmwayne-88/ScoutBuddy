@@ -21,7 +21,7 @@ const darkBg = req(darkPalette.background?.default);
 const darkPaper = req(darkPalette.background?.paper);
 
 // Every foreground/background pairing the theme actually renders, per
-// REQ-9.13 (docs/requirements/09-adopt-mui-design-system.md). `text.disabled`
+// REQ-9.13 (docs/requirements/design-system-visual-identity/09-adopt-mui-design-system.md). `text.disabled`
 // is deliberately excluded from the WCAG assertions below — disabled
 // controls are exempt from the 4.5:1 text requirement — but is still logged
 // in the results table for visibility.

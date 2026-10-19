@@ -47,5 +47,5 @@ None of these is field-level — each surfaces as one generic alert at the top o
 ## Related
 
 - [Requirement 13 - UX Quick-Win Polish Pass](13-ux-quick-win-polish.md) / [ADR 0023](../adr/0023-redirect-based-toast-notifications.md) — the success-path pattern this requirement's validation-path changes sit alongside, not replace.
-- [Requirement 5 - Workflow Hardening & Polish](05-workflow-hardening-and-polish.md) — REQ-5.6 is the empty-occasion submit guardrail whose error presentation this requirement changes.
+- [Requirement 5 - Workflow Hardening & Polish](../roadmap-iterations/05-workflow-hardening-and-polish.md) — REQ-5.6 is the empty-occasion submit guardrail whose error presentation this requirement changes.
 - CLAUDE.md's "every architecture decision gets its own ADR" rule — governs REQ-20.4's `useActionState` adoption.

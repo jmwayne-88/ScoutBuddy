@@ -78,7 +78,7 @@ User request, 2026-10-18: make the comments icon smaller, and add the same comme
 
 - [Requirement 26 - Full Comment & Annotation System](26-full-comment-annotation-system.md) — the comment system extended here with a fourth target.
 - [Requirement 28 - Comment Pane UX Revision](28-comment-pane-ux-revision.md) — the icon trigger and pane this requirement resizes and reuses.
-- [Requirement 4 - Meal-Framework Variation](04-meal-framework-variation.md) — the remove/restore occasion behavior REQ-29.7 and the Open Question depend on.
-- [Requirement 15 - Consistent Destructive-Action Pattern](15-consistent-destructive-action-pattern.md) — the Undo-via-restore flow behind the Open Question's recommendation.
+- [Requirement 4 - Meal-Framework Variation](../roadmap-iterations/04-meal-framework-variation.md) — the remove/restore occasion behavior REQ-29.7 and the Open Question depend on.
+- [Requirement 15 - Consistent Destructive-Action Pattern](../ux-interaction-polish/15-consistent-destructive-action-pattern.md) — the Undo-via-restore flow behind the Open Question's recommendation.
 - [ADR 0026 - Comment/annotation data model](../adr/0026-comment-annotation-data-model.md) — the `Comment`/`CommentActivity` schema a meal target extends.
 - [ADR 0029 - Meal comments anchor on occasion, not a `Meal` foreign key](../adr/0029-meal-comment-occasion-anchor.md) — records the occasion-based meal anchor (see Open Questions).
