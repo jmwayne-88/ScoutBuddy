@@ -3,8 +3,10 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
+import { canImportCampouts } from "@/lib/permissions";
 import { getActivePatrols } from "@/lib/patrols";
 import { campoutProgress } from "@/lib/progress";
 import { unresolvedCountsByMenu } from "@/lib/comments";
@@ -46,15 +48,28 @@ export default async function CampoutsLayout({ children }: { children: ReactNode
             <Typography variant="h6" component="h2">
               Campouts
             </Typography>
-            <LinkButton
-              href="/campouts/new"
-              variant="contained"
-              size="small"
-              startIcon={<AddIcon />}
-              aria-label="New campout"
-            >
-              New
-            </LinkButton>
+            <Stack direction="row" spacing={1}>
+              {canImportCampouts(actor) && (
+                <LinkButton
+                  href="/campouts/import"
+                  variant="outlined"
+                  size="small"
+                  startIcon={<UploadFileIcon />}
+                  aria-label="Import from file"
+                >
+                  Import
+                </LinkButton>
+              )}
+              <LinkButton
+                href="/campouts/new"
+                variant="contained"
+                size="small"
+                startIcon={<AddIcon />}
+                aria-label="New campout"
+              >
+                New
+              </LinkButton>
+            </Stack>
           </Stack>
           {campouts.length === 0 ? (
             <EmptyState icon={EMPTY_STATES.noCampouts().Icon}>{EMPTY_STATES.noCampouts().message}</EmptyState>

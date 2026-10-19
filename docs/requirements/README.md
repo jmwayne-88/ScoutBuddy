@@ -15,6 +15,7 @@ Categories are grouped by what the requirement is actually about, not by number 
 - **ux-interaction-polish/** — presentation-layer and interaction-pattern work: layout, status visualization, async states, destructive-action patterns, empty states, validation, loading states, navigation, gamification.
 - **printing-exports/** — menu print preview and shopping-list generation.
 - **review-comments/** — the comment/annotation system and review-history UX.
+- **data-import/** — bulk-importing troop data from an uploaded file (AI-assisted extraction, review-before-save).
 
 ## Index
 
@@ -70,3 +71,7 @@ Categories are grouped by what the requirement is actually about, not by number 
 - [26 - Full Comment & Annotation System (Office Review-Mode Style)](review-comments/26-full-comment-annotation-system.md)
 - [28 - Comment Pane UX Revision](review-comments/28-comment-pane-ux-revision.md)
 - [29 - Smaller Comment Icon, Meal-Level Comments & Campout-List Comment Counts](review-comments/29-smaller-comment-icon-and-meal-comments.md)
+
+### data-import/
+
+- [30 - AI-Assisted Campout Import from PDF/Excel](data-import/30-campout-import-from-pdf-excel.md)

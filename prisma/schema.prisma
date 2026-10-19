@@ -53,12 +53,35 @@ model Campout {
   id                       String                    @id @default(cuid())
   name                     String
   date                     DateTime
+  // REQ-30: the campout's last day, for a multi-day span (e.g. Fri-Sun) --
+  // null means single-day, same as every campout before this column
+  // existed. See ADR 0030.
+  endDate                  DateTime?
   location                 String?
   description              String?
   imageUrl                 String?
+  // REQ-30: provenance only, not an audit trail -- overwritten on every
+  // subsequent import, so it answers "was this last touched by an
+  // upload" rather than "show me its full import history." See ADR 0030.
+  lastImportedFrom         String?
+  lastImportedAt           DateTime?
   createdAt                DateTime                  @default(now())
   menus                    Menu[]
   mealFrameworkExceptions  MealFrameworkException[]
+}
+
+// REQ-30: a short-lived staging row holding one upload's proposed
+// campouts (post-match, pre-ASPL-edit) between "upload" and "confirm" --
+// a real table rather than a session store or a signed hidden-form
+// payload, since this app has no session infra and `candidates` can carry
+// multi-KB base64 thumbnail data per row. Deleted on confirm; swept
+// lazily (by age) on the next upload rather than via a cron job. See ADR
+// 0031.
+model CampoutImportBatch {
+  id             String   @id @default(cuid())
+  sourceFileName String
+  createdAt      DateTime @default(now())
+  candidates     Json
 }
 
 model Menu {
