@@ -45,6 +45,9 @@ const pairings: Pairing[] = [
   { name: "dark: text.primary on background.paper", foreground: req(darkPalette.text?.primary), background: darkPaper, threshold: "text" },
   { name: "dark: divider on background.default (non-text)", foreground: req(darkPalette.divider), background: darkBg, threshold: "non-text" },
   { name: "dark: brand.oliveDark on background.default (outlined secondary-action)", foreground: req(darkPalette.brand?.oliveDark), background: darkBg, threshold: "text" },
+  // REQ-25.6: components/StreakBadge.tsx's outlined chip uses primary.main
+  // as its text/icon color directly on the page background.
+  { name: "dark: primary.main on background.default (streak badge)", foreground: req(darkPalette.primary?.main), background: darkBg, threshold: "text" },
 
   // Semantic status colors (lib/progress.ts) — unchanged by this migration,
   // re-verified here since Requirement 9 touches every pairing the app renders.

@@ -30,3 +30,5 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0024 - Patrol icons: a fixed, hand-drawn glyph set plus name-based suggestion](0024-patrol-icon-identity.md)
 - [0025 - `useActionState` adopted for the two patrol color-validation forms](0025-useactionstate-for-patrol-color-validation.md)
 - [0026 - Comment/annotation data model: a self-referencing table plus an append-only activity log](0026-comment-annotation-data-model.md)
+- [0027 - Mobile bottom navigation, breakpoint-scoped and header-only role switching](0027-mobile-bottom-navigation.md)
+- [0028 - `Menu.submittedAt`, set once, backs the on-time streak](0028-menu-submitted-at-for-streak-tracking.md)

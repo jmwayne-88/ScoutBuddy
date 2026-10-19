@@ -10,6 +10,7 @@ import { getActor } from "@/lib/session";
 import { getActivePatrols } from "@/lib/patrols";
 import { RoleSwitcher } from "@/components/RoleSwitcher";
 import { AppNav } from "@/components/AppNav";
+import { BottomNav } from "@/components/BottomNav";
 import { ColorModeToggle } from "@/components/ColorModeToggle";
 import { ToastListener } from "@/components/ToastListener";
 
@@ -35,9 +36,22 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           </Stack>
         </Toolbar>
       </AppBar>
-      <Container component="main" maxWidth="lg" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 2, sm: 3 } }}>
+      <Container
+        component="main"
+        maxWidth="lg"
+        sx={{
+          pt: { xs: 2, sm: 4 },
+          // REQ-23.4: room for the fixed bottom bar on mobile (its ~56px
+          // action height plus the home-indicator safe area) so it never
+          // overlaps a page's own bottom-of-screen controls (e.g. the menu
+          // page's Submit/Approve buttons).
+          pb: { xs: "calc(56px + env(safe-area-inset-bottom) + 16px)", sm: 4 },
+          px: { xs: 2, sm: 3 },
+        }}
+      >
         <Box>{children}</Box>
       </Container>
+      <BottomNav role={actor?.role ?? null} />
       <Suspense fallback={null}>
         <ToastListener />
       </Suspense>

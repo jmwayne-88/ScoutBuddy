@@ -9,6 +9,8 @@ import { EMPTY_STATES } from "@/lib/empty-states";
 import { EmptyState } from "@/components/EmptyState";
 import { formatDueDate } from "@/lib/dates";
 import { RelativeDate } from "@/components/RelativeDate";
+import { onTimeStreak } from "@/lib/streaks";
+import { StreakBadge } from "@/components/StreakBadge";
 
 export default async function PatrolLeaderPage() {
   const actor = await getActor();
@@ -32,9 +34,16 @@ export default async function PatrolLeaderPage() {
     redirect(`/menus/${menus[0].id}`);
   }
 
+  // REQ-25.2/25.4: shown only here, to the Patrol Leader it belongs to --
+  // never on any ASPL-facing view.
+  const streak = onTimeStreak(menus);
+
   return (
     <Stack spacing={2} sx={{ maxWidth: 600 }}>
-      <Typography variant="h5">Your patrol&apos;s menus</Typography>
+      <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 1 }}>
+        <Typography variant="h5">Your patrol&apos;s menus</Typography>
+        <StreakBadge streak={streak} />
+      </Stack>
       <Stack spacing={1} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
         {menus.map((menu) => (
           <Typography key={menu.id} component="li" variant="body2">

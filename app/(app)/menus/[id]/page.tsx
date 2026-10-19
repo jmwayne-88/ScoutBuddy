@@ -22,6 +22,8 @@ import type { CommentTarget } from "@/components/CommentThread";
 import { CommentPane } from "@/components/CommentPane";
 import { CommentActivityLog } from "@/components/CommentActivityLog";
 import { MenuStatusChip } from "@/components/MenuStatusChip";
+import { StreakBadge } from "@/components/StreakBadge";
+import { onTimeStreak } from "@/lib/streaks";
 import { NavLink } from "@/components/NavLink";
 import { LinkButton } from "@/components/LinkButton";
 import { RenameDishDialog } from "@/components/RenameDishDialog";
@@ -67,6 +69,18 @@ export default async function MenuPage({
   });
 
   if (!menu) notFound();
+
+  // REQ-25.2: computed and shown only when the viewer is this menu's own
+  // Patrol Leader -- never for the ASPL, and never comparing across patrols.
+  const isOwnPatrolLeader = actor?.role === "PATROL_LEADER" && actor.patrolId === menu.patrolId;
+  const streak = isOwnPatrolLeader
+    ? onTimeStreak(
+        await db.menu.findMany({
+          where: { patrolId: menu.patrolId },
+          select: { dueDate: true, submittedAt: true },
+        })
+      )
+    : 0;
 
   const canEdit = canEditMenu(actor, menu);
   const canSubmit = canSubmitMenu(actor, menu);
@@ -163,11 +177,12 @@ export default async function MenuPage({
             Close
           </LinkButton>
         </Stack>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 1 }}>
           <Typography variant="body2" color="text.secondary">
             Due <RelativeDate {...formatDueDate(menu.dueDate)} />
           </Typography>
           <MenuStatusChip status={menu.status} />
+          {isOwnPatrolLeader && <StreakBadge streak={streak} />}
         </Stack>
         <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 1 }}>
           <Typography variant="body2">

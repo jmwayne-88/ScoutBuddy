@@ -69,6 +69,12 @@ model Menu {
   patrol          Patrol            @relation(fields: [patrolId], references: [id])
   dueDate         DateTime
   status          MenuStatus        @default(NOT_STARTED)
+  // REQ-25.1: set once, on the first NOT_STARTED/IN_PROGRESS -> SUBMITTED
+  // transition only (see submitMenu in app/(app)/menus/[id]/actions.ts) --
+  // never overwritten by a later Changes-Requested resubmission, so it
+  // always reflects the *first* submission, which is what the on-time
+  // streak (lib/streaks.ts) compares against dueDate. See ADR 0028.
+  submittedAt     DateTime?
   nutritionNote   String            @default("")
   allergyNote     String            @default("")
   createdAt       DateTime          @default(now())

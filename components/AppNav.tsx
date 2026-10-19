@@ -30,7 +30,10 @@ export function AppNav({ items }: { items: NavItem[] }) {
           </MuiLink>
         ))}
       </Box>
-      <Box sx={{ display: { xs: "block", md: "none" } }}>
+      {/* REQ-23.5: retired below `sm`, where components/BottomNav.tsx now
+          covers this drawer's one destination -- unchanged at `sm`-`md`,
+          where no bottom bar renders (REQ-23.3). See ADR 0027. */}
+      <Box sx={{ display: { xs: "none", sm: "block", md: "none" } }}>
         <IconButton color="inherit" aria-label="Open navigation" onClick={() => setOpen(true)}>
           <MenuIcon />
         </IconButton>

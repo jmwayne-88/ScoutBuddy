@@ -1,6 +1,6 @@
 # Requirement 23 — Persistent Mobile Bottom Navigation
 
-Status: Not started
+Status: Done
 Depends on: none tied to a single ROADMAP iteration; restructures navigation established in [Requirement 7](07-campout-dashboard-layout.md)'s REQ-7.4 (role switcher moved into the header) and `components/AppNav.tsx`
 
 ## Goal

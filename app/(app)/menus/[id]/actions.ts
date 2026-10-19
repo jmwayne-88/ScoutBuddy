@@ -283,7 +283,14 @@ export async function submitMenu(formData: FormData) {
     redirect(`/menus/${menuId}`);
   }
 
-  await db.menu.update({ where: { id: menuId }, data: { status: "SUBMITTED" } });
+  // REQ-25.1: `submittedAt` is set only on the *first* submission -- a
+  // later Changes-Requested -> resubmit cycle leaves it untouched, so
+  // lib/streaks.ts's on-time comparison always reflects the first
+  // submission, never a later resubmission. See ADR 0028.
+  await db.menu.update({
+    where: { id: menuId },
+    data: { status: "SUBMITTED", submittedAt: menu.submittedAt ?? new Date() },
+  });
   revalidatePath(`/menus/${menuId}`);
   redirect(withToast(`/menus/${menuId}`, "Menu submitted — nice work!"));
 }

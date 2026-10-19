@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Montserrat, Inter } from "next/font/google";
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
@@ -21,6 +21,14 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "ScoutBuddy",
   description: "Campout menu planning and approval for the troop",
+};
+
+// REQ-23.4: `viewportFit: "cover"` is what makes `env(safe-area-inset-*)`
+// resolve to the device's actual notch/home-indicator insets rather than 0
+// -- needed for components/BottomNav.tsx's fixed bar to clear the home
+// indicator on notched phones instead of sitting under it.
+export const viewport: Viewport = {
+  viewportFit: "cover",
 };
 
 // Deliberately minimal -- the AppBar/nav chrome lives in app/(app)/layout.tsx

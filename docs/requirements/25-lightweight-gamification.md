@@ -1,6 +1,6 @@
 # Requirement 25 — Lightweight Gamification (Streaks & Recognition)
 
-Status: Not started
+Status: Done
 Depends on: none tied to a single ROADMAP iteration; purely additive over existing menu/review data
 
 ## Goal

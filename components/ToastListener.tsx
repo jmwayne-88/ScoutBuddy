@@ -97,6 +97,9 @@ export function ToastListener() {
       autoHideDuration={toast?.celebrate || canUndo ? 6000 : 4000}
       onClose={() => setToast(null)}
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      // REQ-23.4: clears components/BottomNav.tsx's fixed mobile bar instead
+      // of being hidden behind it.
+      sx={{ bottom: { xs: "calc(56px + env(safe-area-inset-bottom) + 8px)", sm: 24 } }}
     >
       <Alert
         severity={toast?.celebrate ? "success" : "info"}
