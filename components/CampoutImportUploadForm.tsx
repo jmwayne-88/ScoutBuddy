@@ -40,7 +40,7 @@ export function CampoutImportUploadForm() {
     setIsUploading(true);
     try {
       const blob = await upload(file.name, file, {
-        access: "public",
+        access: "private",
         handleUploadUrl: "/api/campout-import-upload",
       });
       const formData = new FormData();

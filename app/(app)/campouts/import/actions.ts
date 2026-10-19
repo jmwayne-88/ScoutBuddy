@@ -3,7 +3,7 @@
 import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { del } from "@vercel/blob";
+import { del, get } from "@vercel/blob";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
@@ -25,14 +25,17 @@ const MAX_EXCEL_SHEETS = 30;
 // time anyone starts a new import, rather than on a schedule.
 const BATCH_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
-// ADR 0032: a real Vercel Blob URL always has this hostname shape. The
-// client picks `blobUrl` and hands it to this public Server Action, so
-// it's validated the same defense-in-depth way every other action in this
-// app validates client-supplied values -- without this, the action would
-// `fetch()` whatever URL it's given, an SSRF-shaped risk.
+// ADR 0032: a real Vercel Blob URL always has one of these two hostname
+// shapes (private store vs. public store -- this app uses a private one,
+// see the ADR, but both are accepted defensively). The client picks
+// `blobUrl` and hands it to this public Server Action, so it's validated
+// the same defense-in-depth way every other action in this app validates
+// client-supplied values -- without this, the action would read whatever
+// URL it's given via the Blob SDK, an SSRF-shaped risk.
 function isOwnBlobUrl(url: string): boolean {
   try {
-    return new URL(url).hostname.endsWith(".public.blob.vercel-storage.com");
+    const { hostname } = new URL(url);
+    return hostname.endsWith(".private.blob.vercel-storage.com") || hostname.endsWith(".public.blob.vercel-storage.com");
   } catch {
     return false;
   }
@@ -93,14 +96,19 @@ export async function uploadCampoutFile(
 async function processUpload(blobUrl: string, fileName: string, isPdf: boolean): Promise<ImportUploadFormState> {
   let bytes: Uint8Array;
   try {
-    const response = await fetch(blobUrl);
-    if (!response.ok) throw new Error(`fetch failed: ${response.status}`);
-    const buf = await response.arrayBuffer();
-    if (buf.byteLength > MAX_FILE_BYTES) {
+    // ADR 0032: a private blob isn't fetchable by URL alone -- `get()` is
+    // the SDK's authenticated reader (OIDC on Vercel, BLOB_READ_WRITE_TOKEN
+    // locally), the same pattern Vercel's own private-storage docs show.
+    const result = await get(blobUrl, { access: "private" });
+    if (!result || result.statusCode !== 200 || !result.stream) {
+      throw new Error("blob not found");
+    }
+    if (result.blob.size > MAX_FILE_BYTES) {
       return {
         error: `This file is too large -- imports are limited to ${Math.floor(MAX_FILE_BYTES / (1024 * 1024))}MB.`,
       };
     }
+    const buf = await new Response(result.stream).arrayBuffer();
     bytes = new Uint8Array(buf);
   } catch {
     return { error: "Could not read the uploaded file. Please try again." };
