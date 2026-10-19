@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { actorLabel, activityLine, nestReplies, targetSummary } from "./comments";
+import { actorLabel, activityLine, nestReplies, targetSummary, unresolvedThreadCount } from "./comments";
 
 describe("actorLabel", () => {
   it("labels the ASPL and a patrol's Leader", () => {
@@ -73,5 +73,19 @@ describe("nestReplies", () => {
   it("drops an orphaned reply (its root already deleted/filtered out) instead of throwing", () => {
     const comments = [{ id: "reply-1", parentId: "missing-root", createdAt: new Date(), ...base }];
     expect(nestReplies(comments)).toEqual([]);
+  });
+});
+
+describe("unresolvedThreadCount", () => {
+  it("counts only open root threads, never replies or resolved threads", () => {
+    expect(
+      unresolvedThreadCount([
+        { parentId: null, status: "OPEN" },
+        { parentId: "a", status: "OPEN" },
+        { parentId: null, status: "OPEN" },
+        { parentId: null, status: "RESOLVED" },
+      ])
+    ).toBe(2);
+    expect(unresolvedThreadCount([])).toBe(0);
   });
 });

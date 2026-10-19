@@ -1,11 +1,20 @@
+"use client";
+
+import { useState, useTransition } from "react";
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
-import TextField from "@mui/material/TextField";
-import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import PersonIcon from "@mui/icons-material/Person";
+import ReplyIcon from "@mui/icons-material/Reply";
+import CheckIcon from "@mui/icons-material/Check";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import type { CommentActorRole, CommentStatus } from "@prisma/client";
 import { formatEventDate } from "@/lib/dates";
 import { actorLabel } from "@/lib/comments";
@@ -15,9 +24,8 @@ import type { Actor } from "@/lib/session";
 import { RelativeDate } from "@/components/RelativeDate";
 import { SubmitButton } from "@/components/SubmitButton";
 import { RemoveIconButton } from "@/components/RemoveIconButton";
-import { ResolvedThreadsToggle } from "@/components/ResolvedThreadsToggle";
+import { CommentComposer } from "@/components/CommentComposer";
 import {
-  addComment,
   assignComment,
   deleteComment,
   replyToComment,
@@ -47,38 +55,51 @@ export type CommentTarget =
   | { type: "DISH"; dishId: string }
   | { type: "INGREDIENT"; ingredientId: string };
 
-// REQ-26.1-26.5/26.9: one target's whole thread -- root comments (each
-// with its flat replies, an assign control, a resolve/reopen toggle, and
-// an author-only delete) plus a composer to start a new thread here.
-// Reuses Requirement 22's chat-bubble shape and relative-timestamp
-// convention; the ASPL side keeps REQ-22's patrol-color accent, the
-// Patrol Leader side uses `primary.main` -- both already-established
-// tokens, not a new color.
+// REQ-26.2-26.5/26.9, revised by REQ-28.3/28.4: one root comment and its
+// flat replies, rendered inside components/CommentPane.tsx. Reuses
+// Requirement 22's chat-bubble shape and relative-timestamp convention;
+// the ASPL side keeps REQ-22's patrol-color accent, the Patrol Leader side
+// uses `primary.main`.
+//
+// Per-thread controls are a single compact row of text buttons (Reply,
+// Resolve/Reopen, Assign) rather than an always-visible reply field and
+// assign <select> under every thread -- the reply composer only appears
+// once "Reply" is clicked, and can be cancelled.
+//
+// "use client": Reply's open/closed state and Assign's menu are
+// interactive, and building Chip/Menu/Tooltip trees here (not in the
+// Server Component page) sidesteps CLAUDE.md's MUI + Server Components
+// gotcha entirely. Server Actions are imported directly, which is safe.
 export function CommentThread({
   menuId,
   patrolColor,
   patrolName,
-  target,
-  comments,
+  root,
   actor,
 }: {
   menuId: string;
   patrolColor: string;
   patrolName: string;
-  target: CommentTarget;
-  comments: CommentRecord[];
+  root: CommentRecord;
   actor: Actor | null;
 }) {
+  const [replying, setReplying] = useState(false);
+  const [assignAnchor, setAssignAnchor] = useState<HTMLElement | null>(null);
+  const [isAssigning, startAssignTransition] = useTransition();
   const avatarText = contrastText(patrolColor);
-  const openThreads = comments.filter((c) => c.status === "OPEN");
-  const resolvedThreads = comments.filter((c) => c.status === "RESOLVED");
+  const resolved = root.status === "RESOLVED";
 
-  const hiddenTargetFields: Record<string, string> =
-    target.type === "DISH"
-      ? { dishId: target.dishId }
-      : target.type === "INGREDIENT"
-        ? { ingredientId: target.ingredientId }
-        : {};
+  function assignTo(role: CommentActorRole) {
+    setAssignAnchor(null);
+    if (role === root.assigneeRole) return;
+    const formData = new FormData();
+    formData.set("menuId", menuId);
+    formData.set("commentId", root.id);
+    formData.set("assigneeRole", role);
+    startAssignTransition(async () => {
+      await assignComment(formData);
+    });
+  }
 
   function renderBubble(comment: CommentBase, isReply: boolean) {
     const isASPLAuthor = comment.authorRole === "ASPL";
@@ -113,116 +134,100 @@ export function CommentThread({
         >
           <Stack spacing={0.5}>
             <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between" }}>
-              <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                {actorLabel(comment.authorRole, patrolName)}
-              </Typography>
+              <Stack direction="row" spacing={1} sx={{ alignItems: "baseline", minWidth: 0 }}>
+                <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                  {actorLabel(comment.authorRole, patrolName)}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  <RelativeDate {...formatEventDate(comment.createdAt)} />
+                </Typography>
+              </Stack>
               {canDelete && (
                 <RemoveIconButton
-                  label="Delete comment"
+                  label={isReply ? "Delete reply" : "Delete comment"}
                   action={deleteComment}
                   hiddenFields={{ menuId, commentId: comment.id }}
                   tone="subtle"
                 />
               )}
             </Stack>
-            <Typography variant="body2">{comment.body}</Typography>
-            <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
-              <Typography variant="caption" color="text.secondary">
-                <RelativeDate {...formatEventDate(comment.createdAt)} />
-              </Typography>
-              {!isReply && comment.assigneeRole && (
-                <Typography variant="caption" color="text.secondary">
-                  · Assigned to {actorLabel(comment.assigneeRole, patrolName)}
-                </Typography>
-              )}
-            </Stack>
+            <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>
+              {comment.body}
+            </Typography>
           </Stack>
         </Paper>
       </Stack>
     );
   }
 
-  function renderThread(root: CommentRecord) {
-    const resolved = root.status === "RESOLVED";
-
-    return (
-      <Stack key={root.id} spacing={1.25} sx={{ pb: 2, mb: 2, borderBottom: 1, borderColor: "divider" }}>
-        {renderBubble(root, false)}
-        {root.replies.map((reply) => renderBubble(reply, true))}
-
-        {actor && (
-          <Stack component="form" action={replyToComment} direction="row" spacing={1} sx={{ ml: 4.5, alignItems: "flex-end" }}>
-            <input type="hidden" name="menuId" value={menuId} />
-            <input type="hidden" name="parentId" value={root.id} />
-            <TextField name="body" label="Reply" size="small" fullWidth multiline maxRows={4} required />
-            <SubmitButton variant="text" size="small">
-              Reply
-            </SubmitButton>
-          </Stack>
-        )}
-
-        {actor && (
-          <Stack direction="row" spacing={1} sx={{ ml: 4.5, alignItems: "center", flexWrap: "wrap" }}>
-            <Stack component="form" action={assignComment} direction="row" spacing={1} sx={{ alignItems: "flex-end" }}>
-              <input type="hidden" name="menuId" value={menuId} />
-              <input type="hidden" name="commentId" value={root.id} />
-              <TextField
-                select
-                name="assigneeRole"
-                label="Assign to"
-                size="small"
-                defaultValue={root.assigneeRole ?? ""}
-                sx={{ minWidth: 160 }}
-              >
-                <MenuItem value="ASPL">the ASPL</MenuItem>
-                <MenuItem value="PATROL_LEADER">{patrolName} Leader</MenuItem>
-              </TextField>
-              <SubmitButton variant="text" size="small">
-                Assign
-              </SubmitButton>
-            </Stack>
-
-            <Box component="form" action={resolved ? reopenComment : resolveComment}>
-              <input type="hidden" name="menuId" value={menuId} />
-              <input type="hidden" name="commentId" value={root.id} />
-              <SubmitButton variant={resolved ? "outlined" : "contained"} size="small" color={resolved ? "inherit" : "primary"}>
-                {resolved ? "Reopen" : "Mark resolved"}
-              </SubmitButton>
-            </Box>
-          </Stack>
-        )}
-      </Stack>
-    );
-  }
-
   return (
-    <Stack spacing={1}>
-      {openThreads.length === 0 && resolvedThreads.length === 0 && (
-        <Typography variant="body2" color="text.secondary">
-          No comments yet.
-        </Typography>
+    <Stack spacing={1.25} sx={{ opacity: resolved ? 0.75 : 1 }}>
+      {(resolved || root.assigneeRole) && (
+        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+          {resolved && <Chip size="small" icon={<CheckIcon />} label="Resolved" />}
+          {root.assigneeRole && (
+            <Chip
+              size="small"
+              variant="outlined"
+              icon={<AssignmentIndIcon />}
+              label={`Assigned to ${actorLabel(root.assigneeRole, patrolName)}`}
+            />
+          )}
+        </Stack>
       )}
 
-      {openThreads.map(renderThread)}
-
-      {resolvedThreads.length > 0 && (
-        <ResolvedThreadsToggle count={resolvedThreads.length}>
-          <Stack spacing={0}>{resolvedThreads.map(renderThread)}</Stack>
-        </ResolvedThreadsToggle>
-      )}
+      {renderBubble(root, false)}
+      {root.replies.map((reply) => renderBubble(reply, true))}
 
       {actor && (
-        <Stack component="form" action={addComment} spacing={1} sx={{ alignItems: "flex-start" }}>
-          <input type="hidden" name="menuId" value={menuId} />
-          <input type="hidden" name="target" value={target.type} />
-          {Object.entries(hiddenTargetFields).map(([key, value]) => (
-            <input key={key} type="hidden" name={key} value={value} />
-          ))}
-          <TextField name="body" label="Add a comment" size="small" fullWidth multiline rows={2} required />
-          <SubmitButton variant="contained" size="small">
-            Comment
-          </SubmitButton>
-        </Stack>
+        <Box sx={{ ml: 4.5 }}>
+          {replying ? (
+            <CommentComposer
+              action={replyToComment}
+              hiddenFields={{ menuId, parentId: root.id }}
+              label="Reply"
+              submitLabel="Reply"
+              onDone={() => setReplying(false)}
+            />
+          ) : (
+            <Stack direction="row" sx={{ alignItems: "center", flexWrap: "wrap", gap: 0.5 }}>
+              {!resolved && (
+                <Button size="small" startIcon={<ReplyIcon />} onClick={() => setReplying(true)}>
+                  Reply
+                </Button>
+              )}
+              <Box component="form" action={resolved ? reopenComment : resolveComment}>
+                <input type="hidden" name="menuId" value={menuId} />
+                <input type="hidden" name="commentId" value={root.id} />
+                <SubmitButton size="small" startIcon={resolved ? <RestartAltIcon /> : <CheckIcon />}>
+                  {resolved ? "Reopen" : "Resolve"}
+                </SubmitButton>
+              </Box>
+              {!resolved && (
+                <>
+                  <Button
+                    size="small"
+                    startIcon={<AssignmentIndIcon />}
+                    onClick={(e) => setAssignAnchor(e.currentTarget)}
+                    disabled={isAssigning}
+                    aria-haspopup="menu"
+                    sx={{ color: "text.secondary" }}
+                  >
+                    {root.assigneeRole ? "Reassign" : "Assign"}
+                  </Button>
+                  <Menu anchorEl={assignAnchor} open={assignAnchor !== null} onClose={() => setAssignAnchor(null)}>
+                    <MenuItem selected={root.assigneeRole === "ASPL"} onClick={() => assignTo("ASPL")}>
+                      the ASPL
+                    </MenuItem>
+                    <MenuItem selected={root.assigneeRole === "PATROL_LEADER"} onClick={() => assignTo("PATROL_LEADER")}>
+                      {patrolName} Leader
+                    </MenuItem>
+                  </Menu>
+                </>
+              )}
+            </Stack>
+          )}
+        </Box>
       )}
     </Stack>
   );

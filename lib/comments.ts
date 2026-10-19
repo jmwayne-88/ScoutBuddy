@@ -78,3 +78,11 @@ export function nestReplies<T extends { id: string; parentId: string | null; cre
 
   return roots;
 }
+
+// REQ-28.2: the number on an area's comment badge -- open root threads
+// only. Resolution is per-thread (resolveComment acts on a root), so a
+// thread's replies never count separately, and a resolved thread no
+// longer needs anyone's attention.
+export function unresolvedThreadCount(comments: { parentId: string | null; status: "OPEN" | "RESOLVED" }[]): number {
+  return comments.filter((c) => !c.parentId && c.status === "OPEN").length;
+}

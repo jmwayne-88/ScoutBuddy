@@ -7,7 +7,7 @@ import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import { db } from "@/lib/db";
 import { getActor } from "@/lib/session";
-import { canEditMenu, canReview, canSubmitMenu } from "@/lib/permissions";
+import { canCommentOnMenu, canEditMenu, canReview, canSubmitMenu } from "@/lib/permissions";
 import { menuHasEmptyOccasion } from "@/lib/validation";
 import { MEAL_OCCASIONS } from "@/lib/constants";
 import { formatDueDate } from "@/lib/dates";
@@ -18,8 +18,8 @@ import { EmptyState } from "@/components/EmptyState";
 import { PatrolBadge } from "@/components/PatrolBadge";
 import { RelativeDate } from "@/components/RelativeDate";
 import { ReviewThread } from "@/components/ReviewThread";
-import { CommentThread, type CommentTarget } from "@/components/CommentThread";
-import { CommentDisclosure } from "@/components/CommentDisclosure";
+import type { CommentTarget } from "@/components/CommentThread";
+import { CommentPane } from "@/components/CommentPane";
 import { CommentActivityLog } from "@/components/CommentActivityLog";
 import { MenuStatusChip } from "@/components/MenuStatusChip";
 import { NavLink } from "@/components/NavLink";
@@ -71,6 +71,7 @@ export default async function MenuPage({
   const canEdit = canEditMenu(actor, menu);
   const canSubmit = canSubmitMenu(actor, menu);
   const canReviewMenu = canReview(actor, menu);
+  const canComment = canCommentOnMenu(actor, menu);
 
   const mealsByOccasion = new Map(menu.meals.map((m) => [m.occasion, m]));
   const mealProgress = menuMealProgress(menu.meals);
@@ -108,8 +109,24 @@ export default async function MenuPage({
     });
   }
 
-  function threadCount(target: CommentTarget) {
-    return commentsForTarget(target).filter((c) => !c.parentId).length;
+  // REQ-28.1: every comment entry point on the page shares these props --
+  // only the target and its display labels differ per call site.
+  const { id: menuId, patrol } = menu;
+  function commentPane(target: CommentTarget, title: string, subtitle: string, variant?: "icon" | "button") {
+    if (!canComment) return null;
+    return (
+      <CommentPane
+        menuId={menuId}
+        patrolColor={patrol.color}
+        patrolName={patrol.name}
+        target={target}
+        title={title}
+        subtitle={subtitle}
+        comments={nestReplies(commentsForTarget(target))}
+        actor={actor}
+        variant={variant}
+      />
+    );
   }
 
   // REQ-26.7: newest first, an initial page plus "Load more" via
@@ -152,9 +169,12 @@ export default async function MenuPage({
           </Typography>
           <MenuStatusChip status={menu.status} />
         </Stack>
-        <Typography variant="body2">
-          <NavLink href={`/menus/${menu.id}/print`}>Print preview</NavLink>
-        </Typography>
+        <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 1 }}>
+          <Typography variant="body2">
+            <NavLink href={`/menus/${menu.id}/print`}>Print preview</NavLink>
+          </Typography>
+          {commentPane({ type: "MENU" }, `${menu.patrol.name} menu`, "Whole menu", "button")}
+        </Stack>
       </Stack>
 
       <Paper variant="outlined" sx={{ p: 2 }}>
@@ -226,7 +246,10 @@ export default async function MenuPage({
                           )
                         }
                       >
-                        <Typography sx={{ fontWeight: 500 }}>{dish.name}</Typography>
+                        <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", minWidth: 0 }}>
+                          <Typography sx={{ fontWeight: 500 }}>{dish.name}</Typography>
+                          {commentPane({ type: "DISH", dishId: dish.id }, dish.name, "Dish")}
+                        </Stack>
                       </SwipeableRow>
                       <Stack spacing={0.5} component="ul" sx={{ listStyle: "none", m: 0, ml: 2, p: 0 }}>
                         {dish.ingredients.map((ing) => {
@@ -256,20 +279,13 @@ export default async function MenuPage({
                                 )
                               }
                             >
-                              <Typography variant="body2" color="text.secondary">
-                                {ing.name} — {ing.quantity}
-                              </Typography>
+                              <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", minWidth: 0 }}>
+                                <Typography variant="body2" color="text.secondary">
+                                  {ing.name} — {ing.quantity}
+                                </Typography>
+                                {commentPane({ type: "INGREDIENT", ingredientId: ing.id }, ing.name, "Ingredient")}
+                              </Stack>
                             </SwipeableRow>
-                            <CommentDisclosure label="Comments" count={threadCount({ type: "INGREDIENT", ingredientId: ing.id })}>
-                              <CommentThread
-                                menuId={menu.id}
-                                patrolColor={menu.patrol.color}
-                                patrolName={menu.patrol.name}
-                                target={{ type: "INGREDIENT", ingredientId: ing.id }}
-                                comments={nestReplies(commentsForTarget({ type: "INGREDIENT", ingredientId: ing.id }))}
-                                actor={actor}
-                              />
-                            </CommentDisclosure>
                           </Stack>
                           );
                         })}
@@ -290,16 +306,6 @@ export default async function MenuPage({
                           </SubmitButton>
                         </Stack>
                       )}
-                      <CommentDisclosure label="Comments" count={threadCount({ type: "DISH", dishId: dish.id })}>
-                        <CommentThread
-                          menuId={menu.id}
-                          patrolColor={menu.patrol.color}
-                          patrolName={menu.patrol.name}
-                          target={{ type: "DISH", dishId: dish.id }}
-                          comments={nestReplies(commentsForTarget({ type: "DISH", dishId: dish.id }))}
-                          actor={actor}
-                        />
-                      </CommentDisclosure>
                     </Stack>
                     );
                   })}
@@ -409,20 +415,6 @@ export default async function MenuPage({
           <ReviewThread reviews={menu.reviews} patrolColor={menu.patrol.color} />
         </Stack>
       )}
-
-      <Stack spacing={1.5} sx={{ borderTop: 1, borderColor: "divider", pt: 2 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-          Menu comments
-        </Typography>
-        <CommentThread
-          menuId={menu.id}
-          patrolColor={menu.patrol.color}
-          patrolName={menu.patrol.name}
-          target={{ type: "MENU" }}
-          comments={nestReplies(commentsForTarget({ type: "MENU" }))}
-          actor={actor}
-        />
-      </Stack>
 
       <Stack spacing={1.5} id="comment-activity-log" sx={{ borderTop: 1, borderColor: "divider", pt: 2 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>

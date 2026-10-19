@@ -72,6 +72,7 @@ This requirement does not replace `Review`/`ReviewDecision` or the Approved/Chan
 
 ## Related
 
+- [Requirement 28 - Comment Pane UX Revision](28-comment-pane-ux-revision.md) — revises where/how REQ-26.8's per-anchor threads are viewed and started (side pane, unresolved-count badges, cancellable composers); the data model and audit log above are unchanged.
 - [Requirement 22 - Chat-Thread Review History](22-chat-thread-review-history.md) — the bubble/thread visual language this requirement extends to a new, general-purpose comment target; `Review`'s chat-thread restyle itself is unchanged by this requirement.
 - [ADR 0007 - Menu status lifecycle as a role-gated state machine](../adr/0007-menu-status-lifecycle-and-permissions.md) — the approve/reject/status rules this requirement's comment layer sits alongside but never alters (REQ-26.10).
 - [ADR 0026 - Comment/annotation data model](../adr/0026-comment-annotation-data-model.md) — the `Comment`/`CommentActivity` schema this requirement is implemented with, including why deletion is a soft delete and why assignment is role-level.
