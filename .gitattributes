@@ -1,0 +1,8 @@
+# Prisma computes a SHA-256 checksum of each migration.sql's exact bytes and
+# compares it against the checksum recorded when that migration was applied.
+# On Windows, core.autocrlf can rewrite a migration file's line endings on
+# checkout (LF -> CRLF), changing its checksum and making `prisma migrate dev`
+# falsely believe an already-applied migration was edited, prompting a
+# database reset it doesn't actually need. Keep these files byte-identical
+# across platforms.
+prisma/migrations/**/migration.sql -text
