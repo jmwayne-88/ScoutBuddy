@@ -16,6 +16,19 @@ const nextConfig: NextConfig = {
   // it via native `require`/`import` from node_modules instead, same as
   // this list's existing `sharp` entry, avoids the relocation entirely.
   serverExternalPackages: ["pdfjs-dist", "exceljs"],
+  // ADR 0031: externalizing pdfjs-dist (above) fixed `next dev`, but
+  // Vercel's own deployment file-tracing still missed pdf.worker.mjs --
+  // it's only ever reached via a fully dynamic import() inside pdfjs-
+  // dist's own compiled code when it sets up its "fake worker" (main-
+  // thread parsing), which the automatic tracer doesn't follow, so the
+  // file never made it into the deployed function's bundle ("Cannot find
+  // module '/var/task/node_modules/pdfjs-dist/legacy/build/
+  // pdf.worker.mjs'" in production). `contains: true` matching (Next's
+  // own glob-match behavior for this option) means the "campouts/import"
+  // key matches both the upload route and its nested review route.
+  outputFileTracingIncludes: {
+    "campouts/import": ["./node_modules/pdfjs-dist/legacy/build/*.mjs"],
+  },
 };
 
 export default nextConfig;
