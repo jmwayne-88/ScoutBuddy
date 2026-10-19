@@ -1,6 +1,6 @@
 # Requirement 22 — Chat-Thread Review History
 
-Status: Not started
+Status: Done
 Depends on: [Requirement 5](05-workflow-hardening-and-polish.md)'s REQ-5.3/5.4 (every revision's comments stay visible and timestamped — the data this requirement re-presents, not re-derives)
 
 ## Goal
@@ -26,11 +26,11 @@ Recommendation #17 from the UX/style audit referenced by [Requirement 13](13-ux-
 
 ## Acceptance Criteria
 
-- [ ] A menu with multiple rounds of Changes Requested / resubmission shows each round as a distinct chat-style bubble in chronological order.
-- [ ] An Approved review and a Changes-Requested review are visually distinguishable from each other at a glance, not just by their text label.
-- [ ] Every bubble shows a relative timestamp with the exact date available on hover/tap.
-- [ ] No new comment-authoring, editing, or reaction capability is introduced — the thread is read-only, exactly as the existing review history is today.
-- [ ] A menu with zero reviews shows no thread at all (unchanged from today's `menu.reviews.length > 0` guard).
+- [x] A menu with multiple rounds of Changes Requested / resubmission shows each round as a distinct chat-style bubble in chronological order.
+- [x] An Approved review and a Changes-Requested review are visually distinguishable from each other at a glance, not just by their text label.
+- [x] Every bubble shows a relative timestamp with the exact date available on hover/tap.
+- [x] No new comment-authoring, editing, or reaction capability is introduced — the thread is read-only, exactly as the existing review history is today.
+- [x] A menu with zero reviews shows no thread at all (unchanged from today's `menu.reviews.length > 0` guard).
 
 ## Out of Scope for This Requirement
 

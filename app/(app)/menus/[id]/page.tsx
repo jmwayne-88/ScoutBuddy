@@ -16,6 +16,7 @@ import { EMPTY_STATES } from "@/lib/empty-states";
 import { EmptyState } from "@/components/EmptyState";
 import { PatrolBadge } from "@/components/PatrolBadge";
 import { RelativeDate } from "@/components/RelativeDate";
+import { ReviewThread } from "@/components/ReviewThread";
 import { MenuStatusChip } from "@/components/MenuStatusChip";
 import { NavLink } from "@/components/NavLink";
 import { LinkButton } from "@/components/LinkButton";
@@ -324,17 +325,7 @@ export default async function MenuPage({
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Review history
           </Typography>
-          <Stack spacing={1} component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
-            {menu.reviews.map((review) => (
-              <Paper key={review.id} component="li" variant="outlined" sx={{ p: 1.5 }}>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  {review.decision === "APPROVED" ? "Approved" : "Changes requested"} —{" "}
-                  {review.createdAt.toDateString()}
-                </Typography>
-                {review.comment && <Typography variant="body2">{review.comment}</Typography>}
-              </Paper>
-            ))}
-          </Stack>
+          <ReviewThread reviews={menu.reviews} patrolColor={menu.patrol.color} />
         </Stack>
       )}
     </Stack>
