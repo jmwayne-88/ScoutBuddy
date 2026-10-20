@@ -288,3 +288,20 @@ export async function confirmCampoutUpload(
   const count = toUpload.length;
   redirect(withToast("/campouts", `Uploaded ${count} campout${count === 1 ? "" : "s"}`));
 }
+
+// REQ-30.21: an explicit "Cancel"/"Close" out of the review screen --
+// immediately deletes the pending batch rather than leaving it to the
+// lazy age-based sweep, since this is a deliberate cancel, not just
+// idle abandonment. Nothing was ever written to `Campout` at this
+// point, so there's nothing to undo besides the staging row itself.
+export async function discardCampoutUpload(formData: FormData): Promise<void> {
+  const actor = await getActor();
+  if (!canUploadCampouts(actor)) {
+    throw new Error("Only the ASPL of Camping can upload campouts.");
+  }
+
+  const batchId = requireString(formData, "batchId");
+  await db.campoutUploadBatch.deleteMany({ where: { id: batchId } });
+
+  redirect("/campouts");
+}

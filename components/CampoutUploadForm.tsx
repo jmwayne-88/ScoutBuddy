@@ -7,6 +7,7 @@ import Alert from "@mui/material/Alert";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { SubmitButton } from "@/components/SubmitButton";
+import { LinkButton } from "@/components/LinkButton";
 import { uploadCampoutFile, type UploadFormState } from "@/app/(app)/campouts/upload/actions";
 
 const initialState: UploadFormState = { error: null };
@@ -68,9 +69,14 @@ export function CampoutUploadForm() {
         </Typography>
         <input id="campout-upload-file" name="file" type="file" accept=".pdf,.xlsx,.xls" ref={fileInputRef} required />
       </Box>
-      <SubmitButton type="submit" variant="contained" color="primary" pendingOverride={pending} sx={{ alignSelf: "flex-start" }}>
-        {isUploading ? "Uploading…" : "Upload & extract"}
-      </SubmitButton>
+      <Stack direction="row" spacing={2}>
+        <SubmitButton type="submit" variant="contained" color="primary" pendingOverride={pending}>
+          {isUploading ? "Uploading…" : "Upload & extract"}
+        </SubmitButton>
+        <LinkButton href="/campouts" variant="text">
+          Cancel
+        </LinkButton>
+      </Stack>
     </Stack>
   );
 }

@@ -11,7 +11,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import { SubmitButton } from "@/components/SubmitButton";
-import { confirmCampoutUpload, type ConfirmUploadFormState } from "@/app/(app)/campouts/upload/actions";
+import { confirmCampoutUpload, discardCampoutUpload, type ConfirmUploadFormState } from "@/app/(app)/campouts/upload/actions";
 import type { UploadCandidate, UploadCandidateEdit, UploadFieldKey } from "@/lib/campout-upload/types";
 
 const initialState: ConfirmUploadFormState = { error: null };
@@ -195,33 +195,45 @@ export function UploadReviewForm({
   }, [candidates]);
 
   return (
-    <Stack component="form" action={formAction} spacing={2}>
-      <input type="hidden" name="batchId" value={batchId} />
-      <input type="hidden" name="edits" value={editsJson} />
+    // REQ-30.21: the confirm form and the Close form are true siblings,
+    // not nested -- HTML doesn't allow a <form> inside another <form>,
+    // so this outer Stack is a plain container, not itself a form.
+    <Stack spacing={2}>
+      <Stack component="form" action={formAction} spacing={2}>
+        <input type="hidden" name="batchId" value={batchId} />
+        <input type="hidden" name="edits" value={editsJson} />
 
-      {state.error && <Alert severity="error">{state.error}</Alert>}
+        {state.error && <Alert severity="error">{state.error}</Alert>}
 
-      {candidates.map((candidate) => (
-        <CandidateCard
-          key={candidate.tempId}
-          candidate={candidate}
-          onChange={(next) => updateCandidate(candidate.tempId, next)}
-        />
-      ))}
+        {candidates.map((candidate) => (
+          <CandidateCard
+            key={candidate.tempId}
+            candidate={candidate}
+            onChange={(next) => updateCandidate(candidate.tempId, next)}
+          />
+        ))}
 
-      <Divider />
+        <Divider />
 
-      <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-        <SubmitButton variant="contained" color="primary" disabled={activeCount === 0 || incompleteCount > 0}>
-          Upload {activeCount} campout{activeCount === 1 ? "" : "s"}
-        </SubmitButton>
-        {incompleteCount > 0 && (
-          <Typography variant="body2" color="warning.main">
-            {incompleteCount} campout{incompleteCount === 1 ? "" : "s"} need{incompleteCount === 1 ? "s" : ""} a name
-            and date, or can be discarded.
-          </Typography>
-        )}
+        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+          <SubmitButton variant="contained" color="primary" disabled={activeCount === 0 || incompleteCount > 0}>
+            Upload {activeCount} campout{activeCount === 1 ? "" : "s"}
+          </SubmitButton>
+          {incompleteCount > 0 && (
+            <Typography variant="body2" color="warning.main">
+              {incompleteCount} campout{incompleteCount === 1 ? "" : "s"} need{incompleteCount === 1 ? "s" : ""} a
+              name and date, or can be discarded.
+            </Typography>
+          )}
+        </Stack>
       </Stack>
+
+      <Box component="form" action={discardCampoutUpload}>
+        <input type="hidden" name="batchId" value={batchId} />
+        <SubmitButton type="submit" variant="text">
+          Close without uploading
+        </SubmitButton>
+      </Box>
     </Stack>
   );
 }
