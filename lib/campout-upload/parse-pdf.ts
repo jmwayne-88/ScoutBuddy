@@ -62,6 +62,7 @@ async function extractPageImages(
   page: {
     getOperatorList: () => Promise<{ fnArray: number[]; argsArray: unknown[][] }>;
     objs: { get: (name: string, callback: (data: unknown) => void) => void };
+    commonObjs: { get: (name: string, callback: (data: unknown) => void) => void };
   },
   pdfjs: { OPS: Record<string, number>; ImageKind: Record<string, number> }
 ): Promise<string[]> {
@@ -73,8 +74,17 @@ async function extractPageImages(
     const name = opList.argsArray[i][0];
     if (typeof name !== "string") continue;
 
+    // pdfjs-dist caches an image used identically across multiple pages
+    // (e.g. a logo/QR code repeated in a header or footer) as a
+    // document-level "common" object rather than a page-level one -- its
+    // own renderer (CanvasGraphics#paintImageXObject) picks `commonObjs`
+    // vs. `objs` the same way, by this exact "g_" name prefix. Always
+    // resolving via `page.objs` left any such shared image's callback
+    // registered but never fired, hanging this function forever.
+    const objs = name.startsWith("g_") ? page.commonObjs : page.objs;
+
     try {
-      const resolved = await new Promise<unknown>((resolve) => page.objs.get(name, resolve));
+      const resolved = await new Promise<unknown>((resolve) => objs.get(name, resolve));
       const imgData = resolved as {
         width: number;
         height: number;
