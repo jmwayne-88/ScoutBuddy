@@ -25,6 +25,9 @@ model Patrol {
   createdAt               DateTime                  @default(now())
   menus                   Menu[]
   mealFrameworkExceptions MealFrameworkException[]
+  // REQ-31: a Patrol Leader's account points here. Interim placement -- once
+  // Requirement 34's UnitMembership exists, this moves there; see ADR 0033.
+  users                   User[]
 }
 
 enum MealOccasion {
@@ -280,4 +283,136 @@ model MealFrameworkException {
   patrol    Patrol?      @relation(fields: [patrolId], references: [id])
   occasion  MealOccasion
   createdAt DateTime     @default(now())
+}
+
+// ============================================================
+// REQ-31: real accounts & sessions, replacing ADR 0010's cookie-
+// only Actor. See ADR 0033. User/Session/Account/Verification are
+// Better Auth's own standard schema (field names/shapes are its
+// contract with the Prisma adapter, not this project's choice to
+// vary); Passkey is its passkey plugin's schema, same rule. Only
+// `role`/`patrolId` below are ScoutBuddy's own addition.
+// ============================================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String?   @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  passkeys      Passkey[]
+  authEvents    AuthEvent[]
+
+  // REQ-31.1: interim role placement -- a real `UnitMembership` (Requirement
+  // 34) doesn't exist yet, and this app is still single-tenant (Requirement
+  // 27 not built), so role/patrol live directly on the account for now,
+  // matching today's actual single-unit reality. Validated/narrowed to
+  // "ASPL" | "PATROL_LEADER" in lib/session.ts, not a Prisma enum here --
+  // Better Auth's additionalFields type system is string/number/boolean/
+  // date/json only, so a native Postgres enum would fight the adapter
+  // rather than help it. See ADR 0033.
+  role     String?
+  patrolId String?
+  patrol   Patrol? @relation(fields: [patrolId], references: [id])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // REQ-31.6/32.2: which credential established this session --
+  // "passkey" (standing, full assurance) or "magic-link" (bootstrap/
+  // recovery tier, step-up required before anything sensitive). Set in
+  // lib/auth.ts's databaseHooks.session.create.before from the request
+  // path, not inferred later -- the path that created the session is only
+  // known at that moment.
+  createdVia String?
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Verification {
+  id         String    @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+}
+
+model Passkey {
+  id           String    @id @default(cuid())
+  name         String?
+  publicKey    String
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  credentialID String
+  counter      Int
+  deviceType   String
+  backedUp     Boolean
+  transports   String?
+  createdAt    DateTime? @default(now())
+  aaguid       String?
+
+  @@index([userId])
+  @@index([credentialID])
+}
+
+// REQ-31.7: Better Auth's own database-backed rate-limit counters
+// (`rateLimit.storage: "database"` in lib/auth.ts) -- "database", not the
+// default "memory", because Vercel's serverless functions don't share
+// memory across invocations; an in-memory counter would silently do
+// nothing in production. Field shape is Better Auth's own contract
+// (key/count/lastRequest, the last as an epoch-ms number, not a DateTime),
+// not this project's naming convention to vary.
+model RateLimit {
+  id          String  @id @default(cuid())
+  key         String  @unique
+  count       Int
+  lastRequest BigInt
+}
+
+// REQ-31.10: security-relevant auth events, logged without ever storing a
+// credential/token value -- failed sign-ins, lockout triggers, credential
+// changes. `identifier` (the email/username attempted) is kept alongside
+// `userId` since a failed sign-in for an unrecognized account has no user
+// row to attach to yet; REQ-31.7's per-account rate limiting queries this
+// table by `identifier` directly, not by userId alone.
+model AuthEvent {
+  id         String   @id @default(cuid())
+  type       String
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  identifier String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([identifier, createdAt])
 }

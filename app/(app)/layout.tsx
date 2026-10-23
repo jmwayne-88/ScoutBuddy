@@ -1,23 +1,37 @@
 import type { ReactNode } from "react";
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
-import { getActor } from "@/lib/session";
+import { getCurrentUser } from "@/lib/session";
 import { getActivePatrols } from "@/lib/patrols";
-import { RoleSwitcher } from "@/components/RoleSwitcher";
+import { AccountStatus } from "@/components/AccountStatus";
 import { AppNav } from "@/components/AppNav";
 import { BottomNav } from "@/components/BottomNav";
 import { ColorModeToggle } from "@/components/ColorModeToggle";
 import { ToastListener } from "@/components/ToastListener";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const actor = await getActor();
+  // REQ-31: this layout previously rendered unconditionally even with no
+  // actor at all (there was nothing to gate against -- the role picker
+  // itself lived at `/` inside this same group). Now that signing in is a
+  // real thing, a signed-out visitor is sent to /login instead of seeing
+  // an empty-nav shell.
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
+  const actor = user.actor;
   const patrols = await getActivePatrols();
-  const navItems = actor?.role === "ASPL" ? [{ href: "/patrols", label: "Manage Patrols" }] : [];
+  const navItems = actor.role === "ASPL" ? [{ href: "/patrols", label: "Manage Patrols" }] : [];
+  const roleLabel =
+    actor.role === "ASPL"
+      ? "ASPL of Camping"
+      : `Patrol Leader — ${patrols.find((p) => p.id === actor.patrolId)?.name ?? "a patrol"}`;
 
   return (
     <>
@@ -28,10 +42,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           </Typography>
           <AppNav items={navItems} />
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            <Typography variant="body2" sx={{ opacity: 0.85, display: { xs: "none", sm: "block" } }}>
-              Viewing as:
-            </Typography>
-            <RoleSwitcher actor={actor} patrols={patrols} />
+            <AccountStatus name={user.name} roleLabel={roleLabel} />
             <ColorModeToggle />
           </Stack>
         </Toolbar>
@@ -51,7 +62,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       >
         <Box>{children}</Box>
       </Container>
-      <BottomNav role={actor?.role ?? null} />
+      <BottomNav role={actor.role} />
       <Suspense fallback={null}>
         <ToastListener />
       </Suspense>

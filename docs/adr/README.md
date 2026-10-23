@@ -36,3 +36,5 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0030 - `Campout.endDate` and lightweight upload-provenance columns](0030-campout-end-date-and-upload-provenance.md)
 - [0031 - Campout-upload parsing, extraction, and merge architecture](0031-campout-upload-parsing-extraction-and-merge.md)
 - [0032 - Direct-to-Blob upload transport for the campout-upload file](0032-campout-upload-blob-transport.md)
+- [0033 - Passkey-based authentication via Better Auth, superseding cookie-based role identity](0033-passkey-based-authentication-via-better-auth.md)
+- [0034 - Account recovery: magic-link token invalidation, session revocation, and assurance-tier tracking](0034-account-recovery-token-and-session-invalidation.md)

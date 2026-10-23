@@ -1,7 +1,7 @@
 # Requirement 24 — Due-Date & Review Notifications (Push/Email)
 
-Status: Not started — blocked on an open identity decision (see Problem)
-Depends on: [ADR 0010](../adr/0010-cookie-based-role-identity.md) (must be revisited or superseded before this requirement can be built)
+Status: Not started — blocked on an identity prerequisite (see Problem)
+Depends on: [Requirement 31 - Core Authentication: Accounts, Sessions & Passkeys](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md) (supersedes [ADR 0010](../adr/0010-cookie-based-role-identity.md) and gives this requirement the addressable per-person identity it needs; REQ-24.1 below is satisfied once that requirement ships, rather than being a separate decision this requirement makes on its own)
 
 ## Goal
 
@@ -15,14 +15,14 @@ Recommendation #19 from the UX/style audit referenced by [Requirement 13](ux-int
 
 [ADR 0010](../adr/0010-cookie-based-role-identity.md) established cookie-based role identity with **no accounts, no passwords, and no per-person identity at all** — `lib/session.ts`'s `Actor` type is only `{ role: "ASPL" }` or `{ role: "PATROL_LEADER", patrolId }`. There is no email address, no phone number, no stable per-device push-subscription owner, and no way to distinguish "the Eagle Patrol Leader on this phone" from "the Eagle Patrol Leader on a different phone" — by design, intentionally, per that ADR's reasoning that this is a small, trusted, youth-led troop that doesn't need real accounts.
 
-**This requirement cannot be built as specified without first revisiting ADR 0010.** Every notification channel under consideration needs *some* persistent, addressable identity:
+**This requirement cannot be built as specified without first revisiting ADR 0010.** [Requirement 31](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md) does exactly that (2026-10-23) — this requirement no longer needs to make its own identity decision, only to build on Requirement 31 once it ships. Every notification channel under consideration needs *some* persistent, addressable identity:
 
 - **Web push** needs a browser `PushSubscription` stored against *something* stable — today, nothing survives beyond the `scoutbuddy_actor` cookie, which identifies a role, not a person or device, and isn't designed to persist a subscription registration.
 - **Email** needs an email address collected from *someone*, stored against a patrol (so the current Patrol Leader's device receives it) or an individual — a new, explicit data-collection step this app has never needed before.
 
 ## Requirements (contingent on resolving the identity blocker)
 
-- **REQ-24.1** A new ADR is written that explicitly revisits [ADR 0010](../adr/0010-cookie-based-role-identity.md)'s no-accounts decision — not silently working around it — and either (a) supersedes it with some minimal addressable-identity mechanism (e.g. an optional email captured once per patrol, or a per-device push subscription tied to the existing role cookie with explicit user consent), or (b) concludes notifications aren't worth that trade-off at this troop's scale and this requirement is declined. This requirement's remaining items (REQ-24.2 onward) assume option (a).
+- **REQ-24.1** Satisfied by [Requirement 31](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md)'s build-time ADR, which explicitly revisits [ADR 0010](../adr/0010-cookie-based-role-identity.md)'s no-accounts decision and supersedes it with real per-person accounts — a stronger, more general identity mechanism than this requirement originally needed to propose on its own. This requirement's remaining items (REQ-24.2 onward) assume Requirement 31 is already built; each account now has a real email address (adults) or a registered guardian contact (youth, per Requirement 33) to notify.
 - **REQ-24.2** A Patrol Leader can opt in to browser push notifications for their own patrol's menu(s), granted explicitly (the standard browser permission prompt, triggered by a deliberate in-app action, never requested automatically on page load).
 - **REQ-24.3** A notification fires when a menu's due date is reached and it still has at least one active occasion with zero dishes (reusing the same "empty occasion" condition `lib/validation.ts`'s `menuHasEmptyOccasion` already defines for the submit-blocking check in [Requirement 5](roadmap-iterations/05-workflow-hardening-and-polish.md)'s REQ-5.6) — not merely "due date reached" regardless of actual completeness, so a patrol that finished early isn't nagged.
 - **REQ-24.4** A notification fires to the relevant Patrol Leader when their menu's status changes to Changes Requested, and to the ASPL when any menu's status changes to Submitted — mirroring the two directions of the existing review workflow ([ADR 0007](../adr/0007-menu-status-lifecycle-and-permissions.md)).
@@ -32,7 +32,7 @@ Recommendation #19 from the UX/style audit referenced by [Requirement 13](ux-int
 
 ## Acceptance Criteria
 
-- [ ] A new ADR exists that explicitly makes the identity-mechanism decision this requirement depends on, before any of REQ-24.2 onward is implemented.
+- [ ] [Requirement 31](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md) has shipped (its own ADR making the identity-mechanism decision) before any of REQ-24.2 onward is implemented.
 - [ ] A Patrol Leader who opts in receives a push notification when their menu's due date passes while it's still incomplete.
 - [ ] An ASPL receives a notification when any menu is submitted; a Patrol Leader receives one when their menu gets Changes Requested.
 - [ ] No notification payload contains dish, ingredient, or review-comment content.
@@ -42,11 +42,12 @@ Recommendation #19 from the UX/style audit referenced by [Requirement 13](ux-int
 
 - Automatic due-date calculation — explicitly deferred in FEATURES.md's Out-of-Scope list and ROADMAP.md's Later section; this requirement notifies about existing due dates, it doesn't compute new ones.
 - Any notification channel beyond push and (optionally) email — no SMS, no in-app-only badge system (that's closer to the gamification requirement).
-- Building REQ-24.2 onward before REQ-24.1's identity ADR is written and accepted — that ADR is a hard prerequisite, not a parallel task.
+- Building REQ-24.2 onward before [Requirement 31](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md) ships — that requirement is a hard prerequisite, not a parallel task.
 
 ## Related
 
-- [ADR 0010 - Cookie-based role identity, no accounts or passwords](../adr/0010-cookie-based-role-identity.md) — the decision this requirement cannot proceed without revisiting.
+- [Requirement 31 - Core Authentication: Accounts, Sessions & Passkeys](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md) — the prerequisite this requirement cannot proceed without; supersedes ADR 0010.
+- [ADR 0010 - Cookie-based role identity, no accounts or passwords](../adr/0010-cookie-based-role-identity.md) — the decision Requirement 31 revisits and supersedes.
 - [ADR 0007 - Menu status lifecycle as a role-gated state machine](../adr/0007-menu-status-lifecycle-and-permissions.md) — the status transitions REQ-24.4's notifications fire on.
 - [Requirement 5 - Workflow Hardening & Polish](roadmap-iterations/05-workflow-hardening-and-polish.md) — REQ-5.6's empty-occasion check, reused by REQ-24.3.
 - ROADMAP.md's "Later — explicitly deferred" section — automatic due-date calculation, the adjacent-but-distinct deferred item this requirement does not include.

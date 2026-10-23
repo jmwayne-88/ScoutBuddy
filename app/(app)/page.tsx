@@ -1,28 +1,15 @@
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import { redirect } from "next/navigation";
 import { getActor } from "@/lib/session";
-import { getActivePatrols } from "@/lib/patrols";
-import { RoleForm } from "@/components/RoleForm";
-import { chooseRole } from "./role-actions";
 
+// REQ-31: this used to be the role picker (ADR 0010). app/(app)/layout.tsx
+// now redirects a signed-out visitor to /login before this page is ever
+// reached, and role is fixed at signup rather than re-chosen per visit --
+// so this page's only job left is sending an already-signed-in person to
+// their actual landing page.
 export default async function HomePage() {
   const actor = await getActor();
-  const patrols = await getActivePatrols();
-
-  const currentPatrolName =
-    actor?.role === "PATROL_LEADER" ? patrols.find((p) => p.id === actor.patrolId)?.name : undefined;
-  const currentValue = !actor ? "" : actor.role === "ASPL" ? "ASPL" : `PATROL_LEADER:${actor.patrolId}`;
-
-  return (
-    <Stack spacing={3} sx={{ maxWidth: 600 }}>
-      <Typography variant="h5">Who&apos;s using ScoutBuddy?</Typography>
-      {actor && (
-        <Typography variant="body2" color="text.secondary">
-          Currently acting as{" "}
-          {actor.role === "ASPL" ? "the ASPL of Camping" : `the Patrol Leader for ${currentPatrolName ?? "a patrol"}`}.
-        </Typography>
-      )}
-      <RoleForm action={chooseRole} defaultValue={currentValue} patrols={patrols} />
-    </Stack>
-  );
+  // The layout's gate already guarantees a session exists; this defensive
+  // check only matters for the narrow window where role lookup itself
+  // failed (see lib/session.ts), not absence of a session.
+  redirect(actor?.role === "ASPL" ? "/campouts" : "/patrol-leader");
 }
