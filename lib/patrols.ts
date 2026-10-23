@@ -1,9 +1,9 @@
-import { db } from "./db";
+import type { UnitDb } from "./unit-db";
 
-export function getActivePatrols() {
+export function getActivePatrols(db: UnitDb) {
   return db.patrol.findMany({ where: { isActive: true }, orderBy: { order: "asc" } });
 }
 
-export function getAllPatrols() {
+export function getAllPatrols(db: UnitDb) {
   return db.patrol.findMany({ orderBy: { order: "asc" } });
 }

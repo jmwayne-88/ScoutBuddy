@@ -12,10 +12,12 @@ import {
   isPlausibleEmail,
   normalizeEmail,
 } from "@/lib/invitations";
-import { canManageUnitMembers } from "@/lib/permissions";
+import { canManageUnitData, canManageUnitMembers } from "@/lib/permissions";
 import { getActiveMembership, requireStepUp, StepUpRequiredError } from "@/lib/session";
 import { withToast } from "@/lib/toast";
-import { pathAfterUnitSwitch, UNIT_HIERARCHY_INCLUDE, unitFullLabel } from "@/lib/units";
+import { deleteUnitData } from "@/lib/unit-data";
+import { unitDb } from "@/lib/unit-db";
+import { pathAfterUnitSwitch, UNIT_HIERARCHY_INCLUDE, unitDisplayName, unitFullLabel } from "@/lib/units";
 
 const STEP_UP_MESSAGE = "For security, sign out and sign back in with your passkey to manage members.";
 
@@ -199,4 +201,31 @@ export async function switchUnit(formData: FormData) {
 
   revalidatePath("/", "layout");
   redirect(withToast(pathAfterUnitSwitch(pathname, membership.role), `Switched to ${unitFullLabel(membership.unit)}`));
+}
+
+// REQ-27.15: deletes the active unit and everything in it, for a unit
+// that's leaving ScoutBuddy. Gated three ways: ASPL, a passkey session,
+// and typing the unit's name -- re-checked here, not just in
+// components/DeleteUnitDialog.tsx, since a Server Action is a public
+// endpoint. Distinct from one person's account being deleted while the
+// unit carries on (Requirement 35).
+export async function deleteUnit(formData: FormData) {
+  const manager = await getActiveMembership();
+  if (!manager || !canManageUnitData(manager.actor)) {
+    throw new Error("Only the ASPL of Camping can delete the unit.");
+  }
+  await stepUpOrRedirect();
+
+  const unit = await db.unit.findUniqueOrThrow({ where: { id: manager.unitId }, include: UNIT_HIERARCHY_INCLUDE });
+  const confirmation = String(formData.get("confirmation") ?? "").trim();
+  if (confirmation !== unitDisplayName(unit)) {
+    redirect(withToast("/unit", "The unit name you typed didn't match, so nothing was deleted."));
+  }
+
+  await deleteUnitData(unitDb(manager.unitId), manager.unitId, manager.userId);
+
+  // The session still names the deleted unit; lib/session.ts re-resolves it
+  // to another unit they belong to, or sends them to /no-unit.
+  revalidatePath("/", "layout");
+  redirect(withToast("/", `${unitFullLabel(unit)} and all its data were deleted`));
 }

@@ -15,6 +15,7 @@ function campout(overrides: Partial<Campout> = {}): Campout {
     lastUploadedFrom: null,
     lastUploadedAt: null,
     createdAt: new Date("2026-01-01"),
+    unitId: "unit-a",
     ...overrides,
   };
 }

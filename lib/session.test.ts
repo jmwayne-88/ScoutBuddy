@@ -8,22 +8,23 @@ describe("mapMembershipToActor", () => {
   });
 
   it("maps an ASPL membership", () => {
-    expect(mapMembershipToActor({ role: "ASPL", patrolId: null })).toEqual({ role: "ASPL" });
+    expect(mapMembershipToActor({ role: "ASPL", patrolId: null, unitId: "unit-a" })).toEqual({ role: "ASPL", unitId: "unit-a" });
   });
 
   it("maps a Patrol Leader membership", () => {
-    expect(mapMembershipToActor({ role: "PATROL_LEADER", patrolId: "eagle" })).toEqual({
+    expect(mapMembershipToActor({ role: "PATROL_LEADER", patrolId: "eagle", unitId: "unit-a" })).toEqual({
       role: "PATROL_LEADER",
       patrolId: "eagle",
+      unitId: "unit-a",
     });
   });
 
   it("gives no access to a Patrol Leader whose patrol was deleted", () => {
-    expect(mapMembershipToActor({ role: "PATROL_LEADER", patrolId: null })).toBeNull();
+    expect(mapMembershipToActor({ role: "PATROL_LEADER", patrolId: null, unitId: "unit-a" })).toBeNull();
   });
 
   it("treats an unrecognized role value as no access", () => {
-    expect(mapMembershipToActor({ role: "SOMETHING_ELSE", patrolId: null })).toBeNull();
+    expect(mapMembershipToActor({ role: "SOMETHING_ELSE", patrolId: null, unitId: "unit-a" })).toBeNull();
   });
 });
 

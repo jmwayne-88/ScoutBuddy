@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { db } from "@/lib/db";
+import { getUnitScope } from "@/lib/session";
 import { MEAL_OCCASIONS, mealOccasionLabel } from "@/lib/constants";
 import { CATEGORY_ORDER, CATEGORY_LABELS } from "@/lib/ingredient-categorization";
 import { EMPTY_STATES } from "@/lib/empty-states";
@@ -23,8 +23,12 @@ type ShoppingRow = {
 
 export default async function MenuPrintPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  // REQ-27.12: the print view sits outside app/(app)'s signed-in layout, so
+  // it gates itself -- no unit scope, no menu.
+  const scope = await getUnitScope();
+  if (!scope) notFound();
 
-  const menu = await db.menu.findUnique({
+  const menu = await scope.db.menu.findUnique({
     where: { id },
     include: {
       campout: true,

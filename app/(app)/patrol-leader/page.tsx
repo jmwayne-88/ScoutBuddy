@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { db } from "@/lib/db";
-import { getActor } from "@/lib/session";
+import { getUnitScope } from "@/lib/session";
 import { NavLink } from "@/components/NavLink";
 import { RoleMismatchNotice } from "@/components/RoleMismatchNotice";
 import { EMPTY_STATES } from "@/lib/empty-states";
@@ -15,11 +14,13 @@ import { unresolvedCountsByMenu } from "@/lib/comments";
 import { CommentCountBadge } from "@/components/CommentCountBadge";
 
 export default async function PatrolLeaderPage() {
-  const actor = await getActor();
+  const scope = await getUnitScope();
+  const actor = scope?.actor ?? null;
 
-  if (actor?.role !== "PATROL_LEADER") {
+  if (!scope || actor?.role !== "PATROL_LEADER") {
     return <RoleMismatchNotice actor={actor} requiredRoleLabel="a Patrol Leader" />;
   }
+  const { db } = scope;
 
   const menus = await db.menu.findMany({
     where: { patrolId: actor.patrolId },

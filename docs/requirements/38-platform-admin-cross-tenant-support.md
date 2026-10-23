@@ -9,7 +9,7 @@ Let a small number of trusted platform operators troubleshoot and support any ac
 
 ## Source
 
-User request, 2026-10-23, after reviewing [Requirement 27](27-multi-tenant-unit-isolation.md) and Requirements 31-37 and noting that none of them define a system-administrator or cross-tenant support capability — [Requirement 27](27-multi-tenant-unit-isolation.md)'s REQ-27.18 only anticipated "a future internal admin view for the ScoutBuddy operator, if one is ever built," without ever specifying what it is. Offered a choice between support-actions-only, impersonation-for-adults-only, and full impersonation of any account, the user explicitly chose full impersonation, including youth accounts.
+User request, 2026-10-23, after reviewing [Requirement 27](multi-tenancy/27-multi-tenant-unit-isolation.md) and Requirements 31-37 and noting that none of them define a system-administrator or cross-tenant support capability — [Requirement 27](multi-tenancy/27-multi-tenant-unit-isolation.md)'s REQ-27.18 only anticipated "a future internal admin view for the ScoutBuddy operator, if one is ever built," without ever specifying what it is. Offered a choice between support-actions-only, impersonation-for-adults-only, and full impersonation of any account, the user explicitly chose full impersonation, including youth accounts.
 
 ## Requirements
 
@@ -28,7 +28,7 @@ User request, 2026-10-23, after reviewing [Requirement 27](27-multi-tenant-unit-
 - **REQ-38.5** A Platform Admin can impersonate any account — adult or youth — starting a session that acts as that user for troubleshooting or support purposes. (Per the 2026-10-23 decision: scope explicitly includes youth accounts, not limited to adults.)
 - **REQ-38.6** Every impersonation session is time-boxed and auto-expires (on the order of an hour, not indefinitely); ending it explicitly before expiry is always available too.
 - **REQ-38.7** Starting an impersonation session requires the admin's own session to already be at step-up assurance ([Requirement 31](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md)'s REQ-31.6) — impersonation is treated as a sensitive action in its own right, never a way to bypass that requirement for the account being impersonated.
-- **REQ-38.8** Every impersonation session is logged in full: which admin, which account, which unit(s) touched, start and end time, and at minimum which kinds of actions were taken while impersonating — extending [Requirement 27](27-multi-tenant-unit-isolation.md)'s REQ-27.18 ("even legitimate operator-level access is auditable") from read-access to acted-as-a-user access.
+- **REQ-38.8** Every impersonation session is logged in full: which admin, which account, which unit(s) touched, start and end time, and at minimum which kinds of actions were taken while impersonating — extending [Requirement 27](multi-tenancy/27-multi-tenant-unit-isolation.md)'s REQ-27.18 ("even legitimate operator-level access is auditable") from read-access to acted-as-a-user access.
 - **REQ-38.9** Any action taken while impersonating is attributable in logs and history as "Platform Admin X, acting as User Y" — never recorded as if User Y performed it unassisted. A later read of, say, a menu-approval history must not be misreadable as the actual ASPL's own unaided action.
 
 ## Acceptance Criteria
@@ -48,7 +48,7 @@ User request, 2026-10-23, after reviewing [Requirement 27](27-multi-tenant-unit-
 
 ## Related
 
-- [Requirement 27 - Multi-Tenant Unit Isolation & Switching](27-multi-tenant-unit-isolation.md) — REQ-27.18's operator-audit-logging principle, extended here from read-access to acted-as-a-user access.
+- [Requirement 27 - Multi-Tenant Unit Isolation & Switching](multi-tenancy/27-multi-tenant-unit-isolation.md) — REQ-27.18's operator-audit-logging principle, extended here from read-access to acted-as-a-user access.
 - [Requirement 31 - Core Authentication: Accounts, Sessions & Passkeys](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md) — REQ-31.6's step-up assurance, required before any Platform Admin action.
 - [Requirement 32 - Account Recovery & Credential Reset](authentication-accounts/32-account-recovery-credential-reset.md), [Requirement 33 - Adult/Guardian-Mediated Youth Account Creation (COPPA)](33-youth-account-creation-coppa.md) — the two recovery paths this requirement is the fallback for.
 - [Requirement 34 - Unit Membership, Invitations & Switching](authentication-accounts/34-unit-membership-invitations-switching.md) — the membership model this requirement reads across, and the invite action it exposes directly.

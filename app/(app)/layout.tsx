@@ -9,6 +9,7 @@ import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import { getCurrentUser, getSessionStatus } from "@/lib/session";
 import { getActivePatrols } from "@/lib/patrols";
+import { unitDb } from "@/lib/unit-db";
 import { AccountStatus } from "@/components/AccountStatus";
 import { AppNav } from "@/components/AppNav";
 import { BottomNav } from "@/components/BottomNav";
@@ -31,7 +32,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     redirect((await getSessionStatus()) === "no-unit" ? "/no-unit" : "/login");
   }
   const actor = user.actor;
-  const patrols = await getActivePatrols();
+  const patrols = await getActivePatrols(unitDb(actor.unitId));
   const navItems =
     actor.role === "ASPL"
       ? [

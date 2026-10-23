@@ -39,3 +39,4 @@ This directory records the significant architecture decisions made for ScoutBudd
 - [0033 - Passkey-based authentication via Better Auth, superseding cookie-based role identity](0033-passkey-based-authentication-via-better-auth.md)
 - [0034 - Account recovery: magic-link token invalidation, session revocation, and assurance-tier tracking](0034-account-recovery-token-and-session-invalidation.md)
 - [0035 - Units, the Council/District hierarchy, per-unit memberships, and email invitations](0035-units-memberships-and-invitations.md)
+- [0036 - Per-unit data isolation: `unitId` everywhere, Row-Level Security under a dedicated role, and same-unit triggers](0036-unit-data-isolation-rls.md)

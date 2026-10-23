@@ -10,18 +10,25 @@ import {
   canReview,
   canSubmitMenu,
   canUploadCampouts,
+  inActorUnit,
   isCommentAuthor,
   type CommentForPermissions,
   type MenuForPermissions,
 } from "./permissions";
 import type { Actor } from "./session";
 
-const aspl: Actor = { role: "ASPL" };
-const eagleLeader: Actor = { role: "PATROL_LEADER", patrolId: "eagle" };
-const pumaLeader: Actor = { role: "PATROL_LEADER", patrolId: "puma" };
+const aspl: Actor = { role: "ASPL", unitId: "unit-a" };
+const eagleLeader: Actor = { role: "PATROL_LEADER", patrolId: "eagle", unitId: "unit-a" };
+const pumaLeader: Actor = { role: "PATROL_LEADER", patrolId: "puma", unitId: "unit-a" };
+
+// REQ-27.11: the same roles, acting in a different unit. A patrol id can't
+// actually repeat across units (ids are global), but the checks must hold
+// on the unit alone, not lean on that.
+const otherUnitAspl: Actor = { role: "ASPL", unitId: "unit-b" };
+const otherUnitEagleLeader: Actor = { role: "PATROL_LEADER", patrolId: "eagle", unitId: "unit-b" };
 
 function menu(overrides: Partial<MenuForPermissions> = {}): MenuForPermissions {
-  return { patrolId: "eagle", status: "NOT_STARTED", ...overrides };
+  return { patrolId: "eagle", status: "NOT_STARTED", unitId: "unit-a", ...overrides };
 }
 
 describe("canCreateCampout / canAssignMenu", () => {
@@ -128,6 +135,26 @@ describe("isCommentAuthor / canDeleteComment", () => {
     expect(canDeleteComment(aspl, menu({ patrolId: "eagle" }), eagle_comment)).toBe(false);
     expect(canDeleteComment(pumaLeader, menu({ patrolId: "eagle" }), eagle_comment)).toBe(false);
     expect(canDeleteComment(eagleLeader, menu({ patrolId: "eagle" }), aspl_comment)).toBe(false);
+  });
+});
+
+describe("unit boundary (REQ-27.11)", () => {
+  it("rejects the right role acting in the wrong unit, for every menu-level check", () => {
+    expect(canEditMenu(otherUnitEagleLeader, menu())).toBe(false);
+    expect(canSubmitMenu(otherUnitEagleLeader, menu({ status: "IN_PROGRESS" }))).toBe(false);
+    expect(canReview(otherUnitAspl, menu({ status: "SUBMITTED" }))).toBe(false);
+    expect(canCommentOnMenu(otherUnitAspl, menu())).toBe(false);
+    expect(canCommentOnMenu(otherUnitEagleLeader, menu())).toBe(false);
+    expect(
+      canDeleteComment(otherUnitEagleLeader, menu(), { authorRole: "PATROL_LEADER", authorPatrolId: "eagle" })
+    ).toBe(false);
+    expect(canDeleteComment(otherUnitAspl, menu(), { authorRole: "ASPL", authorPatrolId: null })).toBe(false);
+  });
+
+  it("inActorUnit compares units, and a signed-out viewer is in none", () => {
+    expect(inActorUnit(aspl, { unitId: "unit-a" })).toBe(true);
+    expect(inActorUnit(otherUnitAspl, { unitId: "unit-a" })).toBe(false);
+    expect(inActorUnit(null, { unitId: "unit-a" })).toBe(false);
   });
 });
 

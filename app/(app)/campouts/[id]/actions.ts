@@ -3,15 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { MealOccasion } from "@prisma/client";
-import { db } from "@/lib/db";
-import { getActor } from "@/lib/session";
+import { requireUnitScope } from "@/lib/session";
 import { canAssignMenu, canManageCampoutRoster, canManageMealFramework } from "@/lib/permissions";
 import { MEAL_OCCASIONS } from "@/lib/constants";
 import { requireString } from "@/lib/form-data";
 import { withToast } from "@/lib/toast";
 
 export async function assignMenu(formData: FormData) {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   if (!canAssignMenu(actor)) {
     throw new Error("Only the ASPL of Camping can assign a menu.");
   }
@@ -51,7 +50,7 @@ export async function assignMenu(formData: FormData) {
 // exceptions for this campout untouched (REQ-10.7 relies on those surviving
 // so a re-add doesn't lose configured occasion removals).
 export async function removePatrolFromCampout(formData: FormData) {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   if (!canManageCampoutRoster(actor)) {
     throw new Error("Only the ASPL of Camping can manage a campout's patrols.");
   }
@@ -82,7 +81,7 @@ export async function removePatrolFromCampout(formData: FormData) {
 }
 
 export async function removeOccasion(formData: FormData) {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   if (!canManageMealFramework(actor)) {
     throw new Error("Only the ASPL of Camping can manage the meal framework.");
   }
@@ -124,7 +123,7 @@ export async function removeOccasion(formData: FormData) {
 }
 
 export async function restoreOccasion(formData: FormData) {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   if (!canManageMealFramework(actor)) {
     throw new Error("Only the ASPL of Camping can manage the meal framework.");
   }

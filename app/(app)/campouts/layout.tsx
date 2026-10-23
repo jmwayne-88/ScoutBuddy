@@ -4,8 +4,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import { db } from "@/lib/db";
-import { getActor } from "@/lib/session";
+import { getUnitScope } from "@/lib/session";
 import { canUploadCampouts } from "@/lib/permissions";
 import { getActivePatrols } from "@/lib/patrols";
 import { campoutProgress } from "@/lib/progress";
@@ -18,17 +17,19 @@ import { CampoutCard } from "@/components/CampoutCard";
 import { RoleMismatchNotice } from "@/components/RoleMismatchNotice";
 
 export default async function CampoutsLayout({ children }: { children: ReactNode }) {
-  const actor = await getActor();
+  const scope = await getUnitScope();
+  const actor = scope?.actor ?? null;
 
-  if (actor?.role !== "ASPL") {
+  if (!scope || actor?.role !== "ASPL") {
     return <RoleMismatchNotice actor={actor} requiredRoleLabel="the ASPL of Camping" />;
   }
+  const { db } = scope;
 
   const campouts = await db.campout.findMany({
     orderBy: { date: "asc" },
     include: { menus: { select: { id: true, status: true } } },
   });
-  const activePatrols = await getActivePatrols();
+  const activePatrols = await getActivePatrols(db);
 
   // REQ-29.9/29.11: a campout's total is every unresolved top-level thread
   // across every patrol's menu for it (menu, meal, dish, and ingredient

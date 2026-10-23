@@ -29,6 +29,12 @@ model Patrol {
   // User.patrolId, ADR 0033's interim placement -- moved by ADR 0035).
   memberships             UnitMembership[]
   invitations             UnitInvitation[]
+
+  // REQ-27.1: set by the database from the unit context, never by app code (ADR 0036).
+  unitId String @default(dbgenerated("scoutbuddy_current_unit_id()"))
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
+  @@index([unitId])
 }
 
 enum MealOccasion {
@@ -72,6 +78,12 @@ model Campout {
   createdAt               DateTime                 @default(now())
   menus                   Menu[]
   mealFrameworkExceptions MealFrameworkException[]
+
+  // REQ-27.1: set by the database from the unit context, never by app code (ADR 0036).
+  unitId String @default(dbgenerated("scoutbuddy_current_unit_id()"))
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
+  @@index([unitId])
 }
 
 // REQ-30: a short-lived staging row holding one upload's proposed
@@ -86,6 +98,12 @@ model CampoutUploadBatch {
   sourceFileName String
   createdAt      DateTime @default(now())
   candidates     Json
+
+  // REQ-27.1: set by the database from the unit context, never by app code (ADR 0036).
+  unitId String @default(dbgenerated("scoutbuddy_current_unit_id()"))
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
+  @@index([unitId])
 }
 
 model Menu {
@@ -111,7 +129,12 @@ model Menu {
   comments        Comment[]
   commentActivity CommentActivity[]
 
+  // REQ-27.1: set by the database from the unit context, never by app code (ADR 0036).
+  unitId String @default(dbgenerated("scoutbuddy_current_unit_id()"))
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
   @@unique([campoutId, patrolId])
+  @@index([unitId])
 }
 
 model Meal {
@@ -121,7 +144,12 @@ model Meal {
   occasion MealOccasion
   dishes   Dish[]
 
+  // REQ-27.1: set by the database from the unit context, never by app code (ADR 0036).
+  unitId String @default(dbgenerated("scoutbuddy_current_unit_id()"))
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
   @@unique([menuId, occasion])
+  @@index([unitId])
 }
 
 model Dish {
@@ -131,6 +159,12 @@ model Dish {
   name        String
   ingredients Ingredient[]
   comments    Comment[]
+
+  // REQ-27.1: set by the database from the unit context, never by app code (ADR 0036).
+  unitId String @default(dbgenerated("scoutbuddy_current_unit_id()"))
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
+  @@index([unitId])
 }
 
 // A patrol-leader-entered free-text item, never tagged by hand with a
@@ -147,6 +181,12 @@ model Ingredient {
   quantity String
   category IngredientCategory?
   comments Comment[]
+
+  // REQ-27.1: set by the database from the unit context, never by app code (ADR 0036).
+  unitId String @default(dbgenerated("scoutbuddy_current_unit_id()"))
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
+  @@index([unitId])
 }
 
 enum IngredientCategory {
@@ -169,6 +209,12 @@ model Review {
   decision  ReviewDecision
   comment   String?
   createdAt DateTime       @default(now())
+
+  // REQ-27.1: set by the database from the unit context, never by app code (ADR 0036).
+  unitId String @default(dbgenerated("scoutbuddy_current_unit_id()"))
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
+  @@index([unitId])
 }
 
 // REQ-26: the two parties who can ever author/assign/resolve/delete a
@@ -250,6 +296,12 @@ model Comment {
   deletedByPatrolId  String?
   createdAt          DateTime          @default(now())
   activity           CommentActivity[]
+
+  // REQ-27.1: set by the database from the unit context, never by app code (ADR 0036).
+  unitId String @default(dbgenerated("scoutbuddy_current_unit_id()"))
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
+  @@index([unitId])
 }
 
 // REQ-26.6: an append-only, immutable audit trail -- deleting a Comment is
@@ -269,6 +321,12 @@ model CommentActivity {
   targetSummary String
   detail        String?
   createdAt     DateTime              @default(now())
+
+  // REQ-27.1: set by the database from the unit context, never by app code (ADR 0036).
+  unitId String @default(dbgenerated("scoutbuddy_current_unit_id()"))
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
+  @@index([unitId])
 }
 
 // A row means "this occasion is removed for this patrol (or every patrol,
@@ -284,6 +342,12 @@ model MealFrameworkException {
   patrol    Patrol?      @relation(fields: [patrolId], references: [id])
   occasion  MealOccasion
   createdAt DateTime     @default(now())
+
+  // REQ-27.1: set by the database from the unit context, never by app code (ADR 0036).
+  unitId String @default(dbgenerated("scoutbuddy_current_unit_id()"))
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
+  @@index([unitId])
 }
 
 // ============================================================
@@ -506,6 +570,21 @@ model Unit {
   memberships       UnitMembership[]
   invitations       UnitInvitation[]
   events            UnitEvent[]
+
+  // REQ-27.1: everything the unit owns. onDelete: Restrict on the other
+  // side -- deleting a unit deletes its data first, explicitly
+  // (lib/unit-data.ts), never as a silent cascade.
+  patrols                 Patrol[]
+  campouts                Campout[]
+  campoutUploadBatches    CampoutUploadBatch[]
+  menus                   Menu[]
+  meals                   Meal[]
+  dishes                  Dish[]
+  ingredients             Ingredient[]
+  reviews                 Review[]
+  comments                Comment[]
+  commentActivity         CommentActivity[]
+  mealFrameworkExceptions MealFrameworkException[]
 
   // REQ-34.11: unique per district. Every column is required, so there's
   // no NULL-distinctness gap in this constraint.

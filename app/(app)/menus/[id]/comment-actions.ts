@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { CommentActivityAction, CommentActorRole, CommentTargetType, MealOccasion } from "@prisma/client";
-import { db } from "@/lib/db";
-import { getActor, type Actor } from "@/lib/session";
+import { requireUnitScope, type Actor } from "@/lib/session";
+import type { UnitDb } from "@/lib/unit-db";
 import { canCommentOnMenu, canDeleteComment } from "@/lib/permissions";
 import { requireString } from "@/lib/form-data";
 import { actorLabel, targetSummary } from "@/lib/comments";
@@ -24,12 +24,12 @@ function revalidateCommentCountLists() {
 // REQ-26.1/26.10: available to the menu's owning Patrol Leader and the
 // ASPL regardless of Menu.status -- see canCommentOnMenu.
 async function requireCommentableMenu(menuId: string) {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   const menu = await db.menu.findUniqueOrThrow({ where: { id: menuId }, include: { patrol: true } });
   if (!canCommentOnMenu(actor, menu)) {
     throw new Error("You don't have permission to comment on this menu.");
   }
-  return { actor: actor as Actor, menu };
+  return { actor, menu, db };
 }
 
 function actorFields(actor: Actor): { role: CommentActorRole; patrolId: string | null } {
@@ -39,7 +39,7 @@ function actorFields(actor: Actor): { role: CommentActorRole; patrolId: string |
 
 // REQ-26.6: one append-only, immutable row per lifecycle event -- written
 // alongside every mutation below, never edited or deleted afterward.
-async function logActivity(params: {
+async function logActivity(db: UnitDb, params: {
   menuId: string;
   commentId: string;
   action: CommentActivityAction;
@@ -72,7 +72,7 @@ export async function addComment(formData: FormData) {
   const ingredientId = String(formData.get("ingredientId") ?? "") || null;
   const occasion = (String(formData.get("occasion") ?? "") || null) as MealOccasion | null;
 
-  const { actor, menu } = await requireCommentableMenu(menuId);
+  const { actor, menu, db } = await requireCommentableMenu(menuId);
 
   let resolvedDishId: string | null = null;
   let resolvedIngredientId: string | null = null;
@@ -119,7 +119,7 @@ export async function addComment(formData: FormData) {
     },
   });
 
-  await logActivity({
+  await logActivity(db, {
     menuId,
     commentId: comment.id,
     action: "CREATED",
@@ -139,7 +139,7 @@ export async function replyToComment(formData: FormData) {
   const parentId = requireString(formData, "parentId");
   const body = requireString(formData, "body");
 
-  const { actor } = await requireCommentableMenu(menuId);
+  const { actor, db } = await requireCommentableMenu(menuId);
 
   const parent = await db.comment.findFirst({ where: { id: parentId, menuId, deletedAt: null } });
   if (!parent) throw new Error("That comment no longer exists.");
@@ -161,7 +161,7 @@ export async function replyToComment(formData: FormData) {
     },
   });
 
-  await logActivity({
+  await logActivity(db, {
     menuId,
     commentId: reply.id,
     action: "REPLIED",
@@ -180,7 +180,7 @@ export async function assignComment(formData: FormData) {
   const commentId = requireString(formData, "commentId");
   const assigneeRole = requireString(formData, "assigneeRole") as CommentActorRole;
 
-  const { actor, menu } = await requireCommentableMenu(menuId);
+  const { actor, menu, db } = await requireCommentableMenu(menuId);
 
   const comment = await db.comment.findFirst({ where: { id: commentId, menuId, deletedAt: null } });
   if (!comment) throw new Error("That comment no longer exists.");
@@ -193,7 +193,7 @@ export async function assignComment(formData: FormData) {
     data: { assigneeRole, assigneePatrolId },
   });
 
-  await logActivity({
+  await logActivity(db, {
     menuId,
     commentId,
     action,
@@ -218,7 +218,7 @@ async function setCommentStatus(
   const menuId = requireString(formData, "menuId");
   const commentId = requireString(formData, "commentId");
 
-  const { actor } = await requireCommentableMenu(menuId);
+  const { actor, db } = await requireCommentableMenu(menuId);
 
   const comment = await db.comment.findFirst({ where: { id: commentId, menuId, deletedAt: null } });
   if (!comment) throw new Error("That comment no longer exists.");
@@ -233,7 +233,7 @@ async function setCommentStatus(
         : { status, resolvedAt: null, resolvedByRole: null, resolvedByPatrolId: null },
   });
 
-  await logActivity({
+  await logActivity(db, {
     menuId,
     commentId,
     action,
@@ -261,7 +261,7 @@ export async function deleteComment(formData: FormData) {
   const menuId = requireString(formData, "menuId");
   const commentId = requireString(formData, "commentId");
 
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   const menu = await db.menu.findUniqueOrThrow({ where: { id: menuId }, include: { patrol: true } });
   const comment = await db.comment.findFirst({ where: { id: commentId, menuId, deletedAt: null } });
   if (!comment) throw new Error("That comment no longer exists.");
@@ -269,20 +269,18 @@ export async function deleteComment(formData: FormData) {
   if (!canDeleteComment(actor, menu, comment)) {
     throw new Error("You don't have permission to delete this comment.");
   }
-  const author = actor as Actor;
-
-  const { role, patrolId } = actorFields(author);
+  const { role, patrolId } = actorFields(actor);
 
   await db.comment.update({
     where: { id: commentId },
     data: { deletedAt: new Date(), deletedByRole: role, deletedByPatrolId: patrolId },
   });
 
-  await logActivity({
+  await logActivity(db, {
     menuId,
     commentId,
     action: "DELETED",
-    actor: author,
+    actor,
     targetSummary: targetSummary(comment.targetType, comment.targetLabel),
   });
 

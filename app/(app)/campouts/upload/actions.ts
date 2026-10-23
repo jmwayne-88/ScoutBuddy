@@ -5,8 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { del, get } from "@vercel/blob";
 import type { Prisma } from "@prisma/client";
-import { db } from "@/lib/db";
-import { getActor } from "@/lib/session";
+import { requireUnitScope } from "@/lib/session";
+import type { UnitDb } from "@/lib/unit-db";
 import { canUploadCampouts } from "@/lib/permissions";
 import { requireString } from "@/lib/form-data";
 import { withToast } from "@/lib/toast";
@@ -22,7 +22,8 @@ const MAX_EXCEL_SHEETS = 30;
 
 // REQ-30 Data Model Impact #5: no cron job exists in this app -- a pending
 // batch nobody ever confirmed or discarded is cleaned up lazily, the next
-// time anyone starts a new upload, rather than on a schedule.
+// time someone in the same unit starts a new upload (the sweep is unit-
+// scoped like every other query, REQ-27.5), rather than on a schedule.
 const BATCH_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 // ADR 0032: a real Vercel Blob URL always has one of these two hostname
@@ -67,7 +68,7 @@ export async function uploadCampoutFile(
   _prevState: UploadFormState,
   formData: FormData
 ): Promise<UploadFormState> {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   if (!canUploadCampouts(actor)) {
     throw new Error("Only the ASPL of Camping can upload campouts.");
   }
@@ -87,13 +88,13 @@ export async function uploadCampoutFile(
   }
 
   try {
-    return await processUpload(blobUrl, fileName, isPdf);
+    return await processUpload(db, blobUrl, fileName, isPdf);
   } finally {
     await safeDeleteBlob(blobUrl);
   }
 }
 
-async function processUpload(blobUrl: string, fileName: string, isPdf: boolean): Promise<UploadFormState> {
+async function processUpload(db: UnitDb, blobUrl: string, fileName: string, isPdf: boolean): Promise<UploadFormState> {
   let bytes: Uint8Array;
   try {
     // ADR 0032: a private blob isn't fetchable by URL alone -- `get()` is
@@ -203,7 +204,7 @@ export async function confirmCampoutUpload(
   _prevState: ConfirmUploadFormState,
   formData: FormData
 ): Promise<ConfirmUploadFormState> {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   if (!canUploadCampouts(actor)) {
     throw new Error("Only the ASPL of Camping can upload campouts.");
   }
@@ -269,7 +270,7 @@ export async function confirmCampoutUpload(
   }
 
   try {
-    await db.$transaction(async (tx) => {
+    await db.$unitTransaction(async (tx) => {
       for (const item of toUpload) {
         if (item.matchedCampoutId) {
           await tx.campout.update({ where: { id: item.matchedCampoutId }, data: item.data });
@@ -295,7 +296,7 @@ export async function confirmCampoutUpload(
 // idle abandonment. Nothing was ever written to `Campout` at this
 // point, so there's nothing to undo besides the staging row itself.
 export async function discardCampoutUpload(formData: FormData): Promise<void> {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   if (!canUploadCampouts(actor)) {
     throw new Error("Only the ASPL of Camping can upload campouts.");
   }

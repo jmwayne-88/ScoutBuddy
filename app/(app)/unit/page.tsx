@@ -3,16 +3,18 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import { db } from "@/lib/db";
 import { getActiveMembership, getActor } from "@/lib/session";
-import { canManageUnitMembers } from "@/lib/permissions";
+import { canManageUnitData, canManageUnitMembers } from "@/lib/permissions";
 import { formatEventDate } from "@/lib/dates";
 import { UNIT_HIERARCHY_INCLUDE, councilDisplayName, unitDisplayName } from "@/lib/units";
 import { RoleMismatchNotice } from "@/components/RoleMismatchNotice";
 import { InviteMemberForm } from "@/components/InviteMemberForm";
 import { RelativeDate } from "@/components/RelativeDate";
 import { SubmitButton } from "@/components/SubmitButton";
-import { removeMember, revokeInvitation } from "./actions";
+import { DeleteUnitDialog } from "@/components/DeleteUnitDialog";
+import { deleteUnit, removeMember, revokeInvitation } from "./actions";
 
 // CLAUDE.md: brand.olive carries the "secondary action" meaning (Remove,
 // like Remove occasion) -- the same filled treatment as Request changes.
@@ -51,11 +53,12 @@ export default async function UnitPage() {
     }),
   ]);
   const asplCount = members.filter((m) => m.role === "ASPL").length;
+  const unitName = unitDisplayName(unit);
 
   return (
     <Stack spacing={4} sx={{ maxWidth: 800 }}>
       <Stack spacing={0.5}>
-        <Typography variant="h5">{unitDisplayName(unit)}</Typography>
+        <Typography variant="h5">{unitName}</Typography>
         <Typography variant="body2" color="text.secondary">
           {unit.district.name} · {councilDisplayName(unit.district.council)}
         </Typography>
@@ -138,6 +141,23 @@ export default async function UnitPage() {
               );
             })}
           </Stack>
+        </Stack>
+      )}
+
+      {canManageUnitData(membership.actor) && (
+        <Stack spacing={2} component="section" aria-labelledby="unit-data-heading">
+          <Typography id="unit-data-heading" variant="h6">
+            Unit data
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Download everything ScoutBuddy holds for {unitName} as a JSON file, or delete the unit and all of its data
+            if it&apos;s leaving ScoutBuddy.
+          </Typography>
+          {/* A plain link, not client-side navigation: the route answers with a file download. */}
+          <Button href="/unit/export" variant="outlined" sx={{ alignSelf: "flex-start" }}>
+            Export unit data
+          </Button>
+          <DeleteUnitDialog unitName={unitName} deleteAction={deleteUnit} />
         </Stack>
       )}
     </Stack>

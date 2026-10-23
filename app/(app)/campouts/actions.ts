@@ -2,8 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
-import { getActor } from "@/lib/session";
+import { requireUnitScope } from "@/lib/session";
 import { canCreateCampout } from "@/lib/permissions";
 import { withToast } from "@/lib/toast";
 
@@ -14,7 +13,7 @@ function optionalString(formData: FormData, key: string): string | undefined {
 }
 
 export async function createCampout(formData: FormData) {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   if (!canCreateCampout(actor)) {
     throw new Error("Only the ASPL of Camping can create a campout.");
   }

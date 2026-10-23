@@ -5,8 +5,7 @@ import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
-import { db } from "@/lib/db";
-import { getActor } from "@/lib/session";
+import { getUnitScope } from "@/lib/session";
 import { canCommentOnMenu, canEditMenu, canReview, canSubmitMenu } from "@/lib/permissions";
 import { menuHasEmptyOccasion } from "@/lib/validation";
 import { MEAL_OCCASIONS } from "@/lib/constants";
@@ -56,31 +55,82 @@ export default async function MenuPage({
 }) {
   const { id } = await params;
   const { activityLimit: activityLimitParam } = await searchParams;
-  const actor = await getActor();
+  const scope = await getUnitScope();
+  if (!scope) notFound();
+  const { actor, db } = scope;
 
-  const menu = await db.menu.findUnique({
-    where: { id },
-    include: {
-      campout: true,
-      patrol: true,
-      meals: { include: { dishes: { include: { ingredients: true } } } },
-      reviews: { orderBy: { createdAt: "asc" } },
-    },
-  });
+  // REQ-26.7: newest first, an initial page plus "Load more" via
+  // `?activityLimit=`, fetched as limit+1 so we know whether more exist
+  // without a separate count query.
+  const activityLimit = Math.min(
+    ACTIVITY_LIMIT_CAP,
+    Math.max(ACTIVITY_PAGE_SIZE, Number(activityLimitParam) || ACTIVITY_PAGE_SIZE)
+  );
 
-  if (!menu) notFound();
+  // ADR 0036: this page's reads share one unit-scoped transaction, so it
+  // pays the unit-context setup once rather than once per query.
+  const data = await db.$unitTransaction(async (tx) => {
+    const menu = await tx.menu.findUnique({
+      where: { id },
+      include: {
+        campout: true,
+        patrol: true,
+        meals: { include: { dishes: { include: { ingredients: true } } } },
+        reviews: { orderBy: { createdAt: "asc" } },
+      },
+    });
+    if (!menu) return null;
 
-  // REQ-25.2: computed and shown only when the viewer is this menu's own
-  // Patrol Leader -- never for the ASPL, and never comparing across patrols.
-  const isOwnPatrolLeader = actor?.role === "PATROL_LEADER" && actor.patrolId === menu.patrolId;
-  const streak = isOwnPatrolLeader
-    ? onTimeStreak(
-        await db.menu.findMany({
+    // REQ-25.2: computed and shown only when the viewer is this menu's own
+    // Patrol Leader -- never for the ASPL, and never comparing across patrols.
+    const isOwnPatrolLeader = actor.role === "PATROL_LEADER" && actor.patrolId === menu.patrolId;
+    const streakMenus = isOwnPatrolLeader
+      ? await tx.menu.findMany({
           where: { patrolId: menu.patrolId },
           select: { dueDate: true, submittedAt: true },
         })
-      )
-    : 0;
+      : null;
+
+    // REQ-26.1-26.5: every live (non-deleted) comment on this menu, fetched
+    // once and sliced per target below -- a reply already carries its
+    // root's target fields (see comment-actions.ts's replyToComment), so a
+    // plain filter per target is enough; lib/comments.ts's nestReplies does
+    // the root/reply grouping.
+    const allComments = await tx.comment.findMany({
+      where: { menuId: id, deletedAt: null },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        parentId: true,
+        targetType: true,
+        dishId: true,
+        ingredientId: true,
+        occasion: true,
+        targetLabel: true,
+        body: true,
+        authorRole: true,
+        authorPatrolId: true,
+        status: true,
+        assigneeRole: true,
+        createdAt: true,
+      },
+    });
+
+    const activityRows = await tx.commentActivity.findMany({
+      where: { menuId: id },
+      orderBy: { createdAt: "desc" },
+      take: activityLimit + 1,
+      select: { id: true, action: true, actorRole: true, targetSummary: true, detail: true, createdAt: true },
+    });
+
+    return { menu, streakMenus, allComments, activityRows };
+  });
+
+  if (!data) notFound();
+  const { menu, streakMenus, allComments, activityRows } = data;
+  // Fetched only for the menu's own Patrol Leader, above.
+  const isOwnPatrolLeader = streakMenus !== null;
+  const streak = streakMenus ? onTimeStreak(streakMenus) : 0;
 
   const canEdit = canEditMenu(actor, menu);
   const canSubmit = canSubmitMenu(actor, menu);
@@ -91,31 +141,6 @@ export default async function MenuPage({
   const mealProgress = menuMealProgress(menu.meals);
   const statusColor = menuStatusColor(menu.status);
   const hasEmptyOccasion = menuHasEmptyOccasion(menu.meals);
-
-  // REQ-26.1-26.5: every live (non-deleted) comment on this menu, fetched
-  // once and sliced per target below -- a reply already carries its
-  // root's target fields (see comment-actions.ts's replyToComment), so a
-  // plain filter per target is enough; lib/comments.ts's nestReplies does
-  // the root/reply grouping.
-  const allComments = await db.comment.findMany({
-    where: { menuId: id, deletedAt: null },
-    orderBy: { createdAt: "asc" },
-    select: {
-      id: true,
-      parentId: true,
-      targetType: true,
-      dishId: true,
-      ingredientId: true,
-      occasion: true,
-      targetLabel: true,
-      body: true,
-      authorRole: true,
-      authorPatrolId: true,
-      status: true,
-      assigneeRole: true,
-      createdAt: true,
-    },
-  });
 
   function commentsForTarget(target: CommentTarget) {
     return allComments.filter((c) => {
@@ -153,19 +178,6 @@ export default async function MenuPage({
     );
   }
 
-  // REQ-26.7: newest first, an initial page plus "Load more" via
-  // `?activityLimit=`, fetched as limit+1 so we know whether more exist
-  // without a separate count query.
-  const activityLimit = Math.min(
-    ACTIVITY_LIMIT_CAP,
-    Math.max(ACTIVITY_PAGE_SIZE, Number(activityLimitParam) || ACTIVITY_PAGE_SIZE)
-  );
-  const activityRows = await db.commentActivity.findMany({
-    where: { menuId: id },
-    orderBy: { createdAt: "desc" },
-    take: activityLimit + 1,
-    select: { id: true, action: true, actorRole: true, targetSummary: true, detail: true, createdAt: true },
-  });
   const hasMoreActivity = activityRows.length > activityLimit;
   const activityEntries = activityRows.slice(0, activityLimit);
 
@@ -180,7 +192,7 @@ export default async function MenuPage({
             <PatrolBadge name={menu.patrol.name} color={menu.patrol.color} icon={menu.patrol.icon} />
           </Stack>
           <LinkButton
-            href={actor?.role === "PATROL_LEADER" ? "/patrol-leader" : `/campouts/${menu.campout.id}`}
+            href={actor.role === "PATROL_LEADER" ? "/patrol-leader" : `/campouts/${menu.campout.id}`}
             variant="outlined"
             size="small"
           >

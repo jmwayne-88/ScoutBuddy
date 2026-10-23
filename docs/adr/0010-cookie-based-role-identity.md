@@ -1,7 +1,7 @@
 # 0010. Cookie-based role identity, no accounts or passwords
 
 Date: 2026-09-14
-Status: Superseded by [ADR 0033](0033-passkey-based-authentication-via-better-auth.md) (2026-10-23) — this ADR's own Consequences section named "shared across multiple troops" as the trigger to revisit it; [Requirement 27](../requirements/27-multi-tenant-unit-isolation.md) hit that trigger.
+Status: Superseded by [ADR 0033](0033-passkey-based-authentication-via-better-auth.md) (2026-10-23) — this ADR's own Consequences section named "shared across multiple troops" as the trigger to revisit it; [Requirement 27](../requirements/multi-tenancy/27-multi-tenant-unit-isolation.md) hit that trigger.
 
 ## Context
 

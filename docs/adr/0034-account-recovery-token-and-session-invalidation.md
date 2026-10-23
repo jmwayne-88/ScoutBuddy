@@ -31,7 +31,7 @@ None of the three are Better Auth's default behavior, confirmed by reading `node
 
 - `Session` now carries one ScoutBuddy-specific field (`createdVia`) alongside Better Auth's own standard columns — flagged inline in `prisma/schema.prisma` with the same "this is ours, not the library's contract" distinction [ADR 0033](0033-passkey-based-authentication-via-better-auth.md) already drew for `User.role`/`User.patrolId`.
 - Verified empirically, not just by reading the code: two consecutive magic-link requests for the same test address left exactly one `Verification` row in the database, and a fourth request within the rate-limit window was correctly rejected.
-- `requireStepUp()` exists but is unreferenced by any current code path — expected and consistent with REQ-31.6's original scope, not dead code to be pruned; it's there for [Requirement 27](../requirements/27-multi-tenant-unit-isolation.md)/[34](../requirements/authentication-accounts/34-unit-membership-invitations-switching.md)/[35](../requirements/35-user-account-disabling-deletion.md) to call once built.
+- `requireStepUp()` exists but is unreferenced by any current code path — expected and consistent with REQ-31.6's original scope, not dead code to be pruned; it's there for [Requirement 27](../requirements/multi-tenancy/27-multi-tenant-unit-isolation.md)/[34](../requirements/authentication-accounts/34-unit-membership-invitations-switching.md)/[35](../requirements/35-user-account-disabling-deletion.md) to call once built.
 
 ## Related
 

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { db } from "@/lib/db";
+import { getUnitScope } from "@/lib/session";
 import { EditPatrolForm } from "@/components/EditPatrolForm";
 import { DeletePatrolDialog } from "@/components/DeletePatrolDialog";
 import { AssignFutureCampoutsPrompt } from "@/components/AssignFutureCampoutsPrompt";
@@ -17,6 +17,9 @@ export default async function EditPatrolPage({
 }) {
   const { id } = await params;
   const { prompt } = await searchParams;
+  const scope = await getUnitScope();
+  if (!scope) notFound();
+  const { db } = scope;
 
   const patrol = await db.patrol.findUnique({ where: { id } });
   if (!patrol) notFound();

@@ -30,8 +30,10 @@ Added by [Requirement 34](docs/requirements/authentication-accounts/34-unit-memb
 - **Switching** — the header shows the active unit. Someone in more than one unit switches from there, and the active unit is rechecked against their memberships on every request.
 - **Joining** — invite-only. The ASPL of Camping sends an email invitation from **Unit Members** (it works once and expires in 7 days); the link creates the account with a passkey, or adds the unit to an existing account. Patrol Leader invitations are paused until parent/guardian-approved youth accounts exist ([Requirement 33](docs/requirements/33-youth-account-creation-coppa.md)).
 - **Leaving** — the ASPL of Camping can remove a member from the unit. That removes only that unit's membership, never the account, and is logged. A unit always keeps at least one ASPL.
+- **Separate data per unit** ([Requirement 27](docs/requirements/multi-tenancy/27-multi-tenant-unit-isolation.md), [ADR 0036](docs/adr/0036-unit-data-isolation-rls.md)) — every patrol, campout, menu, comment, and review belongs to exactly one unit. Nobody acting in one unit can see, change, or point at another unit's data, and the database enforces this too, not only the app.
+- **Unit data** — on **Unit Members**, the ASPL of Camping can download all of the unit's data as a JSON file, or delete the unit and everything in it by typing the unit's name to confirm. Both need a passkey sign-in.
 - **Not yet:**
-  - Creating new units, which waits on per-unit data isolation ([Requirement 27](docs/requirements/27-multi-tenant-unit-isolation.md)).
+  - Creating new units. Data isolation no longer blocks it, but it has no screen yet, and who may create a unit is still open ([Requirement 38](docs/requirements/38-platform-admin-cross-tenant-support.md)).
   - Renaming districts and moving units between districts or councils, which waits on Platform Admin ([Requirement 38](docs/requirements/38-platform-admin-cross-tenant-support.md)) and the adult-leader permissions work.
 
 ## Standard Meal Framework

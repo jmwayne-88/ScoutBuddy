@@ -8,7 +8,7 @@ import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import LinearProgress from "@mui/material/LinearProgress";
 import MenuItem from "@mui/material/MenuItem";
-import { db } from "@/lib/db";
+import { getUnitScope } from "@/lib/session";
 import { getActivePatrols, getAllPatrols } from "@/lib/patrols";
 import { MEAL_OCCASIONS, mealOccasionLabel } from "@/lib/constants";
 import { contrastText } from "@/lib/colors";
@@ -27,6 +27,9 @@ import { assignMenu, removeOccasion, removePatrolFromCampout, restoreOccasion } 
 
 export default async function CampoutDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const scope = await getUnitScope();
+  if (!scope) notFound();
+  const { db } = scope;
 
   const campout = await db.campout.findUnique({
     where: { id },
@@ -38,8 +41,8 @@ export default async function CampoutDetailPage({ params }: { params: Promise<{ 
 
   if (!campout) notFound();
 
-  const activePatrols = await getActivePatrols();
-  const allPatrols = await getAllPatrols();
+  const activePatrols = await getActivePatrols(db);
+  const allPatrols = await getAllPatrols(db);
 
   const menuByPatrolId = new Map(campout.menus.map((menu) => [menu.patrolId, menu]));
   // REQ-10: the patrol roster is unbounded (Requirement 8), so this page no

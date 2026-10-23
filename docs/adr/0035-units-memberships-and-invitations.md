@@ -9,7 +9,7 @@ Status: Accepted. Supersedes [ADR 0033](0033-passkey-based-authentication-via-be
 
 Requirement 34 needs a `Unit` that a person can belong to, a role held per unit, an active unit per session that can't be spoofed, and joining only through an explicit, auditable invitation. On 2026-10-23 the user also settled how a unit is identified: the way Scouting America identifies it (Unit Type, Unit Number, Gender Designation, District, and Council), unique per district, with councils keyed by their council number.
 
-[Requirement 27](../requirements/27-multi-tenant-unit-isolation.md) (scoping campouts, patrols, and menus to a unit) is **not** built yet. That shapes what this ADR can safely turn on.
+[Requirement 27](../requirements/multi-tenancy/27-multi-tenant-unit-isolation.md) (scoping campouts, patrols, and menus to a unit) is **not** built yet. That shapes what this ADR can safely turn on.
 
 ## Decision
 
@@ -80,4 +80,5 @@ Because seed rows live in the migration, every environment, including the test b
 - [ADR 0034](0034-account-recovery-token-and-session-invalidation.md): the assurance tiers `requireStepUp()` reads.
 - [ADR 0018](0018-patrols-as-database-rows.md): the hand-ordered backfill migration style.
 - [ADR 0025](0025-useactionstate-for-patrol-color-validation.md): the `useActionState` pattern the invite and accept forms follow.
-- [Requirement 34](../requirements/authentication-accounts/34-unit-membership-invitations-switching.md), [Requirement 27](../requirements/27-multi-tenant-unit-isolation.md), [Requirement 33](../requirements/33-youth-account-creation-coppa.md), [Requirement 38](../requirements/38-platform-admin-cross-tenant-support.md).
+- [ADR 0036](0036-unit-data-isolation-rls.md): the per-unit data isolation that lifts this ADR's "data isn't separated yet" consequence.
+- [Requirement 34](../requirements/authentication-accounts/34-unit-membership-invitations-switching.md), [Requirement 27](../requirements/multi-tenancy/27-multi-tenant-unit-isolation.md), [Requirement 33](../requirements/33-youth-account-creation-coppa.md), [Requirement 38](../requirements/38-platform-admin-cross-tenant-support.md).

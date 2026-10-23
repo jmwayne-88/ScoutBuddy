@@ -6,11 +6,10 @@ import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import { getActor } from "@/lib/session";
+import { getUnitScope } from "@/lib/session";
 import { getAllPatrols } from "@/lib/patrols";
 import { getPatrolIcon } from "@/lib/patrolIcons";
 import { contrastText } from "@/lib/colors";
-import { db } from "@/lib/db";
 import { LinkButton } from "@/components/LinkButton";
 import { NavLink } from "@/components/NavLink";
 import { RoleMismatchNotice } from "@/components/RoleMismatchNotice";
@@ -18,13 +17,15 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { movePatrol, setPatrolActive } from "./actions";
 
 export default async function PatrolsPage() {
-  const actor = await getActor();
+  const scope = await getUnitScope();
+  const actor = scope?.actor ?? null;
 
-  if (actor?.role !== "ASPL") {
+  if (!scope || actor?.role !== "ASPL") {
     return <RoleMismatchNotice actor={actor} requiredRoleLabel="the ASPL of Camping" />;
   }
+  const { db } = scope;
 
-  const patrols = await getAllPatrols();
+  const patrols = await getAllPatrols(db);
   const menuCounts = await db.menu.groupBy({ by: ["patrolId"], _count: { _all: true } });
   const countByPatrol = new Map(menuCounts.map((m) => [m.patrolId, m._count._all]));
 

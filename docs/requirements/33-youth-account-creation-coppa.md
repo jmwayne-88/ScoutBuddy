@@ -10,7 +10,7 @@ Let Patrol Leaders and the ASPL of Camping — both youth, per [FEATURES.md](../
 
 ## Source
 
-[Requirement 27](27-multi-tenant-unit-isolation.md)'s original REQ-27.16 (2026-10-18) flagged this as "a hard gate that must be explicitly addressed, not defaulted into, before any unit with real youth accounts goes live" but deferred the actual design to this requirement's prerequisite. The design below comes from the 2026-10-23 research into COPPA verifiable parental consent methods, folded into the 2026-10-23 request to split the authentication recommendation into independently reviewable requirements.
+[Requirement 27](multi-tenancy/27-multi-tenant-unit-isolation.md)'s original REQ-27.16 (2026-10-18) flagged this as "a hard gate that must be explicitly addressed, not defaulted into, before any unit with real youth accounts goes live" but deferred the actual design to this requirement's prerequisite. The design below comes from the 2026-10-23 research into COPPA verifiable parental consent methods, folded into the 2026-10-23 request to split the authentication recommendation into independently reviewable requirements.
 
 ## Requirements
 
@@ -39,7 +39,7 @@ Let Patrol Leaders and the ASPL of Camping — both youth, per [FEATURES.md](../
 
 ## Related
 
-- [Requirement 27 - Multi-Tenant Unit Isolation & Switching](27-multi-tenant-unit-isolation.md) — REQ-27.16, retired in favor of this requirement.
+- [Requirement 27 - Multi-Tenant Unit Isolation & Switching](multi-tenancy/27-multi-tenant-unit-isolation.md) — REQ-27.16, retired in favor of this requirement.
 - [Requirement 31 - Core Authentication: Accounts, Sessions & Passkeys](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md) — this requirement's prerequisite.
 - [Requirement 32 - Account Recovery & Credential Reset](authentication-accounts/32-account-recovery-credential-reset.md) — REQ-32.6's youth-specific recovery routing.
 - [Requirement 34 - Unit Membership, Invitations & Switching](authentication-accounts/34-unit-membership-invitations-switching.md) — the invite mechanism REQ-33.1 uses.

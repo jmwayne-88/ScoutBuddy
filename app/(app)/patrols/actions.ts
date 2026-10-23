@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { PatrolType } from "@prisma/client";
-import { db } from "@/lib/db";
-import { getActor } from "@/lib/session";
+import { requireUnitScope } from "@/lib/session";
+import type { UnitDb } from "@/lib/unit-db";
 import { canManagePatrols } from "@/lib/permissions";
 import { requireString } from "@/lib/form-data";
 import { meetsContrast } from "@/lib/theme/contrast";
@@ -76,7 +76,7 @@ export async function createPatrol(
   _prevState: PatrolFormState,
   formData: FormData
 ): Promise<PatrolFormState> {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   if (!canManagePatrols(actor)) {
     throw new Error("Only the ASPL of Camping can manage patrols.");
   }
@@ -107,7 +107,7 @@ export async function updatePatrol(
   _prevState: PatrolFormState,
   formData: FormData
 ): Promise<PatrolFormState> {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   if (!canManagePatrols(actor)) {
     throw new Error("Only the ASPL of Camping can manage patrols.");
   }
@@ -133,7 +133,7 @@ export async function updatePatrol(
 }
 
 export async function setPatrolActive(formData: FormData) {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   if (!canManagePatrols(actor)) {
     throw new Error("Only the ASPL of Camping can manage patrols.");
   }
@@ -156,7 +156,7 @@ export async function setPatrolActive(formData: FormData) {
 }
 
 export async function deletePatrol(formData: FormData) {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   if (!canManagePatrols(actor)) {
     throw new Error("Only the ASPL of Camping can manage patrols.");
   }
@@ -195,7 +195,7 @@ export async function deletePatrol(formData: FormData) {
   redirect(withToast("/patrols", "Patrol deleted"));
 }
 
-async function createMenusForPatrol(patrolId: string, campoutIds: string[]) {
+async function createMenusForPatrol(db: UnitDb, patrolId: string, campoutIds: string[]) {
   for (const campoutId of campoutIds) {
     const campout = await db.campout.findUnique({ where: { id: campoutId } });
     if (!campout) continue;
@@ -226,7 +226,7 @@ async function createMenusForPatrol(patrolId: string, campoutIds: string[]) {
 // at submit time, server-side — not from whatever the page happened to show
 // when it was rendered.
 export async function assignToFutureCampouts(formData: FormData) {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   if (!canManagePatrols(actor)) {
     throw new Error("Only the ASPL of Camping can manage patrols.");
   }
@@ -237,7 +237,7 @@ export async function assignToFutureCampouts(formData: FormData) {
     select: { id: true },
   });
 
-  await createMenusForPatrol(patrolId, futureCampouts.map((c) => c.id));
+  await createMenusForPatrol(db, patrolId, futureCampouts.map((c) => c.id));
 
   revalidatePath("/campouts");
   redirect(withToast(`/patrols/${patrolId}`, "Patrol assigned to upcoming campouts"));
@@ -245,7 +245,7 @@ export async function assignToFutureCampouts(formData: FormData) {
 
 // REQ-8.15: the reactivation campout picker's submit action.
 export async function assignPatrolToCampouts(formData: FormData) {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   if (!canManagePatrols(actor)) {
     throw new Error("Only the ASPL of Camping can manage patrols.");
   }
@@ -253,14 +253,14 @@ export async function assignPatrolToCampouts(formData: FormData) {
   const patrolId = requireString(formData, "patrolId");
   const campoutIds = formData.getAll("campoutId").map(String);
 
-  await createMenusForPatrol(patrolId, campoutIds);
+  await createMenusForPatrol(db, patrolId, campoutIds);
 
   revalidatePath("/campouts");
   redirect(withToast(`/patrols/${patrolId}`, "Patrol assigned to selected campouts"));
 }
 
 export async function movePatrol(formData: FormData) {
-  const actor = await getActor();
+  const { actor, db } = await requireUnitScope();
   if (!canManagePatrols(actor)) {
     throw new Error("Only the ASPL of Camping can manage patrols.");
   }
@@ -278,10 +278,10 @@ export async function movePatrol(formData: FormData) {
   const current = all[index];
   const swapWith = all[swapIndex];
 
-  await db.$transaction([
-    db.patrol.update({ where: { id: current.id }, data: { order: swapWith.order } }),
-    db.patrol.update({ where: { id: swapWith.id }, data: { order: current.order } }),
-  ]);
+  await db.$unitTransaction(async (tx) => {
+    await tx.patrol.update({ where: { id: current.id }, data: { order: swapWith.order } });
+    await tx.patrol.update({ where: { id: swapWith.id }, data: { order: current.order } });
+  });
 
   revalidatePath("/patrols");
   revalidatePath("/");

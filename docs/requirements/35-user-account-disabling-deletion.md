@@ -9,7 +9,7 @@ Give the app two clearly distinct, correctly scoped ways to stop a person's acce
 
 ## Source
 
-User request, 2026-10-23: "disabling and deleting users all together." The retention/export language below carries forward the user-level portions of [Requirement 27](27-multi-tenant-unit-isolation.md)'s original REQ-27.14/REQ-27.15 (2026-10-18); the unit-level portions of those stay in Requirement 27, since deleting a user's account is a different operation from a unit closing down entirely.
+User request, 2026-10-23: "disabling and deleting users all together." The retention/export language below carries forward the user-level portions of [Requirement 27](multi-tenancy/27-multi-tenant-unit-isolation.md)'s original REQ-27.14/REQ-27.15 (2026-10-18); the unit-level portions of those stay in Requirement 27, since deleting a user's account is a different operation from a unit closing down entirely.
 
 ## Requirements
 
@@ -31,12 +31,12 @@ User request, 2026-10-23: "disabling and deleting users all together." The reten
 
 ## Out of Scope for This Requirement
 
-- Unit-wide data export/deletion (a whole unit closing down) — [Requirement 27](27-multi-tenant-unit-isolation.md)'s REQ-27.15.
+- Unit-wide data export/deletion (a whole unit closing down) — [Requirement 27](multi-tenancy/27-multi-tenant-unit-isolation.md)'s REQ-27.15.
 - Removing a single unit membership while the account stays active elsewhere — [Requirement 34](authentication-accounts/34-unit-membership-invitations-switching.md)'s REQ-34.8.
 
 ## Related
 
-- [Requirement 27 - Multi-Tenant Unit Isolation & Switching](27-multi-tenant-unit-isolation.md) — the unit-level counterpart to this account-level requirement; REQ-27.14's user-level portion moved here.
+- [Requirement 27 - Multi-Tenant Unit Isolation & Switching](multi-tenancy/27-multi-tenant-unit-isolation.md) — the unit-level counterpart to this account-level requirement; REQ-27.14's user-level portion moved here.
 - [Requirement 31 - Core Authentication: Accounts, Sessions & Passkeys](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md) — REQ-31.6's step-up requirement, which REQ-35.6 relies on.
 - [Requirement 33 - Adult/Guardian-Mediated Youth Account Creation (COPPA)](33-youth-account-creation-coppa.md) — REQ-33.6, the parental deletion-request right this requirement implements.
 - [Requirement 34 - Unit Membership, Invitations & Switching](authentication-accounts/34-unit-membership-invitations-switching.md) — this requirement's prerequisite.

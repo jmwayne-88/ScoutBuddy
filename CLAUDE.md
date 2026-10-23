@@ -14,6 +14,7 @@ Use real troop terms throughout code, UI copy, and comments. Do not genericize:
 
 - **Stack**: Next.js (React + TypeScript), API routes in the same project, Postgres via Neon, deployed on Vercel from the `jmwayne-88/ScoutBuddy` GitHub repo.
 - Full rationale for every architectural choice lives in [docs/adr/](docs/adr/README.md) as individual Architecture Decision Records — read those before proposing a stack or data-model change, and add a new ADR when a real decision is made rather than just editing code.
+- **Unit isolation** ([ADR 0036](docs/adr/0036-unit-data-isolation-rls.md)): troop data (patrols, campouts, menus, and everything under them) is only ever read or written through the unit-scoped client from `getUnitScope()`/`requireUnitScope()` in `lib/session.ts`, never the plain `db` from `lib/db.ts`. That client's queries run under Row-Level Security, so another unit's rows are invisible. Don't pass `unitId` on create; the database fills it in. For multi-statement writes use `db.$unitTransaction`, not `$transaction`, and keep `redirect()` outside its callback. A new table with a `unitId` needs RLS, a grant, triggers, and an index in its migration; `lib/unit-isolation.test.ts` fails until it has them.
 
 ## Design system
 

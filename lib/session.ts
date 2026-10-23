@@ -3,11 +3,14 @@ import { headers as nextHeaders } from "next/headers";
 import type { UnitRole } from "@prisma/client";
 import { auth } from "./auth";
 import { db } from "./db";
+import { unitDb, type UnitDb } from "./unit-db";
 import { UNIT_HIERARCHY_INCLUDE, councilDisplayName, unitDisplayName, unitFullLabel } from "./units";
 
+// REQ-27.11: an Actor is always someone acting *in a unit*, so it carries
+// that unit -- lib/permissions.ts checks a resource's unitId against it.
 export type Actor =
-  | { role: "ASPL" }
-  | { role: "PATROL_LEADER"; patrolId: string };
+  | { role: "ASPL"; unitId: string }
+  | { role: "PATROL_LEADER"; patrolId: string; unitId: string };
 
 // REQ-34.2: a role now comes from the active unit's UnitMembership rather
 // than the account itself (ADR 0035, superseding ADR 0033's interim
@@ -19,16 +22,17 @@ export type Actor =
 // prone -- narrowing a membership into Actor -- is unit-testable without a
 // database or request context.
 export function mapMembershipToActor(
-  membership: { role: UnitRole | string; patrolId: string | null } | null | undefined
+  membership: { role: UnitRole | string; patrolId: string | null; unitId: string } | null | undefined
 ): Actor | null {
   if (!membership) return null;
-  if (membership.role === "ASPL") return { role: "ASPL" };
+  const { unitId } = membership;
+  if (membership.role === "ASPL") return { role: "ASPL", unitId };
   // A Patrol Leader membership whose patrol was deleted has patrolId=null
   // (onDelete: SetNull) -- no access in that unit, same outcome REQ-8.14's
   // deleted-patrol check produced before. Deactivation alone doesn't
   // remove access.
   if (membership.role === "PATROL_LEADER" && typeof membership.patrolId === "string") {
-    return { role: "PATROL_LEADER", patrolId: membership.patrolId };
+    return { role: "PATROL_LEADER", patrolId: membership.patrolId, unitId };
   }
   return null;
 }
@@ -96,6 +100,33 @@ function getActiveContext(requestHeaders?: Headers) {
 // context, which only exists inside an actual request.
 export async function getActor(requestHeaders?: Headers): Promise<Actor | null> {
   return (await getActiveContext(requestHeaders))?.actor ?? null;
+}
+
+export type UnitScope = {
+  actor: Actor;
+  unitId: string;
+  db: UnitDb;
+};
+
+// REQ-27.5/27.12: how every page, Server Action, and route handler gets at
+// troop data -- the actor plus a database client bound to the actor's
+// active unit (lib/unit-db.ts). Null when no one is acting in a unit.
+export async function getUnitScope(requestHeaders?: Headers): Promise<UnitScope | null> {
+  const actor = await getActor(requestHeaders);
+  if (!actor) return null;
+  return { actor, unitId: actor.unitId, db: unitDb(actor.unitId) };
+}
+
+export class NoUnitScopeError extends Error {
+  constructor() {
+    super("Sign in to a unit to do that.");
+  }
+}
+
+export async function requireUnitScope(requestHeaders?: Headers): Promise<UnitScope> {
+  const scope = await getUnitScope(requestHeaders);
+  if (!scope) throw new NoUnitScopeError();
+  return scope;
 }
 
 export type ActiveMembershipContext = {
