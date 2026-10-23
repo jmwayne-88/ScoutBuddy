@@ -1,7 +1,7 @@
 # Requirement 35 — User Account Disabling & Deletion
 
 Status: Not started
-Depends on: [Requirement 31 - Core Authentication: Accounts, Sessions & Passkeys](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md), [Requirement 34 - Unit Membership, Invitations & Switching](34-unit-membership-invitations-switching.md) — a person's memberships need to exist as a concept before lifecycle actions on their account make sense.
+Depends on: [Requirement 31 - Core Authentication: Accounts, Sessions & Passkeys](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md), [Requirement 34 - Unit Membership, Invitations & Switching](authentication-accounts/34-unit-membership-invitations-switching.md) — a person's memberships need to exist as a concept before lifecycle actions on their account make sense.
 
 ## Goal
 
@@ -32,12 +32,12 @@ User request, 2026-10-23: "disabling and deleting users all together." The reten
 ## Out of Scope for This Requirement
 
 - Unit-wide data export/deletion (a whole unit closing down) — [Requirement 27](27-multi-tenant-unit-isolation.md)'s REQ-27.15.
-- Removing a single unit membership while the account stays active elsewhere — [Requirement 34](34-unit-membership-invitations-switching.md)'s REQ-34.8.
+- Removing a single unit membership while the account stays active elsewhere — [Requirement 34](authentication-accounts/34-unit-membership-invitations-switching.md)'s REQ-34.8.
 
 ## Related
 
 - [Requirement 27 - Multi-Tenant Unit Isolation & Switching](27-multi-tenant-unit-isolation.md) — the unit-level counterpart to this account-level requirement; REQ-27.14's user-level portion moved here.
 - [Requirement 31 - Core Authentication: Accounts, Sessions & Passkeys](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md) — REQ-31.6's step-up requirement, which REQ-35.6 relies on.
 - [Requirement 33 - Adult/Guardian-Mediated Youth Account Creation (COPPA)](33-youth-account-creation-coppa.md) — REQ-33.6, the parental deletion-request right this requirement implements.
-- [Requirement 34 - Unit Membership, Invitations & Switching](34-unit-membership-invitations-switching.md) — this requirement's prerequisite.
+- [Requirement 34 - Unit Membership, Invitations & Switching](authentication-accounts/34-unit-membership-invitations-switching.md) — this requirement's prerequisite.
 - [Requirement 38 - Platform Administration: Cross-Tenant Support Access & Impersonation](38-platform-admin-cross-tenant-support.md) — the platform-level path to REQ-35.1's disable action, for support cases beyond self-service.

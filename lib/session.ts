@@ -1,68 +1,135 @@
+import { cache } from "react";
 import { headers as nextHeaders } from "next/headers";
+import type { UnitRole } from "@prisma/client";
 import { auth } from "./auth";
 import { db } from "./db";
+import { UNIT_HIERARCHY_INCLUDE, councilDisplayName, unitDisplayName, unitFullLabel } from "./units";
 
 export type Actor =
   | { role: "ASPL" }
   | { role: "PATROL_LEADER"; patrolId: string };
 
-// Pure and exported separately from getActor so this -- the part that's
-// actually regression-prone (validating/narrowing an untrusted session
-// user shape into Actor) -- can be unit-tested without a database or
-// request context, same split as lib/campout-upload/extract-with-claude.ts's
-// parseExtractionReply vs. extractCampoutsWithClaude.
-export function mapSessionUserToActor(
-  user: { role?: string | null; patrolId?: string | null } | null | undefined
+// REQ-34.2: a role now comes from the active unit's UnitMembership rather
+// than the account itself (ADR 0035, superseding ADR 0033's interim
+// User.role/patrolId). Actor's shape is unchanged on purpose, same as when
+// ADR 0033 replaced ADR 0010's cookie -- lib/permissions.ts and every
+// Server Action that calls getActor() need no changes.
+//
+// Pure and exported separately so the part that's actually regression-
+// prone -- narrowing a membership into Actor -- is unit-testable without a
+// database or request context.
+export function mapMembershipToActor(
+  membership: { role: UnitRole | string; patrolId: string | null } | null | undefined
 ): Actor | null {
-  if (!user) return null;
-  if (user.role === "ASPL") return { role: "ASPL" };
-  if (user.role === "PATROL_LEADER" && typeof user.patrolId === "string") {
-    return { role: "PATROL_LEADER", patrolId: user.patrolId };
+  if (!membership) return null;
+  if (membership.role === "ASPL") return { role: "ASPL" };
+  // A Patrol Leader membership whose patrol was deleted has patrolId=null
+  // (onDelete: SetNull) -- no access in that unit, same outcome REQ-8.14's
+  // deleted-patrol check produced before. Deactivation alone doesn't
+  // remove access.
+  if (membership.role === "PATROL_LEADER" && typeof membership.patrolId === "string") {
+    return { role: "PATROL_LEADER", patrolId: membership.patrolId };
   }
-  // An account that exists but hasn't completed role selection shouldn't
-  // happen under REQ-31's signup flow (role is required to create the
-  // account at all -- see lib/auth.ts's resolveUser), but treat it as
-  // signed-out defensively rather than crash permission checks downstream.
   return null;
 }
 
-// REQ-31.1/ADR 0033: Actor's shape is unchanged from ADR 0010's cookie-based
-// version on purpose -- lib/permissions.ts and every Server Action that
-// calls getActor() needed zero changes for this migration. Only how it's
-// derived changed: a real server-side session (Better Auth) instead of a
-// client-trusted cookie.
-//
+// REQ-34.3: the session's activeUnitId is only a preference, never proof
+// of access. It counts only if it names a unit the person actually belongs
+// to; otherwise (missing, tampered, or a unit they were removed from --
+// REQ-34.8) it re-resolves to their earliest membership, or to nothing at
+// all if they have none.
+export function resolveActiveMembership<M extends { unitId: string; createdAt: Date }>(
+  memberships: M[],
+  activeUnitId: string | null | undefined
+): M | null {
+  if (activeUnitId) {
+    const match = memberships.find((m) => m.unitId === activeUnitId);
+    if (match) return match;
+  }
+  if (memberships.length === 0) return null;
+  return memberships.reduce((earliest, m) => (m.createdAt < earliest.createdAt ? m : earliest));
+}
+
+async function loadActiveContext(headers: Headers) {
+  const result = await auth.api.getSession({ headers });
+  if (!result?.session || !result.user) return null;
+
+  const memberships = await db.unitMembership.findMany({
+    where: { userId: result.user.id },
+    include: { unit: { include: UNIT_HIERARCHY_INCLUDE } },
+    orderBy: { createdAt: "asc" },
+  });
+
+  const storedActiveUnitId = (result.session as { activeUnitId?: string | null }).activeUnitId ?? null;
+  const active = resolveActiveMembership(memberships, storedActiveUnitId);
+  const resolvedUnitId = active?.unitId ?? null;
+
+  // Write the re-resolved unit back so the session stops pointing at a unit
+  // the person no longer belongs to. updateMany, not update: the session
+  // row may have been revoked between the read above and this write.
+  if (resolvedUnitId !== storedActiveUnitId) {
+    await db.session.updateMany({ where: { id: result.session.id }, data: { activeUnitId: resolvedUnitId } });
+  }
+
+  return {
+    userId: result.user.id,
+    sessionId: result.session.id,
+    name: result.user.name,
+    memberships,
+    active,
+    actor: mapMembershipToActor(active),
+  };
+}
+
+// Deduplicated per request -- the layout, the page, and getCurrentUser all
+// ask for the same thing. Only the real-request path is cached; an
+// injected `requestHeaders` (tests) always loads fresh.
+const loadActiveContextForRequest = cache(async () => loadActiveContext(await nextHeaders()));
+
+function getActiveContext(requestHeaders?: Headers) {
+  return requestHeaders ? loadActiveContext(requestHeaders) : loadActiveContextForRequest();
+}
+
 // `requestHeaders` is injectable (matching lib/db-environment-guard.ts's
 // existing pattern of an optional parameter defaulting to the real runtime
 // value) so tests can call this without needing next/headers' request
 // context, which only exists inside an actual request.
 export async function getActor(requestHeaders?: Headers): Promise<Actor | null> {
-  const headers = requestHeaders ?? (await nextHeaders());
-  const session = await auth.api.getSession({ headers });
-  const actor = mapSessionUserToActor(session?.user ?? null);
-  if (!actor) return null;
+  return (await getActiveContext(requestHeaders))?.actor ?? null;
+}
 
-  if (actor.role === "PATROL_LEADER") {
-    // A Patrol Leader's patrol may have been deleted (not just deactivated)
-    // since their account was created. Deactivation alone doesn't invalidate
-    // an already-active session (REQ-8.14) -- only deletion does.
-    const stillExists = await db.patrol.findUnique({ where: { id: actor.patrolId } });
-    if (!stillExists) return null;
-  }
+export type ActiveMembershipContext = {
+  userId: string;
+  sessionId: string;
+  unitId: string;
+  actor: Actor;
+};
 
-  return actor;
+// For Server Actions that act on the active unit itself (members,
+// invitations, switching) -- they need the unit and user ids, not just the
+// role Actor carries.
+export async function getActiveMembership(requestHeaders?: Headers): Promise<ActiveMembershipContext | null> {
+  const context = await getActiveContext(requestHeaders);
+  if (!context?.active || !context.actor) return null;
+  return { userId: context.userId, sessionId: context.sessionId, unitId: context.active.unitId, actor: context.actor };
+}
+
+// Distinguishes "signed out" from "signed in, but not acting in any unit"
+// (e.g. just removed from their only unit) -- app/(app)/layout.tsx sends
+// the first to /login and the second to /no-unit.
+export async function getSessionStatus(requestHeaders?: Headers): Promise<"signed-out" | "no-unit" | "active"> {
+  const context = await getActiveContext(requestHeaders);
+  if (!context) return "signed-out";
+  return context.actor ? "active" : "no-unit";
 }
 
 // REQ-31.6/32.2: "passkey" is standing, full assurance; "recovery" is the
 // bootstrap/recovery tier every magic-link session gets (REQ-31.3: magic
-// link is never a standing credential). No action in this app currently
-// requires step-up (REQ-31.6's scope note: that's REQ-27/34/35's job once
-// built), so nothing calls requireStepUp() yet -- it exists so those
-// requirements have a real mechanism to call into rather than inventing
-// their own.
+// link is never a standing credential). REQ-34's invitation management and
+// member removal are the first actions to call requireStepUp().
 export type AssuranceTier = "passkey" | "recovery";
 
-// Pure, same reasoning as mapSessionUserToActor above. Fail-closed by
+// Pure, same reasoning as mapMembershipToActor above. Fail-closed by
 // construction: only an explicit "passkey" marker counts as the higher
 // tier. A missing/unrecognized value (a row from before this field
 // existed, or a future credential type that doesn't set it) falls through
@@ -86,9 +153,7 @@ export class StepUpRequiredError extends Error {
   }
 }
 
-// Not called anywhere yet -- see the AssuranceTier comment above. A later
-// requirement that marks an action "sensitive" calls this at the start of
-// that Server Action.
+// A Server Action marked "sensitive" (REQ-31.6) calls this at its start.
 export async function requireStepUp(requestHeaders?: Headers): Promise<void> {
   const tier = await getSessionAssuranceTier(requestHeaders);
   if (tier !== "passkey") {
@@ -96,21 +161,37 @@ export async function requireStepUp(requestHeaders?: Headers): Promise<void> {
   }
 }
 
+export type UnitSummary = {
+  id: string;
+  shortName: string;
+  hierarchyLabel: string;
+  fullLabel: string;
+};
+
 export type CurrentUser = {
   id: string;
   name: string;
   actor: Actor;
+  activeUnit: UnitSummary;
+  units: UnitSummary[];
 };
 
-// For the account-identity UI (components/AccountStatus.tsx) -- richer
-// than Actor, which lib/permissions.ts intentionally keeps minimal.
+// For the account/unit identity UI in the AppBar -- richer than Actor,
+// which lib/permissions.ts intentionally keeps minimal.
 export async function getCurrentUser(requestHeaders?: Headers): Promise<CurrentUser | null> {
-  const headers = requestHeaders ?? (await nextHeaders());
-  const session = await auth.api.getSession({ headers });
-  if (!session?.user) return null;
+  const context = await getActiveContext(requestHeaders);
+  if (!context?.active || !context.actor) return null;
 
-  const actor = await getActor(headers);
-  if (!actor) return null;
+  const units = context.memberships.map((m) => ({
+    id: m.unitId,
+    shortName: unitDisplayName(m.unit),
+    hierarchyLabel: `${m.unit.district.name} · ${councilDisplayName(m.unit.district.council)}`,
+    fullLabel: unitFullLabel(m.unit),
+  }));
 
-  return { id: session.user.id, name: session.user.name, actor };
+  const activeUnitId = context.active.unitId;
+  const activeUnit = units.find((u) => u.id === activeUnitId);
+  if (!activeUnit) return null;
+
+  return { id: context.userId, name: context.name, actor: context.actor, activeUnit, units };
 }

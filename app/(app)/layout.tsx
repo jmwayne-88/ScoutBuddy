@@ -7,13 +7,14 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
-import { getCurrentUser } from "@/lib/session";
+import { getCurrentUser, getSessionStatus } from "@/lib/session";
 import { getActivePatrols } from "@/lib/patrols";
 import { AccountStatus } from "@/components/AccountStatus";
 import { AppNav } from "@/components/AppNav";
 import { BottomNav } from "@/components/BottomNav";
 import { ColorModeToggle } from "@/components/ColorModeToggle";
 import { ToastListener } from "@/components/ToastListener";
+import { UnitSwitcher } from "@/components/UnitSwitcher";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   // REQ-31: this layout previously rendered unconditionally even with no
@@ -21,13 +22,23 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   // itself lived at `/` inside this same group). Now that signing in is a
   // real thing, a signed-out visitor is sent to /login instead of seeing
   // an empty-nav shell.
+  //
+  // REQ-34.8: signed in but no longer in any unit (e.g. just removed from
+  // their only one) is a different situation from signed out, with its own
+  // page explaining it.
   const user = await getCurrentUser();
   if (!user) {
-    redirect("/login");
+    redirect((await getSessionStatus()) === "no-unit" ? "/no-unit" : "/login");
   }
   const actor = user.actor;
   const patrols = await getActivePatrols();
-  const navItems = actor.role === "ASPL" ? [{ href: "/patrols", label: "Manage Patrols" }] : [];
+  const navItems =
+    actor.role === "ASPL"
+      ? [
+          { href: "/patrols", label: "Manage Patrols" },
+          { href: "/unit", label: "Unit Members" },
+        ]
+      : [];
   const roleLabel =
     actor.role === "ASPL"
       ? "ASPL of Camping"
@@ -41,6 +52,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             ScoutBuddy
           </Typography>
           <AppNav items={navItems} />
+          <UnitSwitcher units={user.units} activeUnit={user.activeUnit} />
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
             <AccountStatus name={user.name} roleLabel={roleLabel} />
             <ColorModeToggle />

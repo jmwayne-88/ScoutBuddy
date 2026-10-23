@@ -34,3 +34,37 @@ export async function sendMagicLinkEmail(to: string, url: string): Promise<void>
     html: `<p>Click the link below to sign in to ScoutBuddy. This link expires shortly and can only be used once.</p><p><a href="${url}">${url}</a></p><p>If you didn't request this, you can ignore this email.</p>`,
   });
 }
+
+// Names and unit labels come from user input, so they're escaped before
+// going into the HTML body.
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// REQ-34.5: the invitation link is the only place the token ever exists
+// (only its hash is stored), and following it is what verifies the invited
+// address (REQ-34.7).
+export async function sendInvitationEmail(
+  to: string,
+  url: string,
+  details: { unitLabel: string; roleLabel: string; inviterName: string }
+): Promise<void> {
+  if (!process.env.RESEND_API_KEY) {
+    console.log(`[dev] Invitation for ${to} to ${details.unitLabel}: ${url}`);
+    return;
+  }
+
+  const unit = escapeHtml(details.unitLabel);
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  await resend.emails.send({
+    from: FROM_ADDRESS,
+    to,
+    subject: `You're invited to ${details.unitLabel} on ScoutBuddy`,
+    html: `<p>${escapeHtml(details.inviterName)} invited you to join <strong>${unit}</strong> on ScoutBuddy as ${escapeHtml(details.roleLabel)}.</p><p><a href="${url}">${url}</a></p><p>This link works once and expires in 7 days. If you weren't expecting this, you can ignore this email.</p>`,
+  });
+}

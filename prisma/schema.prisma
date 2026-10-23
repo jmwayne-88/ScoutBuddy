@@ -15,19 +15,20 @@ enum PatrolType {
 }
 
 model Patrol {
-  id                      String                    @id @default(cuid())
+  id                      String                   @id @default(cuid())
   name                    String
   color                   String
   icon                    String?
   order                   Int
-  type                    PatrolType                @default(YOUTH)
-  isActive                Boolean                   @default(true)
-  createdAt               DateTime                  @default(now())
+  type                    PatrolType               @default(YOUTH)
+  isActive                Boolean                  @default(true)
+  createdAt               DateTime                 @default(now())
   menus                   Menu[]
   mealFrameworkExceptions MealFrameworkException[]
-  // REQ-31: a Patrol Leader's account points here. Interim placement -- once
-  // Requirement 34's UnitMembership exists, this moves there; see ADR 0033.
-  users                   User[]
+  // REQ-34.2: a Patrol Leader's membership points here (formerly
+  // User.patrolId, ADR 0033's interim placement -- moved by ADR 0035).
+  memberships             UnitMembership[]
+  invitations             UnitInvitation[]
 }
 
 enum MealOccasion {
@@ -53,24 +54,24 @@ enum ReviewDecision {
 }
 
 model Campout {
-  id                       String                    @id @default(cuid())
-  name                     String
-  date                     DateTime
+  id                      String                   @id @default(cuid())
+  name                    String
+  date                    DateTime
   // REQ-30: the campout's last day, for a multi-day span (e.g. Fri-Sun) --
   // null means single-day, same as every campout before this column
   // existed. See ADR 0030.
-  endDate                  DateTime?
-  location                 String?
-  description              String?
-  imageUrl                 String?
+  endDate                 DateTime?
+  location                String?
+  description             String?
+  imageUrl                String?
   // REQ-30: provenance only, not an audit trail -- overwritten on every
   // subsequent upload, so it answers "was this last touched by an
   // upload" rather than "show its full upload history." See ADR 0030.
-  lastUploadedFrom         String?
-  lastUploadedAt           DateTime?
-  createdAt                DateTime                  @default(now())
-  menus                    Menu[]
-  mealFrameworkExceptions  MealFrameworkException[]
+  lastUploadedFrom        String?
+  lastUploadedAt          DateTime?
+  createdAt               DateTime                 @default(now())
+  menus                   Menu[]
+  mealFrameworkExceptions MealFrameworkException[]
 }
 
 // REQ-30: a short-lived staging row holding one upload's proposed
@@ -214,14 +215,14 @@ enum CommentActivityAction {
 // comment (and REQ-26.6's audit log) must keep reading sensibly forever,
 // even after its anchor is renamed or removed. See ADR 0026.
 model Comment {
-  id                 String             @id @default(cuid())
+  id                 String            @id @default(cuid())
   menuId             String
-  menu               Menu               @relation(fields: [menuId], references: [id])
+  menu               Menu              @relation(fields: [menuId], references: [id])
   targetType         CommentTargetType
   dishId             String?
-  dish               Dish?              @relation(fields: [dishId], references: [id], onDelete: SetNull)
+  dish               Dish?             @relation(fields: [dishId], references: [id], onDelete: SetNull)
   ingredientId       String?
-  ingredient         Ingredient?        @relation(fields: [ingredientId], references: [id], onDelete: SetNull)
+  ingredient         Ingredient?       @relation(fields: [ingredientId], references: [id], onDelete: SetNull)
   // REQ-29.3/29.7: a MEAL comment anchors on menuId + occasion, not a
   // `Meal` FK -- restoreOccasion (app/(app)/campouts/[id]/actions.ts)
   // creates a brand-new Meal row with a new id on every restore, so an FK
@@ -233,12 +234,12 @@ model Comment {
   occasion           MealOccasion?
   targetLabel        String?
   parentId           String?
-  parent             Comment?           @relation("CommentReplies", fields: [parentId], references: [id])
-  replies            Comment[]          @relation("CommentReplies")
+  parent             Comment?          @relation("CommentReplies", fields: [parentId], references: [id])
+  replies            Comment[]         @relation("CommentReplies")
   body               String
   authorRole         CommentActorRole
   authorPatrolId     String?
-  status             CommentStatus      @default(OPEN)
+  status             CommentStatus     @default(OPEN)
   assigneeRole       CommentActorRole?
   assigneePatrolId   String?
   resolvedAt         DateTime?
@@ -247,7 +248,7 @@ model Comment {
   deletedAt          DateTime?
   deletedByRole      CommentActorRole?
   deletedByPatrolId  String?
-  createdAt          DateTime           @default(now())
+  createdAt          DateTime          @default(now())
   activity           CommentActivity[]
 }
 
@@ -290,34 +291,29 @@ model MealFrameworkException {
 // only Actor. See ADR 0033. User/Session/Account/Verification are
 // Better Auth's own standard schema (field names/shapes are its
 // contract with the Prisma adapter, not this project's choice to
-// vary); Passkey is its passkey plugin's schema, same rule. Only
-// `role`/`patrolId` below are ScoutBuddy's own addition.
+// vary); Passkey is its passkey plugin's schema, same rule. Only the
+// relation fields and Session.createdVia/activeUnitId are ScoutBuddy's own
+// additions.
 // ============================================================
 
 model User {
-  id            String    @id @default(cuid())
+  id            String      @id @default(cuid())
   name          String
-  email         String?   @unique
-  emailVerified Boolean   @default(false)
+  email         String?     @unique
+  emailVerified Boolean     @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
   sessions      Session[]
   accounts      Account[]
   passkeys      Passkey[]
   authEvents    AuthEvent[]
 
-  // REQ-31.1: interim role placement -- a real `UnitMembership` (Requirement
-  // 34) doesn't exist yet, and this app is still single-tenant (Requirement
-  // 27 not built), so role/patrol live directly on the account for now,
-  // matching today's actual single-unit reality. Validated/narrowed to
-  // "ASPL" | "PATROL_LEADER" in lib/session.ts, not a Prisma enum here --
-  // Better Auth's additionalFields type system is string/number/boolean/
-  // date/json only, so a native Postgres enum would fight the adapter
-  // rather than help it. See ADR 0033.
-  role     String?
-  patrolId String?
-  patrol   Patrol? @relation(fields: [patrolId], references: [id])
+  // REQ-34.2: role and patrol are per-unit, on UnitMembership. They lived
+  // directly on User as ADR 0033's interim single-unit placement until
+  // ADR 0035 moved them.
+  memberships     UnitMembership[]
+  invitationsSent UnitInvitation[]
 }
 
 model Session {
@@ -338,6 +334,14 @@ model Session {
   // path, not inferred later -- the path that created the session is only
   // known at that moment.
   createdVia String?
+
+  // REQ-34.3: the unit this session is acting in. Never trusted on its
+  // own -- lib/session.ts revalidates it against the user's actual
+  // UnitMembership rows on every request, and re-resolves (and rewrites)
+  // it when it's missing, stale, or points at a unit they were removed
+  // from (REQ-34.8). No foreign key on purpose: a dangling value is
+  // exactly the case re-resolution exists to handle.
+  activeUnitId String?
 }
 
 model Account {
@@ -392,8 +396,8 @@ model Passkey {
 // (key/count/lastRequest, the last as an epoch-ms number, not a DateTime),
 // not this project's naming convention to vary.
 model RateLimit {
-  id          String  @id @default(cuid())
-  key         String  @unique
+  id          String @id @default(cuid())
+  key         String @unique
   count       Int
   lastRequest BigInt
 }
@@ -415,4 +419,156 @@ model AuthEvent {
 
   @@index([userId])
   @@index([identifier, createdAt])
+}
+
+// ============================================================
+// REQ-34: units, the Scouting America hierarchy above them, and who
+// belongs to which. See ADR 0035. National is implicit (exactly one,
+// Scouting America) and isn't stored. Council and District are shared
+// reference data, not scoped to any one unit (REQ-27.2).
+// ============================================================
+
+enum UnitType {
+  PACK
+  TROOP
+  CREW
+  SHIP
+  POST
+}
+
+// REQ-34.16: required on every unit. Exists because a linked pair of
+// single-gender Packs or Troops can share a unit number in one district.
+enum GenderDesignation {
+  BOYS
+  GIRLS
+  FAMILY
+}
+
+// REQ-34.2: a role is held per unit, not per account -- the same person
+// can be the ASPL in one unit and a Patrol Leader in another.
+enum UnitRole {
+  ASPL
+  PATROL_LEADER
+}
+
+// REQ-34.5: every membership is traceable to how it was created. MIGRATION
+// marks only the rows ADR 0035's migration backfilled from the pre-unit
+// User.role/patrolId columns; every membership created afterwards is
+// INVITATION, with invitationId set.
+enum UnitMembershipSource {
+  INVITATION
+  MIGRATION
+}
+
+// REQ-34.14: keyed by Scouting America's council number, not its name --
+// names change (renames, mergers); the number doesn't. Seeded from a
+// reference list by ADR 0035's migration. isActive=false is how a council
+// emptied by a merger is retired (REQ-34.10): kept for history, hidden from
+// lookup, never deleted.
+model Council {
+  id        String     @id @default(cuid())
+  number    Int        @unique
+  name      String
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  districts District[]
+}
+
+// REQ-34.10: identified by id, never by name -- districts are renamed and
+// realigned. normalizedName (lowercased, whitespace-collapsed; see
+// lib/units.ts's normalizeDistrictName) is what uniqueness within a council
+// is checked against, so "Pathfinder District" and "pathfinder  district"
+// can't both exist.
+model District {
+  id             String   @id @default(cuid())
+  councilId      String
+  council        Council  @relation(fields: [councilId], references: [id])
+  name           String
+  normalizedName String
+  createdAt      DateTime @default(now())
+  units          Unit[]
+
+  @@unique([councilId, normalizedName])
+}
+
+// REQ-34.1: no stored display name -- "Troop 8 (Boys)" is derived from
+// these fields (lib/units.ts), so the two can never disagree. A unit's
+// council is always reached through its district, never stored here.
+// unitNumber is also CHECK-constrained to 1-9999 in the migration SQL.
+model Unit {
+  id                String            @id @default(cuid())
+  unitType          UnitType
+  unitNumber        Int
+  genderDesignation GenderDesignation
+  districtId        String
+  district          District          @relation(fields: [districtId], references: [id])
+  createdAt         DateTime          @default(now())
+  memberships       UnitMembership[]
+  invitations       UnitInvitation[]
+  events            UnitEvent[]
+
+  // REQ-34.11: unique per district. Every column is required, so there's
+  // no NULL-distinctness gap in this constraint.
+  @@unique([districtId, unitType, unitNumber, genderDesignation])
+}
+
+model UnitMembership {
+  id           String               @id @default(cuid())
+  userId       String
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  unitId       String
+  unit         Unit                 @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  role         UnitRole
+  // Set only for a Patrol Leader. SetNull on patrol deletion leaves a
+  // Patrol Leader membership with no patrol, which lib/session.ts treats as
+  // no access in that unit -- same outcome REQ-8.14's deleted-patrol check
+  // produced when this lived on User.
+  patrolId     String?
+  patrol       Patrol?              @relation(fields: [patrolId], references: [id], onDelete: SetNull)
+  source       UnitMembershipSource
+  invitationId String?              @unique
+  invitation   UnitInvitation?      @relation(fields: [invitationId], references: [id])
+  createdAt    DateTime             @default(now())
+
+  @@unique([userId, unitId])
+  @@index([unitId])
+}
+
+// REQ-34.5/34.7: email-bound, single-use, expiring. Only a SHA-256 hash of
+// the token is stored -- the token itself exists only in the emailed link,
+// so neither this row's id nor a database read is enough to accept it.
+model UnitInvitation {
+  id          String          @id @default(cuid())
+  unitId      String
+  unit        Unit            @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  email       String
+  role        UnitRole
+  patrolId    String?
+  patrol      Patrol?         @relation(fields: [patrolId], references: [id], onDelete: SetNull)
+  tokenHash   String          @unique
+  expiresAt   DateTime
+  invitedById String?
+  invitedBy   User?           @relation(fields: [invitedById], references: [id], onDelete: SetNull)
+  acceptedAt  DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime        @default(now())
+  membership  UnitMembership?
+
+  @@index([unitId])
+}
+
+// REQ-34.8 (and the moves REQ-34.10 logs, once built): who did what to a
+// unit's membership, and when. User ids are plain strings, not foreign
+// keys, so the log outlives the accounts it mentions (Requirement 35).
+model UnitEvent {
+  id            String   @id @default(cuid())
+  unitId        String
+  unit          Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  type          String
+  actorUserId   String?
+  subjectUserId String?
+  detail        String?
+  createdAt     DateTime @default(now())
+
+  @@index([unitId, createdAt])
 }

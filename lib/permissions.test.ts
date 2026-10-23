@@ -6,6 +6,7 @@ import {
   canDeleteComment,
   canEditMenu,
   canManageCampoutRoster,
+  canManageUnitMembers,
   canReview,
   canSubmitMenu,
   canUploadCampouts,
@@ -127,5 +128,13 @@ describe("isCommentAuthor / canDeleteComment", () => {
     expect(canDeleteComment(aspl, menu({ patrolId: "eagle" }), eagle_comment)).toBe(false);
     expect(canDeleteComment(pumaLeader, menu({ patrolId: "eagle" }), eagle_comment)).toBe(false);
     expect(canDeleteComment(eagleLeader, menu({ patrolId: "eagle" }), aspl_comment)).toBe(false);
+  });
+});
+
+describe("canManageUnitMembers", () => {
+  it("only the ASPL can invite or remove unit members", () => {
+    expect(canManageUnitMembers(aspl)).toBe(true);
+    expect(canManageUnitMembers(eagleLeader)).toBe(false);
+    expect(canManageUnitMembers(null)).toBe(false);
   });
 });

@@ -4,8 +4,10 @@ import { nextCookies } from "better-auth/next-js";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { passkey } from "@better-auth/passkey";
 import { magicLink } from "better-auth/plugins/magic-link";
+import { randomUUID } from "node:crypto";
 import { db } from "./db";
 import { sendMagicLinkEmail } from "./email";
+import { hashInvitationToken, invitationState, INVITATION_STATE_MESSAGES } from "./invitations";
 
 // REQ-31.1: replaces ADR 0010's cookie-only Actor with real accounts and
 // server-side sessions. See ADR 0033 for the full design rationale.
@@ -42,16 +44,17 @@ async function invalidateOutstandingMagicLinks(email: string): Promise<void> {
   }
 }
 
-type PasskeySignupContext = {
+// REQ-34.5: signup is invite-only. The passkey form on /invite/[token]
+// passes the person's name and the invitation token through as `context`;
+// there's no longer any way to create an account by declaring a role.
+type InviteSignupContext = {
   name: string;
-  role: "ASPL" | "PATROL_LEADER";
-  patrolId?: string;
-  email?: string;
+  invitationToken: string;
 };
 
-function parseSignupContext(raw: string | null | undefined): PasskeySignupContext {
+function parseInviteSignupContext(raw: string | null | undefined): InviteSignupContext {
   if (!raw) {
-    throw new APIError("BAD_REQUEST", { message: "Missing signup details." });
+    throw new APIError("BAD_REQUEST", { message: "ScoutBuddy is invite-only. Open the invitation link you were sent." });
   }
   let parsed: unknown;
   try {
@@ -62,24 +65,45 @@ function parseSignupContext(raw: string | null | undefined): PasskeySignupContex
   if (typeof parsed !== "object" || parsed === null) {
     throw new APIError("BAD_REQUEST", { message: "Could not read signup details." });
   }
-  const { name, role, patrolId, email } = parsed as Record<string, unknown>;
+  const { name, invitationToken } = parsed as Record<string, unknown>;
   if (typeof name !== "string" || name.trim() === "") {
     throw new APIError("BAD_REQUEST", { message: "A name is required." });
   }
-  // REQ-31.3: magic-link recovery needs *something* to send to -- this is
-  // the only place an email is ever collected (optional; recovery simply
-  // isn't available to an account that skips it). REQ-33 will replace this
-  // single shared flow with separate adult/youth paths -- for a youth that
-  // means a guardian contact here instead, never the youth's own email.
-  const trimmedEmail = typeof email === "string" && email.trim() !== "" ? email.trim() : undefined;
+  if (typeof invitationToken !== "string" || invitationToken === "") {
+    throw new APIError("BAD_REQUEST", { message: "ScoutBuddy is invite-only. Open the invitation link you were sent." });
+  }
+  return { name: name.trim(), invitationToken };
+}
 
-  if (role === "ASPL") {
-    return { name: name.trim(), role: "ASPL", email: trimmedEmail };
+// Checked twice -- once before the browser's passkey prompt (resolveUser,
+// so a dead link fails fast) and again after the passkey is verified
+// (afterVerification, which is what actually consumes the invitation).
+async function findAcceptableInvitation(token: string) {
+  const invitation = await db.unitInvitation.findUnique({ where: { tokenHash: hashInvitationToken(token) } });
+  if (!invitation) {
+    throw new APIError("BAD_REQUEST", { message: "That invitation link isn't valid." });
   }
-  if (role === "PATROL_LEADER" && typeof patrolId === "string" && patrolId.trim() !== "") {
-    return { name: name.trim(), role: "PATROL_LEADER", patrolId: patrolId.trim(), email: trimmedEmail };
+  const state = invitationState(invitation, new Date());
+  if (state !== "pending") {
+    throw new APIError("BAD_REQUEST", { message: INVITATION_STATE_MESSAGES[state] });
   }
-  throw new APIError("BAD_REQUEST", { message: "Choose a role to continue." });
+  // REQ-34.6: a youth (Patrol Leader) invitation must go through
+  // Requirement 33's adult-mediated path, which isn't built -- new Patrol
+  // Leader sign-ups are paused (user decision, 2026-10-23). The invite form
+  // can't create one; this is the defense-in-depth check.
+  if (invitation.role !== "ASPL") {
+    throw new APIError("BAD_REQUEST", { message: "Patrol Leader invitations aren't available yet." });
+  }
+  const existing = await db.user.findFirst({
+    where: { email: { equals: invitation.email, mode: "insensitive" } },
+    select: { id: true },
+  });
+  if (existing) {
+    throw new APIError("BAD_REQUEST", {
+      message: `An account already uses ${invitation.email}. Sign in, then open your invitation link again.`,
+    });
+  }
+  return invitation;
 }
 
 // Explicit, not left to request-origin inference -- Better Auth warns
@@ -87,7 +111,7 @@ function parseSignupContext(raw: string | null | undefined): PasskeySignupContex
 // provides VERCEL_URL automatically in every deployed environment
 // (production and preview alike); BETTER_AUTH_URL is only needed to
 // override that (e.g. a custom production domain) or for local dev.
-const baseURL =
+export const baseURL =
   process.env.BETTER_AUTH_URL ??
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
@@ -97,17 +121,14 @@ export const auth = betterAuth({
 
   // REQ-31.8: ASVS Level 2 / NIST IAL1 stated explicitly -- no real-world
   // identity proofing, self-asserted name only. See ADR 0033.
-  user: {
-    additionalFields: {
-      role: { type: "string", required: false, input: false },
-      patrolId: { type: "string", required: false, input: false },
-    },
-  },
-
-  // REQ-31.6/32.2: lib/session.ts's getSessionAssuranceTier() reads this.
+  // REQ-31.6/32.2: lib/session.ts's getSessionAssuranceTier() reads
+  // createdVia. REQ-34.3: activeUnitId is read (and revalidated against real
+  // memberships) by lib/session.ts on every request; only this app's own
+  // server code writes it, never client input.
   session: {
     additionalFields: {
       createdVia: { type: "string", required: false, input: false },
+      activeUnitId: { type: "string", required: false, input: false },
     },
   },
 
@@ -163,45 +184,71 @@ export const auth = betterAuth({
     passkey({
       rpName: "ScoutBuddy",
       registration: {
-        // REQ-31's self-service /signup flow (2026-10-23 user decision):
-        // the very first passkey IS how an account gets created, so no
-        // session can exist yet to register against -- resolveUser creates
-        // the real User row from the role/patrol the person chose on the
-        // signup form, passed through as `context`.
+        // REQ-34.5 (superseding ADR 0033's self-service signup): the first
+        // passkey is still how an account gets created -- there's no session
+        // yet to register against -- but only from an invitation.
+        //
+        // resolveUser runs when the browser asks for registration options,
+        // *before* the passkey prompt, so it only validates and reserves an
+        // id; nothing is written. The account, its membership, and consuming
+        // the invitation all happen in afterVerification, once the passkey
+        // has actually been verified -- so cancelling the prompt leaves the
+        // invitation usable and no half-made account behind.
         requireSession: false,
         resolveUser: async ({ context }) => {
-          const signup = parseSignupContext(context);
-
-          if (signup.role === "PATROL_LEADER") {
-            const patrol = await db.patrol.findFirst({ where: { id: signup.patrolId, isActive: true } });
-            if (!patrol) {
-              throw new APIError("BAD_REQUEST", { message: "That patrol isn't available to select." });
-            }
+          const signup = parseInviteSignupContext(context);
+          await findAcceptableInvitation(signup.invitationToken);
+          return { id: randomUUID(), name: signup.name };
+        },
+        afterVerification: async ({ user, context }) => {
+          const existing = await db.user.findUnique({ where: { id: user.id }, select: { id: true } });
+          if (existing) {
+            // A signed-in account adding another passkey -- not a signup.
+            await db.authEvent.create({ data: { type: "PASSKEY_REGISTERED", userId: user.id } });
+            return;
           }
 
-          if (signup.email) {
-            const existing = await db.user.findUnique({ where: { email: signup.email } });
-            if (existing) {
-              throw new APIError("BAD_REQUEST", { message: "An account already uses that email." });
-            }
-          }
+          const signup = parseInviteSignupContext(context);
+          const invitation = await findAcceptableInvitation(signup.invitationToken);
+          const now = new Date();
 
-          const user = await db.user.create({
-            data: {
-              name: signup.name,
-              email: signup.email ?? null,
-              emailVerified: false,
-              role: signup.role,
-              patrolId: signup.role === "PATROL_LEADER" ? signup.patrolId : null,
-            },
+          await db.$transaction(async (tx) => {
+            // Single use, enforced by the database rather than the read
+            // above: only one of two racing acceptances can claim it.
+            const claimed = await tx.unitInvitation.updateMany({
+              where: { id: invitation.id, acceptedAt: null, revokedAt: null, expiresAt: { gt: now } },
+              data: { acceptedAt: now },
+            });
+            if (claimed.count !== 1) {
+              throw new APIError("BAD_REQUEST", { message: INVITATION_STATE_MESSAGES.accepted });
+            }
+            // REQ-34.7: following the emailed link is what verified this
+            // address, so the account starts out with it verified.
+            await tx.user.create({
+              data: { id: user.id, name: signup.name, email: invitation.email, emailVerified: true },
+            });
+            await tx.unitMembership.create({
+              data: {
+                userId: user.id,
+                unitId: invitation.unitId,
+                role: invitation.role,
+                patrolId: invitation.patrolId,
+                source: "INVITATION",
+                invitationId: invitation.id,
+              },
+            });
+            await tx.unitEvent.create({
+              data: { unitId: invitation.unitId, type: "INVITATION_ACCEPTED", actorUserId: user.id, subjectUserId: user.id },
+            });
           });
 
-          await db.authEvent.create({ data: { type: "ACCOUNT_CREATED", userId: user.id } });
-
-          return { id: user.id, name: user.name };
-        },
-        afterVerification: async ({ user }) => {
-          await db.authEvent.create({ data: { type: "PASSKEY_REGISTERED", userId: user.id } });
+          await db.authEvent.createMany({
+            data: [
+              { type: "ACCOUNT_CREATED", userId: user.id },
+              { type: "PASSKEY_REGISTERED", userId: user.id },
+            ],
+          });
+          return { userId: user.id, name: signup.name };
         },
       },
       // Sign-in success (via passkey or magic link) is logged generically

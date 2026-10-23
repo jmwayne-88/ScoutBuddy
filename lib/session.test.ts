@@ -1,33 +1,56 @@
 import { describe, expect, it } from "vitest";
-import { mapSessionToAssuranceTier, mapSessionUserToActor } from "./session";
+import { mapMembershipToActor, mapSessionToAssuranceTier, resolveActiveMembership } from "./session";
 
-describe("mapSessionUserToActor", () => {
-  it("returns null for no user", () => {
-    expect(mapSessionUserToActor(null)).toBeNull();
-    expect(mapSessionUserToActor(undefined)).toBeNull();
+describe("mapMembershipToActor", () => {
+  it("returns null for no membership", () => {
+    expect(mapMembershipToActor(null)).toBeNull();
+    expect(mapMembershipToActor(undefined)).toBeNull();
   });
 
-  it("maps an ASPL account", () => {
-    expect(mapSessionUserToActor({ role: "ASPL", patrolId: null })).toEqual({ role: "ASPL" });
+  it("maps an ASPL membership", () => {
+    expect(mapMembershipToActor({ role: "ASPL", patrolId: null })).toEqual({ role: "ASPL" });
   });
 
-  it("maps a Patrol Leader account", () => {
-    expect(mapSessionUserToActor({ role: "PATROL_LEADER", patrolId: "eagle" })).toEqual({
+  it("maps a Patrol Leader membership", () => {
+    expect(mapMembershipToActor({ role: "PATROL_LEADER", patrolId: "eagle" })).toEqual({
       role: "PATROL_LEADER",
       patrolId: "eagle",
     });
   });
 
-  it("treats a Patrol Leader account with no patrolId as signed-out", () => {
-    expect(mapSessionUserToActor({ role: "PATROL_LEADER", patrolId: null })).toBeNull();
+  it("gives no access to a Patrol Leader whose patrol was deleted", () => {
+    expect(mapMembershipToActor({ role: "PATROL_LEADER", patrolId: null })).toBeNull();
   });
 
-  it("treats an account with no role (incomplete signup) as signed-out", () => {
-    expect(mapSessionUserToActor({ role: null, patrolId: null })).toBeNull();
+  it("treats an unrecognized role value as no access", () => {
+    expect(mapMembershipToActor({ role: "SOMETHING_ELSE", patrolId: null })).toBeNull();
+  });
+});
+
+describe("resolveActiveMembership", () => {
+  const unitA = { unitId: "unit-a", createdAt: new Date("2026-01-01") };
+  const unitB = { unitId: "unit-b", createdAt: new Date("2026-02-01") };
+
+  it("honors an active unit the person actually belongs to", () => {
+    expect(resolveActiveMembership([unitA, unitB], "unit-b")).toBe(unitB);
   });
 
-  it("treats an unrecognized role value as signed-out", () => {
-    expect(mapSessionUserToActor({ role: "SOMETHING_ELSE", patrolId: null })).toBeNull();
+  it("never grants a tampered or stale unit -- falls back to the earliest real membership", () => {
+    expect(resolveActiveMembership([unitB, unitA], "unit-someone-elses")).toBe(unitA);
+  });
+
+  it("re-resolves when the active unit is the one they were just removed from", () => {
+    // unit-a removed: only unit-b remains, but the session still says unit-a.
+    expect(resolveActiveMembership([unitB], "unit-a")).toBe(unitB);
+  });
+
+  it("picks the earliest membership when no active unit is set", () => {
+    expect(resolveActiveMembership([unitB, unitA], null)).toBe(unitA);
+  });
+
+  it("resolves to nothing for a person with no memberships, whatever the session says", () => {
+    expect(resolveActiveMembership([], "unit-a")).toBeNull();
+    expect(resolveActiveMembership([], null)).toBeNull();
   });
 });
 

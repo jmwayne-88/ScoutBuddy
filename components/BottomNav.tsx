@@ -8,6 +8,7 @@ import BottomNavigation from "@mui/material/BottomNavigation";
 import BottomNavigationAction from "@mui/material/BottomNavigationAction";
 import EventIcon from "@mui/icons-material/Event";
 import GroupsIcon from "@mui/icons-material/Groups";
+import BadgeIcon from "@mui/icons-material/Badge";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import PrintIcon from "@mui/icons-material/Print";
 import type { Actor } from "@/lib/session";
@@ -33,6 +34,8 @@ export function BottomNav({ role }: { role: Actor["role"] | null }) {
       ? [
           { value: "/campouts", href: "/campouts", label: "Campouts", icon: <EventIcon fontSize="small" /> },
           { value: "/patrols", href: "/patrols", label: "Manage Patrols", icon: <GroupsIcon fontSize="small" /> },
+          // REQ-34.5/34.8: the ASPL's member/invitation page.
+          { value: "/unit", href: "/unit", label: "Unit", icon: <BadgeIcon fontSize="small" /> },
         ]
       : [
           {

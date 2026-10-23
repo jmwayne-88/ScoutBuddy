@@ -16,7 +16,7 @@ Categories are grouped by what the requirement is actually about, not by number 
 - **printing-exports/** — menu print preview and shopping-list generation.
 - **review-comments/** — the comment/annotation system and review-history UX.
 - **data-upload/** — bulk-uploading troop data from a file (AI-assisted extraction, review-before-save).
-- **authentication-accounts/** — real accounts, sessions, passkeys, and account recovery, replacing ADR 0010's cookie-based role identity.
+- **authentication-accounts/** — real accounts, sessions, passkeys, account recovery, and unit membership/invitations, replacing ADR 0010's cookie-based role identity.
 
 ## Index
 
@@ -25,14 +25,13 @@ Categories are grouped by what the requirement is actually about, not by number 
 - [24 - Due-Date & Review Notifications (Push/Email)](24-due-date-and-review-notifications.md)
 - [27 - Multi-Tenant Unit Isolation & Switching](27-multi-tenant-unit-isolation.md)
 - [33 - Adult/Guardian-Mediated Youth Account Creation (COPPA)](33-youth-account-creation-coppa.md)
-- [34 - Unit Membership, Invitations & Switching](34-unit-membership-invitations-switching.md)
 - [35 - User Account Disabling & Deletion](35-user-account-disabling-deletion.md)
 - [36 - Roster Import & Suggested Role Assignment](36-roster-import-user-creation.md)
 - [37 - Roster Reimport, Conflict Resolution & Member-Number Correction](37-roster-reconciliation-member-number-correction.md)
 - [38 - Platform Administration: Cross-Tenant Support Access & Impersonation](38-platform-admin-cross-tenant-support.md)
 - [39 - Federated Sign-In (OAuth/OIDC) with Google, Apple & Other Providers](39-federated-sign-in-oauth-providers.md)
 
-The authentication sequence (31-35, in [authentication-accounts/](authentication-accounts/) once built) is dependency-ordered, not just numbered: [31](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md) is the root (accounts/sessions/passkeys — **Done**) and [32](authentication-accounts/32-account-recovery-credential-reset.md) depends only on 31 (**Done**, except the one item genuinely blocked on 33); 33 also depends only on 31 and can be built/reviewed independently of 32; 34 depends on 31 (and integrates with 33 for youth invitees); 35 depends on 31 and 34. [Requirement 27](27-multi-tenant-unit-isolation.md) depends on 31 and 34 specifically. [Requirement 36](36-roster-import-user-creation.md) is additive on top of 31/33/34 — bulk account creation from a roster file, built after that trio lands. [Requirement 37](37-roster-reconciliation-member-number-correction.md) depends on 36 — handles everything that happens on a *second* roster import (conflicts, drift, member-number correction) rather than the first. [Requirement 39](39-federated-sign-in-oauth-providers.md) depends only on 31 — OAuth sign-in (Google/Apple/etc.) layered onto 31's assurance-tier model, open to any account regardless of age by explicit user decision; its youth-inclusive design is a named input to 33's legal-review gate, not an exception to it. [Requirement 38](38-platform-admin-cross-tenant-support.md) depends on 31/34/35 — cross-tenant operator support and impersonation, the capability [Requirement 27](27-multi-tenant-unit-isolation.md)'s REQ-27.18 anticipated but never specified.
+The authentication sequence (31-35, in [authentication-accounts/](authentication-accounts/) once built) is dependency-ordered, not just numbered: [31](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md) is the root (accounts/sessions/passkeys — **Done**) and [32](authentication-accounts/32-account-recovery-credential-reset.md) depends only on 31 (**Done**, except the one item genuinely blocked on 33); 33 also depends only on 31 and can be built/reviewed independently of 32; [34](authentication-accounts/34-unit-membership-invitations-switching.md) depends on 31 (and integrates with 33 for youth invitees) (**Partly done**: units, memberships, switching, and email invitations are built; unit creation waits on 27, Platform Admin hierarchy edits on 38, and Patrol Leader invitations on 33); 35 depends on 31 and 34. [Requirement 27](27-multi-tenant-unit-isolation.md) depends on 31 and 34 specifically. [Requirement 36](36-roster-import-user-creation.md) is additive on top of 31/33/34 — bulk account creation from a roster file, built after that trio lands. [Requirement 37](37-roster-reconciliation-member-number-correction.md) depends on 36 — handles everything that happens on a *second* roster import (conflicts, drift, member-number correction) rather than the first. [Requirement 39](39-federated-sign-in-oauth-providers.md) depends only on 31 — OAuth sign-in (Google/Apple/etc.) layered onto 31's assurance-tier model, open to any account regardless of age by explicit user decision; its youth-inclusive design is a named input to 33's legal-review gate, not an exception to it. [Requirement 38](38-platform-admin-cross-tenant-support.md) depends on 31/34/35 — cross-tenant operator support and impersonation, the capability [Requirement 27](27-multi-tenant-unit-isolation.md)'s REQ-27.18 anticipated but never specified.
 
 ### roadmap-iterations/
 
@@ -90,3 +89,4 @@ The authentication sequence (31-35, in [authentication-accounts/](authentication
 
 - [31 - Core Authentication: Accounts, Sessions & Passkeys](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md)
 - [32 - Account Recovery & Credential Reset](authentication-accounts/32-account-recovery-credential-reset.md)
+- [34 - Unit Membership, Invitations & Switching](authentication-accounts/34-unit-membership-invitations-switching.md)

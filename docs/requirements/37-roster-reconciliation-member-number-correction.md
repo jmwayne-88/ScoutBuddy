@@ -16,7 +16,7 @@ User feedback, 2026-10-23: Scouting America is actively correcting duplicate/inc
 ### Member-number correction
 
 - **REQ-37.1** A person's registration/member number can be corrected after the fact. Correcting it never creates a new `User` or a new person record — the existing record, and everything attached to it (`UnitMembership` rows, account, retained roster history), is kept under its original identity; only the number itself is updated.
-- **REQ-37.2** Every number change is recorded with a history: the prior number(s), the new number, when the change was recorded, and who confirmed it — an audit trail, consistent with how [Requirement 34](34-unit-membership-invitations-switching.md)'s REQ-34.8 already logs membership removal.
+- **REQ-37.2** Every number change is recorded with a history: the prior number(s), the new number, when the change was recorded, and who confirmed it — an audit trail, consistent with how [Requirement 34](authentication-accounts/34-unit-membership-invitations-switching.md)'s REQ-34.8 already logs membership removal.
 - **REQ-37.3** A re-import row with no matching member number in this unit, but whose other fields (name, age bucket, address, or guardian contact) closely match an existing person, is surfaced as a **likely renumbering** — never silently matched, and never silently treated as a brand-new person either. (Age bucket, not date of birth, is the comparable signal here — [Requirement 33](33-youth-account-creation-coppa.md)'s REQ-33.8 means no stored DOB exists to compare the new row's raw date against in the first place.) A human confirms the match (or rejects it, creating a genuinely new person) before anything is linked, the same human-confirmation discipline [Requirement 36](36-roster-import-user-creation.md) already established for role suggestions.
 - **REQ-37.4** A confirmed renumbering never duplicates `UnitMembership` rows or any retained informational data — it's the same person, continuously, before and after the correction.
 
@@ -48,6 +48,6 @@ User feedback, 2026-10-23: Scouting America is actively correcting duplicate/inc
 ## Related
 
 - [Requirement 36 - Roster Import & Suggested Role Assignment](36-roster-import-user-creation.md) — this requirement's prerequisite; the review-before-write pattern REQ-37.3/37.6 reuse.
-- [Requirement 34 - Unit Membership, Invitations & Switching](34-unit-membership-invitations-switching.md) — REQ-34.8's logged-removal precedent REQ-37.2's audit trail follows.
+- [Requirement 34 - Unit Membership, Invitations & Switching](authentication-accounts/34-unit-membership-invitations-switching.md) — REQ-34.8's logged-removal precedent REQ-37.2's audit trail follows.
 - [Requirement 31 - Core Authentication: Accounts, Sessions & Passkeys](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md) — REQ-31.10's security/audit-logging foundation.
 - [Requirement 33 - Adult/Guardian-Mediated Youth Account Creation (COPPA)](33-youth-account-creation-coppa.md) — REQ-33.8's age-bucket rule, which REQ-37.10 keeps current on every reimport.

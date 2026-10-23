@@ -1,7 +1,7 @@
 # Requirement 38 — Platform Administration: Cross-Tenant Support Access & Impersonation
 
 Status: Not started
-Depends on: [Requirement 31 - Core Authentication: Accounts, Sessions & Passkeys](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md) (accounts, sessions, step-up assurance), [Requirement 34 - Unit Membership, Invitations & Switching](34-unit-membership-invitations-switching.md) (the membership model this requirement reads across), [Requirement 35 - User Account Disabling & Deletion](35-user-account-disabling-deletion.md) (the disable mechanics this requirement exposes directly).
+Depends on: [Requirement 31 - Core Authentication: Accounts, Sessions & Passkeys](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md) (accounts, sessions, step-up assurance), [Requirement 34 - Unit Membership, Invitations & Switching](authentication-accounts/34-unit-membership-invitations-switching.md) (the membership model this requirement reads across), [Requirement 35 - User Account Disabling & Deletion](35-user-account-disabling-deletion.md) (the disable mechanics this requirement exposes directly).
 
 ## Goal
 
@@ -20,7 +20,7 @@ User request, 2026-10-23, after reviewing [Requirement 27](27-multi-tenant-unit-
 ### Support access short of impersonation
 
 - **REQ-38.2** A Platform Admin can view any account's state across every unit — person-level profile data, every `UnitMembership` they hold, session/login history, and any pending [Requirement 37](37-roster-reconciliation-member-number-correction.md) Action Center items — without needing to belong to that unit themselves.
-- **REQ-38.3** A Platform Admin can take specific, named support actions directly, without starting a full impersonation session, for the common cases that don't need one: force-disable an account ([Requirement 35](35-user-account-disabling-deletion.md)), force a credential reset (invalidate passkeys, issue a fresh recovery path per [Requirement 32](authentication-accounts/32-account-recovery-credential-reset.md)), resend or revoke a [Requirement 34](34-unit-membership-invitations-switching.md) invite, and manually resolve a stuck Requirement 37 Action Center item on a unit's behalf. Impersonation (below) is available for anything these don't cover, but is never the only path for these specific cases.
+- **REQ-38.3** A Platform Admin can take specific, named support actions directly, without starting a full impersonation session, for the common cases that don't need one: force-disable an account ([Requirement 35](35-user-account-disabling-deletion.md)), force a credential reset (invalidate passkeys, issue a fresh recovery path per [Requirement 32](authentication-accounts/32-account-recovery-credential-reset.md)), resend or revoke a [Requirement 34](authentication-accounts/34-unit-membership-invitations-switching.md) invite, manually resolve a stuck Requirement 37 Action Center item on a unit's behalf, and maintain the Council/District hierarchy — rename a district, move a unit to a district in another council, move a whole district to another council, and mark an emptied council inactive after a merger ([Requirement 34](authentication-accounts/34-unit-membership-invitations-switching.md)'s REQ-34.10). Impersonation (below) is available for anything these don't cover, but is never the only path for these specific cases.
 - **REQ-38.4** This requirement is the fallback path for an account genuinely stuck with no working self-service recovery ([Requirement 32](authentication-accounts/32-account-recovery-credential-reset.md)) and no reachable guardian ([Requirement 33](33-youth-account-creation-coppa.md)'s REQ-33.6) — reached through this same logged, step-up-gated access, never a silent workaround outside it.
 
 ### Impersonation
@@ -43,7 +43,7 @@ User request, 2026-10-23, after reviewing [Requirement 27](27-multi-tenant-unit-
 ## Out of Scope for This Requirement
 
 - A general-purpose RBAC/role-tier system for platform admins — this requirement assumes a small, explicitly maintained allowlist, not a hierarchy of admin levels.
-- Any unit-level capability (e.g. an ASPL managing their own unit's members more directly) beyond what [Requirement 34](34-unit-membership-invitations-switching.md) already specifies — this requirement is about cross-unit, platform-level access specifically.
+- Any unit-level capability (e.g. an ASPL managing their own unit's members more directly) beyond what [Requirement 34](authentication-accounts/34-unit-membership-invitations-switching.md) already specifies — this requirement is about cross-unit, platform-level access specifically.
 - Real-time or advance notice to a unit or guardian before an impersonation session starts — not built into this requirement as specified; a retrospective notice is a reasonable lighter-touch addition if wanted later, but isn't assumed here.
 
 ## Related
@@ -51,7 +51,7 @@ User request, 2026-10-23, after reviewing [Requirement 27](27-multi-tenant-unit-
 - [Requirement 27 - Multi-Tenant Unit Isolation & Switching](27-multi-tenant-unit-isolation.md) — REQ-27.18's operator-audit-logging principle, extended here from read-access to acted-as-a-user access.
 - [Requirement 31 - Core Authentication: Accounts, Sessions & Passkeys](authentication-accounts/31-core-authentication-accounts-sessions-passkeys.md) — REQ-31.6's step-up assurance, required before any Platform Admin action.
 - [Requirement 32 - Account Recovery & Credential Reset](authentication-accounts/32-account-recovery-credential-reset.md), [Requirement 33 - Adult/Guardian-Mediated Youth Account Creation (COPPA)](33-youth-account-creation-coppa.md) — the two recovery paths this requirement is the fallback for.
-- [Requirement 34 - Unit Membership, Invitations & Switching](34-unit-membership-invitations-switching.md) — the membership model this requirement reads across, and the invite action it exposes directly.
+- [Requirement 34 - Unit Membership, Invitations & Switching](authentication-accounts/34-unit-membership-invitations-switching.md) — the membership model this requirement reads across, and the invite action it exposes directly.
 - [Requirement 35 - User Account Disabling & Deletion](35-user-account-disabling-deletion.md) — the disable mechanics this requirement exposes directly without requiring impersonation.
 - [Requirement 37 - Roster Reimport, Conflict Resolution & Member-Number Correction](37-roster-reconciliation-member-number-correction.md) — the Action Center items a Platform Admin can resolve directly.
 - Better Auth's admin plugin (`impersonateUser`/`stopImpersonation`/`banUser`) — the concrete library primitive this requirement's capability maps onto, already in use for this project per Requirement 31.

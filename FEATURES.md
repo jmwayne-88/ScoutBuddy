@@ -17,6 +17,23 @@ Status: documentation only, not yet built. Covers the "build first" scope from t
 - **Ingredient** — belongs to a dish, has a name and a quantity (per person).
 - **Review** — the ASPL's approve/reject decision on a submission, with comments on reject.
 
+## Units & Membership
+
+Added by [Requirement 34](docs/requirements/authentication-accounts/34-unit-membership-invitations-switching.md) and [ADR 0035](docs/adr/0035-units-memberships-and-invitations.md).
+
+- **Unit** — identified the way Scouting America identifies it: Unit Type (Pack, Troop, Crew, Ship, Post), Unit Number (1–9999), Gender Designation (Boys, Girls, Family), and District. Its name ("Troop 8 (Boys)") is always derived, never typed.
+  - **Hierarchy:** Council → District → Unit. A unit's council comes through its district.
+  - **Councils:** keyed by Scouting America council number, from a seeded list.
+  - **Uniqueness:** a unit is unique per district.
+  - Wherever someone picks or confirms a unit, district and council are shown alongside it.
+- **Membership** — a person's role (ASPL of Camping or Patrol Leader, plus their patrol) is held per unit. One person can belong to several units, with a different role in each.
+- **Switching** — the header shows the active unit. Someone in more than one unit switches from there, and the active unit is rechecked against their memberships on every request.
+- **Joining** — invite-only. The ASPL of Camping sends an email invitation from **Unit Members** (it works once and expires in 7 days); the link creates the account with a passkey, or adds the unit to an existing account. Patrol Leader invitations are paused until parent/guardian-approved youth accounts exist ([Requirement 33](docs/requirements/33-youth-account-creation-coppa.md)).
+- **Leaving** — the ASPL of Camping can remove a member from the unit. That removes only that unit's membership, never the account, and is logged. A unit always keeps at least one ASPL.
+- **Not yet:**
+  - Creating new units, which waits on per-unit data isolation ([Requirement 27](docs/requirements/27-multi-tenant-unit-isolation.md)).
+  - Renaming districts and moving units between districts or councils, which waits on Platform Admin ([Requirement 38](docs/requirements/38-platform-admin-cross-tenant-support.md)) and the adult-leader permissions work.
+
 ## Standard Meal Framework
 
 Six fixed occasions, always in this order:

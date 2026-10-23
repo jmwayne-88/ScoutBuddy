@@ -7,7 +7,8 @@ import Alert from "@mui/material/Alert";
 import { SubmitButton } from "@/components/SubmitButton";
 import { authClient } from "@/lib/auth-client";
 
-export function LoginForm() {
+// `next` is already validated by the page (lib/redirects.ts's safeNextPath).
+export function LoginForm({ next = "/" }: { next?: string }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -22,8 +23,9 @@ export function LoginForm() {
         return;
       }
 
-      const role = (data.user as { role?: string | null }).role;
-      router.push(role === "ASPL" ? "/campouts" : "/patrol-leader");
+      // REQ-34.2: role lives on the active unit's membership now, not the
+      // user -- "/" resolves it and routes to the right landing page.
+      router.push(next);
       router.refresh();
     });
   }

@@ -82,3 +82,11 @@ export function canDeleteComment(
 ): boolean {
   return canCommentOnMenu(actor, menu) && isCommentAuthor(actor, comment);
 }
+
+// REQ-34.5/34.8: inviting people to the active unit, cancelling an
+// invitation, and removing a member. ASPL for now -- the adult leader roles
+// (Scoutmaster, Committee Chair, etc.) these will likely move to don't exist
+// yet; that's the later permissions pass, not this requirement.
+export function canManageUnitMembers(actor: Actor | null): boolean {
+  return isASPL(actor);
+}
